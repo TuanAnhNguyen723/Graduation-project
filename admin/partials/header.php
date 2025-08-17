@@ -42,33 +42,6 @@ if ($admin_index !== false) {
 
         <!-- Right Actions -->
         <div class="navbar-actions" style="display: flex; align-items: center; gap: 0.5rem; min-width: 300px; justify-content: flex-end; flex-shrink: 0;">
-            <!-- Language Selector -->
-            <div class="dropdown me-2">
-                <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center" 
-                        type="button" data-bs-toggle="dropdown">
-                    <img src="<?php echo $root_path; ?>assets/images/flags/us_flag.jpg" 
-                         alt="VN" class="rounded-circle me-2" width="20" height="20">
-                    <span>VN</span>
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">
-                        <img src="<?php echo $root_path; ?>assets/images/flags/us_flag.jpg" 
-                             alt="VN" width="16" height="16" class="me-2">Tiếng Việt
-                    </a></li>
-                    <li><a class="dropdown-item" href="#">
-                        <img src="<?php echo $root_path; ?>assets/images/flags/us_flag.jpg" 
-                             alt="EN" width="16" height="16" class="me-2">English
-                    </a></li>
-                </ul>
-            </div>
-
-            <!-- Theme Toggle -->
-            <button class="btn btn-outline-secondary me-2" id="light-dark-mode" 
-                    title="Chuyển đổi giao diện">
-                <i class="iconoir-half-moon dark-mode"></i>
-                <i class="iconoir-sun-light light-mode d-none"></i>
-            </button>
-
             <!-- Notifications -->
             <div class="dropdown me-2">
                 <button class="btn btn-outline-secondary position-relative" 

@@ -298,6 +298,8 @@ try {
     <!-- End Page content -->
     <!-- ============================================================== -->
 
+    <!-- Bootstrap JS -->
+    <script src="../../../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
     <!-- Vendor js -->
     <script src="../../../assets/js/vendor.min.js"></script>
     <!-- App js -->
@@ -306,7 +308,7 @@ try {
     <script src="../../../assets/libs/simplebar/simplebar.min.js"></script>
     
     <!-- Common Admin Layout JavaScript -->
-    <script src="../../partials/layout.js"></script>
+    <script src="../../../admin/partials/layout.js"></script>
 
     <script>
         // Lưu cảm biến mới

@@ -19,13 +19,29 @@ if ($admin_index !== false) {
     $root_path = '';
 }
 
-// Xác định trang active cho menu Ecommerce
-$is_products_page = strpos($current_path, '/admin/products/') !== false;
-$is_categories_page = strpos($current_path, '/admin/categories/') !== false;
-$is_ecommerce_active = $is_products_page || $is_categories_page;
+// Xác định trang active - CHỈ CÓ 1 TRANG ACTIVE TẠI MỘT THỜI ĐIỂM
+$active_page = '';
 
-// Debug: hiển thị thông tin đường dẫn (có thể xóa sau)
-// echo "<!-- Debug: current_path=$current_path, depth=$depth, root_path=$root_path -->";
+// Kiểm tra theo thứ tự ưu tiên - CHÍNH XÁC HƠN
+if (strpos($current_path, '/admin/iot/locations/') !== false) {
+    $active_page = 'iot_locations';
+} elseif (strpos($current_path, '/admin/iot/sensors/') !== false) {
+    $active_page = 'iot_sensors';
+} elseif (strpos($current_path, '/admin/iot/') !== false && $current_page === 'index.php') {
+    $active_page = 'iot_dashboard';
+} elseif (strpos($current_path, '/admin/categories/') !== false) {
+    $active_page = 'categories';
+} elseif (strpos($current_path, '/admin/products/') !== false) {
+    $active_page = 'products';
+} elseif ($current_dir === '' && $current_page === 'index.php') {
+    $active_page = 'dashboard';
+}
+
+// Xác định menu Ecommerce có active không
+$is_ecommerce_active = ($active_page === 'products' || $active_page === 'categories');
+
+// Debug: In ra để kiểm tra
+// echo "<!-- Debug: Current path: $current_path, Active page: $active_page -->";
 ?>
 <!-- Left Sidebar Start -->
 <div class="startbar d-print-none">
@@ -49,17 +65,17 @@ $is_ecommerce_active = $is_products_page || $is_categories_page;
                     </li>
                     <li class="nav-item">
                         <a class="nav-link <?php echo $is_ecommerce_active ? 'active' : ''; ?>" href="#sidebarEcommerce" data-bs-toggle="collapse" role="button" aria-expanded="<?php echo $is_ecommerce_active ? 'true' : 'false'; ?>" aria-controls="sidebarEcommerce">
-                            <i class="iconoir-cart-alt"></i><span>Ecommerce</span>
+                            <i class="iconoir-folder me-2"></i><span>Ecommerce</span>
                         </a>
                         <div class="collapse <?php echo $is_ecommerce_active ? 'show' : ''; ?>" id="sidebarEcommerce">
                             <ul class="nav flex-column">
                                 <li class="nav-item">
-                                    <a class="nav-link <?php echo $is_products_page ? 'active' : ''; ?>" href="<?php echo $root_path; ?>admin/products/index.php">
+                                    <a class="nav-link <?php echo $active_page === 'products' ? 'active' : ''; ?>" href="<?php echo $root_path; ?>admin/products/index.php">
                                         <i class="iconoir-shopping-bag me-2"></i>Products
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link <?php echo $is_categories_page ? 'active' : ''; ?>" href="<?php echo $root_path; ?>admin/categories/index.php">
+                                    <a class="nav-link <?php echo $active_page === 'categories' ? 'active' : ''; ?>" href="<?php echo $root_path; ?>admin/categories/index.php">
                                         <i class="iconoir-folder me-2"></i>Categories
                                     </a>
                                 </li>
@@ -68,17 +84,17 @@ $is_ecommerce_active = $is_products_page || $is_categories_page;
                     </li>
                     <li class="menu-label mt-2"><span>IoT System</span></li>
                     <li class="nav-item">
-                        <a class="nav-link <?php echo ($current_dir === 'iot' && $current_page === 'index.php') ? 'active' : ''; ?>" href="<?php echo $root_path; ?>admin/iot/index.php">
-                            <i class="iconoir-thermometer"></i><span>IoT Dashboard</span>
+                        <a class="nav-link <?php echo $active_page === 'iot_dashboard' ? 'active' : ''; ?>" href="<?php echo $root_path; ?>admin/iot/index.php">
+                            <i class="iconoir-dashboard-dots"></i><span>IoT Dashboard</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <?php echo ($current_dir === 'iot' && $current_page === 'sensors') ? 'active' : ''; ?>" href="<?php echo $root_path; ?>admin/iot/sensors/">
-                            <i class="iconoir-sensor"></i><span>Quản lý cảm biến</span>
+                        <a class="nav-link <?php echo $active_page === 'iot_sensors' ? 'active' : ''; ?>" href="<?php echo $root_path; ?>admin/iot/sensors/">
+                            <i class="iconoir-tv me-2"></i><span>Quản lý cảm biến</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <?php echo ($current_dir === 'iot' && $current_page === 'locations') ? 'active' : ''; ?>" href="<?php echo $root_path; ?>admin/iot/locations/">
+                        <a class="nav-link <?php echo $active_page === 'iot_locations' ? 'active' : ''; ?>" href="<?php echo $root_path; ?>admin/iot/locations/">
                             <i class="iconoir-map-pin"></i><span>Quản lý vị trí</span>
                         </a>
                     </li>

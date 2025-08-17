@@ -1,10 +1,66 @@
 /* Admin Layout CSS - Common for all admin pages */
 
-/* Layout fixes */
-.content-page {
-    margin-left: 260px; /* Width của sidebar */
+/* ==============================================================
+   MAIN LAYOUT FIXES - SỬA LỖI HEADER CHE CONTENT
+   ============================================================== */
+
+/* Main page wrapper - Tránh bị header che */
+.page-wrapper {
+    margin-top: 70px; /* Chiều cao của header */
+    margin-left: 260px; /* Chiều rộng của sidebar */
     transition: margin-left 0.3s ease;
+    min-height: calc(100vh - 70px); /* Chiều cao tối thiểu */
 }
+
+/* Content page - Tránh bị header che */
+.content-page {
+    margin-top: 70px; /* Chiều cao của header */
+    margin-left: 260px; /* Chiều rộng của sidebar */
+    transition: margin-left 0.3s ease;
+    min-height: calc(100vh - 70px); /* Chiều cao tối thiểu */
+    padding: 2rem; /* Padding cho content */
+}
+
+/* Page content container */
+.page-content {
+    background: #f8f9fa;
+    min-height: calc(100vh - 70px);
+    padding: 2rem;
+}
+
+/* Container fluid với padding */
+.container-fluid {
+    padding: 0 1rem;
+}
+
+/* ==============================================================
+   RESPONSIVE LAYOUT - ĐÁP ỨNG TRÊN MOBILE
+   ============================================================== */
+
+@media (max-width: 768px) {
+    .page-wrapper {
+        margin-left: 0;
+        margin-top: 70px;
+    }
+    
+    .content-page {
+        margin-left: 0;
+        margin-top: 70px;
+        padding: 1rem;
+    }
+    
+    .page-content {
+        padding: 1rem;
+    }
+    
+    .container-fluid {
+        padding: 0 0.5rem;
+    }
+}
+
+/* ==============================================================
+   SIDEBAR STYLES - STYLE CHO SIDEBAR
+   ============================================================== */
 
 .startbar {
     position: fixed;
@@ -13,16 +69,32 @@
     bottom: 0;
     width: 260px;
     z-index: 1000;
-    background: #2c3e50;
-    color: white;
+    background: #ffffff; /* Thay đổi từ #2c3e50 sang màu trắng */
+    color: #333333; /* Thay đổi text color sang màu tối */
+    border-right: 1px solid #e9ecef; /* Thêm border để phân tách */
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1); /* Thêm shadow để tạo độ sâu */
+}
+
+/* Brand/Logo styling cho sidebar trắng */
+.startbar .brand {
+    padding: 1.5rem 1rem;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.startbar .brand .logo {
+    color: #2c3e50;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.startbar .brand .logo:hover {
+    color: #3b7ddd;
 }
 
 /* Responsive sidebar */
 @media (max-width: 768px) {
-    .content-page {
-        margin-left: 0;
-    }
-
     .startbar {
         transform: translateX(-100%);
         transition: transform 0.3s ease;
@@ -32,6 +104,10 @@
         transform: translateX(0);
     }
 }
+
+/* ==============================================================
+   HEADER STYLES - STYLE CHO HEADER
+   ============================================================== */
 
 /* Topbar fixes - Tất cả elements trên cùng một hàng ngang */
 .navbar-custom {
@@ -201,18 +277,54 @@
 
 /* Dropdown menus styling */
 .dropdown-menu {
-    border: none;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-    border-radius: 12px;
-    padding: 0.5rem 0;
-    margin-top: 0.5rem;
+    border: none !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15) !important;
+    border-radius: 12px !important;
+    padding: 0.5rem 0 !important;
+    margin-top: 0.5rem !important;
+    z-index: 1050 !important; /* Đảm bảo hiển thị trên các element khác */
+    /* Không ghi đè display của Bootstrap */
 }
 
+/* Sửa lại dropdown notification để rộng hơn và không bị overflow */
+.dropdown-menu[style*="width: 350px"] {
+    width: 450px !important; /* Tăng chiều rộng từ 350px lên 450px */
+    max-width: 90vw; /* Giới hạn tối đa 90% viewport width */
+    /* Không ghi đè display */
+}
+
+/* Khi dropdown được hiển thị */
+.dropdown-menu.show {
+    display: block !important;
+}
+
+/* Đảm bảo notification content không bị overflow */
+.dropdown-body {
+    max-height: 400px !important; /* Tăng chiều cao tối đa */
+    overflow-y: auto !important; /* Chỉ cho phép scroll dọc */
+    overflow-x: hidden !important; /* Không cho phép scroll ngang */
+}
+
+/* Sửa lại notification item để không bị overflow */
 .dropdown-item {
     padding: 0.75rem 1.5rem;
     transition: all 0.2s ease;
     border-radius: 8px;
     margin: 0 0.5rem;
+    white-space: normal !important; /* Cho phép text wrap */
+    word-wrap: break-word !important; /* Wrap text dài */
+    overflow: hidden !important; /* Ẩn overflow */
+}
+
+/* Đảm bảo text trong notification không bị cắt */
+.dropdown-item h6,
+.dropdown-item p,
+.dropdown-item small {
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
 }
 
 .dropdown-item:hover {
@@ -225,22 +337,7 @@
     background: rgba(0, 123, 255, 0.05);
     border-radius: 8px;
     margin: 0 0.5rem 0.5rem 0.5rem;
-}
-
-/* Notification badge */
-.badge {
-    font-size: 0.7rem;
-    padding: 0.25rem 0.5rem;
-}
-
-/* Avatar styling */
-.avatar-sm {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
+    padding: 0.75rem 1rem;
 }
 
 /* Responsive adjustments */
@@ -304,50 +401,9 @@
     }
 }
 
-/* Điều chỉnh content để không bị che bởi header */
-.page-wrapper {
-    margin-left: 260px;
-    margin-top: 70px;
-    transition: margin-left 0.3s ease;
-    min-height: calc(100vh - 70px);
-}
-
-.content {
-    padding-top: 20px;
-}
-
-/* Responsive navbar adjustments */
-@media (max-width: 768px) {
-    .page-wrapper {
-        margin-left: 0;
-        margin-top: 70px;
-    }
-    
-    .content {
-        padding-top: 20px;
-    }
-}
-
-@media (min-width: 769px) and (max-width: 1024px) {
-    .navbar-custom {
-        left: 200px;
-    }
-    
-    .page-wrapper {
-        margin-left: 200px;
-        margin-top: 70px;
-    }
-}
-
-/* Brand logo fixes */
-.brand {
-    padding: 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-.brand .logo img {
-    max-height: 40px;
-}
+/* ==============================================================
+   SIDEBAR MENU STYLES - STYLE CHO MENU SIDEBAR
+   ============================================================== */
 
 /* Navigation menu fixes */
 .startbar-menu {
@@ -356,27 +412,43 @@
 
 .nav-item .nav-link {
     padding: 12px 20px;
-    color: rgba(255,255,255,0.8);
+    color: #6c757d; /* Thay đổi từ rgba(255,255,255,0.8) sang màu xám */
     transition: all 0.3s ease;
     text-decoration: none;
     display: flex;
     align-items: center;
 }
 
-.nav-item .nav-link:hover,
+.nav-item .nav-link:hover {
+    color: #2c3e50 !important; /* Màu xanh đậm khi hover - DỄ NHÌN HƠN */
+    background: #3b7ddd; /* Background xanh khi hover */
+    box-shadow: 0 2px 8px rgba(59, 125, 221, 0.3); /* Thêm shadow để nổi bật */
+}
+
 .nav-item .nav-link.active {
-    color: white;
-    background: rgba(255,255,255,0.1);
+    color: #ffffff !important; /* Chỉ đổi sang trắng khi active */
+    background: #3b7ddd; /* Background xanh khi active */
+    box-shadow: 0 2px 8px rgba(59, 125, 221, 0.3); /* Thêm shadow để nổi bật */
 }
 
 .nav-item .nav-link i {
     margin-right: 10px;
     width: 20px;
     text-align: center;
+    color: inherit; /* Icon sẽ kế thừa màu từ parent */
+    transition: all 0.3s ease;
+}
+
+.nav-item .nav-link:hover i {
+    color: inherit; /* Giữ màu khi hover */
+}
+
+.nav-item .nav-link.active i {
+    color: #ffffff !important; /* Icon màu trắng khi active */
 }
 
 .menu-label {
-    color: rgba(255,255,255,0.5);
+    color: #6c757d; /* Thay đổi từ rgba(255,255,255,0.5) sang màu xám */
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -388,14 +460,14 @@
 .collapse .nav-link {
     padding-left: 3rem;
     font-size: 0.9rem;
-    color: rgba(255,255,255,0.7);
+    color: #6c757d; /* Thay đổi từ rgba(255,255,255,0.7) sang màu xám */
     transition: all 0.3s ease;
 }
 
 .collapse .nav-link:hover,
 .collapse .nav-link.active {
-    color: white;
-    background: rgba(255,255,255,0.05);
+    color: #ffffff; /* Giữ màu trắng cho text khi hover/active */
+    background: #3b7ddd; /* Thay đổi background sang màu xanh */
     padding-left: 3.5rem;
 }
 
@@ -405,127 +477,470 @@
 }
 
 .collapse.show {
-    background: rgba(255,255,255,0.02);
+    background: rgba(59, 125, 221, 0.05); /* Thay đổi từ rgba(255,255,255,0.02) sang màu xanh nhạt */
     border-radius: 8px;
     margin: 0 10px;
 }
 
+/* ==============================================================
+   CARD AND CONTENT STYLES - STYLE CHO NỘI DUNG
+   ============================================================== */
+
 /* Card enhancements */
 .card {
     border: none;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 12px;
     transition: all 0.3s ease;
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
 }
 
 .card-body {
     padding: 1.5rem;
 }
 
-/* Header title styling */
-.header-title {
-    color: #2c3e50;
+/* Table styles */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    border-top: none;
     font-weight: 600;
-    font-size: 1.25rem;
+    color: #495057;
 }
 
-/* Progress bar enhancement */
-.progress {
-    height: 10px;
-    border-radius: 10px;
-    background: linear-gradient(90deg, #e9ecef 0%, #dee2e6 100%);
+.table td {
+    vertical-align: middle;
 }
 
-.progress-bar {
-    border-radius: 10px;
-    background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
-}
-
-/* Button group styling */
-.btn-group .btn {
-    border-radius: 20px !important;
-    margin: 0 2px;
-    padding: 6px 16px;
-    font-size: 0.875rem;
+/* Button styles */
+.btn {
+    border-radius: 8px;
     font-weight: 500;
+    transition: all 0.3s ease;
 }
 
-.btn-group .btn.active {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Form styles */
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
     border-color: #007bff;
-    color: white;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
 }
 
-/* Mobile Responsive */
-@media (max-width: 768px) {
-    .content-page {
-        margin-left: 0;
-    }
-
-    .startbar {
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
-    }
-
-    .startbar.show {
-        transform: translateX(0);
-    }
-
-    .navbar-custom {
-        left: 0 !important;
-        right: 0 !important;
-    }
-
-    .page-wrapper {
-        margin-left: 0;
-        margin-top: 70px;
-    }
-
-    .content {
-        padding-top: 20px;
-    }
-
-    .col-xl-3.col-md-6 {
-        margin-bottom: 1rem;
-    }
-
-    .card-body {
-        padding: 1rem;
-    }
-
-    .btn-group {
-        flex-wrap: wrap;
-        gap: 5px;
-    }
-
-    .btn-group .btn {
-        margin: 2px;
-        flex: 1;
-        min-width: 60px;
-    }
+/* Alert styles */
+.alert {
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
 }
 
-/* Tablet adjustments */
-@media (min-width: 769px) and (max-width: 1024px) {
-    .content-page {
-        margin-left: 200px;
-    }
+/* Badge styles */
+.badge {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+}
 
-    .startbar {
-        width: 200px;
-    }
+/* ==============================================================
+   UTILITY CLASSES - CÁC LỚP TIỆN ÍCH
+   ============================================================== */
 
-    .navbar-custom {
-        left: 200px;
-    }
-    
-    .page-wrapper {
-        margin-left: 200px;
-        margin-top: 70px;
-    }
+/* Spacing utilities */
+.mt-header {
+    margin-top: 70px;
+}
+
+.pt-header {
+    padding-top: 70px;
+}
+
+/* Text utilities */
+.text-primary-dark {
+    color: #0056b3 !important;
+}
+
+.text-success-dark {
+    color: #155724 !important;
+}
+
+.text-warning-dark {
+    color: #856404 !important;
+}
+
+.text-danger-dark {
+    color: #721c24 !important;
+}
+
+/* Background utilities */
+.bg-light-custom {
+    background-color: #f8f9fa !important;
+}
+
+.bg-white-custom {
+    background-color: #ffffff !important;
+}
+
+/* Border utilities */
+.border-light-custom {
+    border-color: #e9ecef !important;
+}
+
+/* Shadow utilities */
+.shadow-custom {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+}
+
+.shadow-hover {
+    transition: box-shadow 0.3s ease;
+}
+
+.shadow-hover:hover {
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15) !important;
+}
+
+/* Sidebar Menu Styling */
+.startbar-menu .nav-link {
+    color: #6c757d; /* Giữ nguyên màu xám */
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    margin: 0.125rem 0.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.startbar-menu .nav-link:hover {
+    color: #2c3e50; /* Màu xanh đậm khi hover - DỄ NHÌN HƠN */
+    background-color: rgba(59, 125, 221, 0.1); /* Background xanh nhạt khi hover */
+}
+
+/* ĐẢM BẢO TEXT MÀU TRẮNG KHI ACTIVE - SPECIFICITY CAO */
+.startbar-menu .nav-link.active,
+.startbar .startbar-menu .nav-link.active,
+body .startbar-menu .nav-link.active {
+    color: #ffffff !important; /* Màu trắng khi active */
+    background-color: #3b7ddd !important; /* Background xanh khi active */
+    box-shadow: 0 2px 8px rgba(59, 125, 221, 0.3); /* Thêm shadow để nổi bật */
+}
+
+.startbar-menu .nav-link.active:hover,
+.startbar .startbar-menu .nav-link.active:hover,
+body .startbar-menu .nav-link.active:hover {
+    background-color: #2e6da4 !important; /* Màu xanh đậm hơn khi hover trên active */
+    color: #ffffff !important; /* Giữ màu trắng khi hover trên active */
+    box-shadow: 0 4px 12px rgba(59, 125, 221, 0.4); /* Shadow đậm hơn khi hover */
+}
+
+/* Menu Label Styling */
+.menu-label {
+    color: #6c757d; /* Giữ nguyên màu xám */
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1rem 1rem 0.5rem;
+    margin: 0;
+}
+
+/* Collapse Menu Styling */
+.startbar-menu .collapse {
+    transition: all 0.3s ease;
+}
+
+.startbar-menu .collapse.show {
+    display: block;
+}
+
+.startbar-menu .collapse:not(.show) {
+    display: none;
+}
+
+/* Sub-menu items */
+.startbar-menu .collapse .nav-link {
+    padding-left: 3rem;
+    font-size: 0.875rem;
+    margin: 0.125rem 0.5rem;
+    color: #6c757d; /* Màu xám cho submenu items */
+}
+
+.startbar-menu .collapse .nav-link:hover {
+    background-color: rgba(59, 125, 221, 0.15); /* Background xanh nhạt khi hover */
+    color: #2c3e50; /* Màu xanh đậm khi hover - DỄ NHÌN HƠN */
+}
+
+/* ĐẢM BẢO SUBMENU ACTIVE CÓ MÀU TRẮNG - SPECIFICITY CAO */
+.startbar-menu .collapse .nav-link.active,
+.startbar .startbar-menu .collapse .nav-link.active,
+body .startbar-menu .collapse .nav-link.active {
+    background-color: #3b7ddd !important; /* Background xanh khi active */
+    color: #ffffff !important; /* Màu trắng khi active */
+    box-shadow: 0 2px 6px rgba(59, 125, 221, 0.3); /* Thêm shadow nhẹ */
+}
+
+/* Collapse arrow indicator - Chỉ hiển thị một arrow duy nhất */
+.startbar-menu .nav-link[data-bs-toggle="collapse"] {
+    position: relative;
+}
+
+/* Ẩn tất cả icon arrow khác - Cải thiện */
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .iconoir-arrow-down,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .iconoir-chevron-right,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .iconoir-arrow-right,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .iconoir-arrow-left,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .iconoir-arrow-up,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .iconoir-arrow-down-left,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .iconoir-arrow-down-right,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .iconoir-arrow-up-left,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .iconoir-arrow-up-right {
+    display: none !important;
+}
+
+/* Ẩn tất cả icon arrow từ Bootstrap hoặc CSS khác - TĂNG SPECIFICITY */
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .dropdown-toggle::after,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .dropdown-toggle::before,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .caret,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .arrow,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .chevron {
+    display: none !important;
+}
+
+/* Ẩn tất cả pseudo-elements arrow khác */
+.startbar-menu .nav-link[data-bs-toggle="collapse"]::before,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .iconoir-arrow-down::before,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .iconoir-chevron-right::before,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .iconoir-arrow-right::before,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .iconoir-arrow-left::before,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .iconoir-arrow-up::before {
+    display: none !important;
+}
+
+/* Ẩn tất cả icon arrow từ CSS framework khác */
+.startbar-menu .nav-link[data-bs-toggle="collapse"] [class*="arrow"],
+.startbar-menu .nav-link[data-bs-toggle="collapse"] [class*="chevron"],
+.startbar-menu .nav-link[data-bs-toggle="collapse"] [class*="caret"],
+.startbar-menu .nav-link[data-bs-toggle="collapse"] [class*="dropdown"] {
+    display: none !important;
+}
+
+/* Ẩn tất cả icon arrow từ Bootstrap - SPECIFICITY CAO HƠN */
+.startbar-menu .nav-link[data-bs-toggle="collapse"]::after,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .dropdown-toggle::after,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .dropdown-toggle::before {
+    display: none !important;
+}
+
+/* OVERRIDE TẤT CẢ ICON ARROW TỪ BOOTSTRAP VÀ CSS KHÁC */
+.startbar-menu .nav-link[data-bs-toggle="collapse"]::after,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .dropdown-toggle::after,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .dropdown-toggle::before,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .btn::after,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .btn::before,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .nav-link::after,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .nav-link::before {
+    display: none !important;
+    content: none !important;
+}
+
+/* Ẩn tất cả icon arrow từ CSS framework khác - SPECIFICITY CAO NHẤT */
+.startbar-menu .nav-link[data-bs-toggle="collapse"] [class*="arrow"]::after,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] [class*="arrow"]::before,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] [class*="chevron"]::after,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] [class*="chevron"]::before,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] [class*="caret"]::after,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] [class*="caret"]::before,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] [class*="dropdown"]::after,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] [class*="dropdown"]::before {
+    display: none !important;
+    content: none !important;
+}
+
+/* Chỉ giữ lại arrow CSS tự tạo - ĐỊNH NGHĨA DUY NHẤT VỚI SPECIFICITY CAO */
+.startbar-menu .nav-link[data-bs-toggle="collapse"]::after {
+    content: '' !important;
+    display: block !important;
+    position: absolute !important;
+    right: 1rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 0 !important;
+    height: 0 !important;
+    border-left: 4px solid transparent !important;
+    border-right: 4px solid transparent !important;
+    border-top: 4px solid currentColor !important;
+    transition: transform 0.3s ease !important;
+    z-index: 10 !important;
+}
+
+.startbar-menu .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]::after {
+    transform: translateY(-50%) rotate(180deg) !important;
+}
+
+/* CSS VỚI SPECIFICITY CAO NHẤT - ĐẢM BẢO CHỈ CÓ 1 ARROW */
+body .startbar-menu .nav-link[data-bs-toggle="collapse"]::after,
+html body .startbar-menu .nav-link[data-bs-toggle="collapse"]::after {
+    content: '' !important;
+    display: block !important;
+    position: absolute !important;
+    right: 1rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 0 !important;
+    height: 0 !important;
+    border-left: 4px solid transparent !important;
+    border-right: 4px solid transparent !important;
+    border-top: 4px solid currentColor !important;
+    transition: transform 0.3s ease !important;
+    z-index: 9999 !important;
+}
+
+body .startbar-menu .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]::after,
+html body .startbar-menu .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]::after {
+    transform: translateY(-50%) rotate(180deg) !important;
+}
+
+/* DEBUG: Ẩn tất cả arrow khác để xem có bao nhiêu */
+.startbar-menu .nav-link[data-bs-toggle="collapse"] *::after,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] *::before {
+    display: none !important;
+    content: none !important;
+}
+
+/* DEBUG: Chỉ giữ lại arrow chính */
+.startbar-menu .nav-link[data-bs-toggle="collapse"]::after {
+    content: '' !important;
+    display: block !important;
+    position: absolute !important;
+    right: 1rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 0 !important;
+    height: 0 !important;
+    border-left: 4px solid transparent !important;
+    border-right: 4px solid transparent !important;
+    border-top: 4px solid currentColor !important;
+    transition: transform 0.3s ease !important;
+    z-index: 9999 !important;
+}
+
+/* FINAL SOLUTION: Ẩn tất cả arrow và chỉ giữ lại một cái */
+.startbar-menu .nav-link[data-bs-toggle="collapse"]::after {
+    content: '' !important;
+    display: block !important;
+    position: absolute !important;
+    right: 1rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 0 !important;
+    height: 0 !important;
+    border-left: 4px solid transparent !important;
+    border-right: 4px solid transparent !important;
+    border-top: 4px solid currentColor !important;
+    transition: transform 0.3s ease !important;
+    z-index: 9999 !important;
+}
+
+.startbar-menu .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]::after {
+    transform: translateY(-50%) rotate(180deg) !important;
+}
+
+/* Ẩn tất cả arrow khác */
+.startbar-menu .nav-link[data-bs-toggle="collapse"] *::after,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] *::before,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .dropdown-toggle::after,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .dropdown-toggle::before,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .btn::after,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .btn::before,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .nav-link::after,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .nav-link::before {
+    display: none !important;
+    content: none !important;
+}
+
+/* Ẩn tất cả arrow từ Bootstrap và CSS khác */
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .dropdown-toggle::after,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .dropdown-toggle::before,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .caret::after,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .caret::before,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .arrow::after,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .arrow::before,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .chevron::after,
+.startbar-menu .nav-link[data-bs-toggle="collapse"] .chevron::before {
+    display: none !important;
+    content: none !important;
+}
+
+/* Icon styling - SỬA LẠI ĐỂ HOẠT ĐỘNG ĐÚNG */
+.startbar-menu .nav-link i {
+    width: 1.25rem;
+    text-align: center;
+    font-size: 1.1rem;
+    color: inherit; /* Icon sẽ kế thừa màu từ parent */
+    transition: all 0.3s ease;
+}
+
+/* ĐẢM BẢO ICON ICONOIR HIỂN THỊ ĐÚNG */
+.startbar-menu .nav-link i[class*="iconoir-"] {
+    display: inline-block !important;
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    position: relative !important;
+}
+
+/* Sửa lại để icon hiển thị đúng thay vì hình vuông */
+.startbar-menu .nav-link i[class*="iconoir-"]::before {
+    content: "" !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: currentColor !important;
+    mask-size: cover !important;
+    -webkit-mask-size: cover !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-position: center !important;
+    -webkit-mask-position: center !important;
+}
+
+/* Icon khi hover */
+.startbar-menu .nav-link:hover i {
+    transform: scale(1.1);
+    color: inherit; /* Giữ màu khi hover */
+}
+
+/* Icon khi active */
+.startbar-menu .nav-link.active i,
+.startbar .startbar-menu .nav-link.active i,
+body .startbar-menu .nav-link.active i {
+    color: #ffffff !important; /* Icon màu trắng khi active */
+    transform: scale(1.05);
+}
+
+/* Icon khi hover trên active */
+.startbar-menu .nav-link.active:hover i,
+.startbar .startbar-menu .nav-link.active:hover i,
+body .startbar-menu .nav-link.active:hover i {
+    color: #ffffff !important; /* Giữ màu trắng khi hover trên active */
+    transform: scale(1.1);
+}
+
+/* Sửa màu chữ cho span trong menu collapse khi mở rộng */
+.startbar .startbar-menu .navbar-nav .nav-item .nav-link[data-bs-toggle="collapse"][aria-expanded="true"] span {
+    color: white !important; /* Màu xanh đậm khi menu được mở rộng */
+    font-weight: 600; /* Làm đậm chữ một chút */
 }
