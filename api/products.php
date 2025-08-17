@@ -1,0 +1,281 @@
+<?php
+/**
+ * API Products - Quản lý sản phẩm
+ */
+
+header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
+header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+
+require_once '../models/Product.php';
+
+$product = new Product();
+$method = $_SERVER['REQUEST_METHOD'];
+
+try {
+    switch($method) {
+        case 'GET':
+            if(isset($_GET['id'])) {
+                // Lấy sản phẩm theo ID
+                $result = $product->getById($_GET['id']);
+                if($result) {
+                    echo json_encode([
+                        'status' => 'success',
+                        'data' => $result
+                    ]);
+                } else {
+                    http_response_code(404);
+                    echo json_encode([
+                        'status' => 'error',
+                        'message' => 'Không tìm thấy sản phẩm'
+                    ]);
+                }
+            } elseif(isset($_GET['slug'])) {
+                // Lấy sản phẩm theo slug
+                $result = $product->getBySlug($_GET['slug']);
+                if($result) {
+                    echo json_encode([
+                        'status' => 'success',
+                        'data' => $result
+                    ]);
+                } else {
+                    http_response_code(404);
+                    echo json_encode([
+                        'status' => 'error',
+                        'message' => 'Không tìm thấy sản phẩm'
+                    ]);
+                }
+            } elseif(isset($_GET['category'])) {
+                // Lấy sản phẩm theo danh mục
+                $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : null;
+                $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : null;
+                
+                $result = $product->getByCategory($_GET['category'], $limit, $offset);
+                $products = [];
+                while($row = $result->fetch()) {
+                    $products[] = $row;
+                }
+                echo json_encode([
+                    'status' => 'success',
+                    'data' => $products,
+                    'total' => count($products)
+                ]);
+            } elseif(isset($_GET['search'])) {
+                // Tìm kiếm sản phẩm
+                $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : null;
+                $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : null;
+                
+                $result = $product->search($_GET['search'], $limit, $offset);
+                $products = [];
+                while($row = $result->fetch()) {
+                    $products[] = $row;
+                }
+                echo json_encode([
+                    'status' => 'success',
+                    'data' => $products,
+                    'total' => count($products)
+                ]);
+            } elseif(isset($_GET['featured'])) {
+                // Lấy sản phẩm nổi bật
+                $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 8;
+                $result = $product->getFeaturedProducts($limit);
+                $products = [];
+                while($row = $result->fetch()) {
+                    $products[] = $row;
+                }
+                echo json_encode([
+                    'status' => 'success',
+                    'data' => $products
+                ]);
+            } elseif(isset($_GET['price_range'])) {
+                // Lấy sản phẩm theo khoảng giá
+                if(isset($_GET['min_price']) && isset($_GET['max_price'])) {
+                    $min_price = (float)$_GET['min_price'];
+                    $max_price = (float)$_GET['max_price'];
+                    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : null;
+                    
+                    $result = $product->getByPriceRange($min_price, $max_price, $limit);
+                    $products = [];
+                    while($row = $result->fetch()) {
+                        $products[] = $row;
+                    }
+                    echo json_encode([
+                        'status' => 'success',
+                        'data' => $products
+                    ]);
+                } else {
+                    http_response_code(400);
+                    echo json_encode([
+                        'status' => 'error',
+                        'message' => 'min_price và max_price không được để trống'
+                    ]);
+                }
+            } else {
+                // Lấy tất cả sản phẩm
+                $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : null;
+                $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : null;
+                
+                $result = $product->getAll($limit, $offset);
+                $products = [];
+                while($row = $result->fetch()) {
+                    $products[] = $row;
+                }
+                echo json_encode([
+                    'status' => 'success',
+                    'data' => $products,
+                    'total' => count($products)
+                ]);
+            }
+            break;
+
+        case 'POST':
+            // Tạo sản phẩm mới
+            $data = json_decode(file_get_contents("php://input"), true);
+            
+            if(!isset($data['name']) || empty($data['name'])) {
+                http_response_code(400);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Tên sản phẩm không được để trống'
+                ]);
+                break;
+            }
+
+            if(!isset($data['sku']) || empty($data['sku'])) {
+                http_response_code(400);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'SKU không được để trống'
+                ]);
+                break;
+            }
+
+            // Kiểm tra SKU đã tồn tại chưa
+            if($product->skuExists($data['sku'])) {
+                http_response_code(400);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'SKU đã tồn tại'
+                ]);
+                break;
+            }
+
+            $product->name = $data['name'];
+            $product->slug = isset($data['slug']) ? $data['slug'] : $product->createSlug($data['name']);
+            $product->description = isset($data['description']) ? $data['description'] : '';
+            $product->sku = $data['sku'];
+            $product->price = isset($data['price']) ? (float)$data['price'] : 0;
+            $product->sale_price = isset($data['sale_price']) ? (float)$data['sale_price'] : null;
+            $product->stock_quantity = isset($data['stock_quantity']) ? (int)$data['stock_quantity'] : 0;
+            $product->category_id = isset($data['category_id']) ? (int)$data['category_id'] : null;
+            $product->brand = isset($data['brand']) ? $data['brand'] : '';
+            $product->images = isset($data['images']) ? $data['images'] : '';
+            $product->is_active = isset($data['is_active']) ? (int)$data['is_active'] : 1;
+
+            $id = $product->create();
+            if($id) {
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Tạo sản phẩm thành công',
+                    'data' => ['id' => $id]
+                ]);
+            } else {
+                http_response_code(500);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Không thể tạo sản phẩm'
+                ]);
+            }
+            break;
+
+        case 'PUT':
+            // Cập nhật sản phẩm
+            $data = json_decode(file_get_contents("php://input"), true);
+            
+            if(!isset($data['id']) || !isset($data['name'])) {
+                http_response_code(400);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'ID và tên sản phẩm không được để trống'
+                ]);
+                break;
+            }
+
+            // Kiểm tra SKU đã tồn tại chưa (nếu thay đổi)
+            if(isset($data['sku']) && $product->skuExists($data['sku'], $data['id'])) {
+                http_response_code(400);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'SKU đã tồn tại'
+                ]);
+                break;
+            }
+
+            $product->id = $data['id'];
+            $product->name = $data['name'];
+            $product->slug = isset($data['slug']) ? $data['slug'] : $product->createSlug($data['name']);
+            $product->description = isset($data['description']) ? $data['description'] : '';
+            $product->sku = isset($data['sku']) ? $data['sku'] : '';
+            $product->price = isset($data['price']) ? (float)$data['price'] : 0;
+            $product->sale_price = isset($data['sale_price']) ? (float)$data['sale_price'] : null;
+            $product->stock_quantity = isset($data['stock_quantity']) ? (int)$data['stock_quantity'] : 0;
+            $product->category_id = isset($data['category_id']) ? (int)$data['category_id'] : null;
+            $product->brand = isset($data['brand']) ? $data['brand'] : '';
+            $product->images = isset($data['images']) ? $data['images'] : '';
+            $product->is_active = isset($data['is_active']) ? (int)$data['is_active'] : 1;
+
+            if($product->update()) {
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Cập nhật sản phẩm thành công'
+                ]);
+            } else {
+                http_response_code(500);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Không thể cập nhật sản phẩm'
+                ]);
+            }
+            break;
+
+        case 'DELETE':
+            // Xóa sản phẩm
+            if(isset($_GET['id'])) {
+                if($product->delete($_GET['id'])) {
+                    echo json_encode([
+                        'status' => 'success',
+                        'message' => 'Xóa sản phẩm thành công'
+                    ]);
+                } else {
+                    http_response_code(500);
+                    echo json_encode([
+                        'status' => 'error',
+                        'message' => 'Không thể xóa sản phẩm'
+                    ]);
+                }
+            } else {
+                http_response_code(400);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'ID sản phẩm không được để trống'
+                ]);
+            }
+            break;
+
+        default:
+            http_response_code(405);
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Method không được hỗ trợ'
+            ]);
+            break;
+    }
+} catch(Exception $e) {
+    http_response_code(500);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Lỗi server: ' . $e->getMessage()
+    ]);
+}
+?>

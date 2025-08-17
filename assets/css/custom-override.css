@@ -1,0 +1,14 @@
+/* Custom CSS Override để tắt width:100% */
+.page-wrapper .page-content {
+    width: auto !important;
+}
+
+body[data-sidebar-size=default] .page-wrapper .page-content {
+    width: auto !important;
+}
+
+@media print {
+    .page-wrapper .page-content {
+        width: auto !important;
+    }
+}

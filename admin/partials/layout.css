@@ -1,0 +1,531 @@
+/* Admin Layout CSS - Common for all admin pages */
+
+/* Layout fixes */
+.content-page {
+    margin-left: 260px; /* Width của sidebar */
+    transition: margin-left 0.3s ease;
+}
+
+.startbar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 260px;
+    z-index: 1000;
+    background: #2c3e50;
+    color: white;
+}
+
+/* Responsive sidebar */
+@media (max-width: 768px) {
+    .content-page {
+        margin-left: 0;
+    }
+
+    .startbar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .startbar.show {
+        transform: translateX(0);
+    }
+}
+
+/* Topbar fixes - Tất cả elements trên cùng một hàng ngang */
+.navbar-custom {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 260px;
+    z-index: 999;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: left 0.3s ease;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+}
+
+/* Container layout - Flexbox để tất cả elements nằm ngang */
+.navbar-custom .container-fluid {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    height: 100%;
+    width: 100%;
+    gap: 1rem;
+    flex-direction: row !important;
+}
+
+/* Logo */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    min-width: 120px;
+    flex-shrink: 0;
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.brand-text {
+    color: #2c3e50 !important;
+    font-weight: 700;
+}
+
+/* Page Title - Nằm ngang hàng với logo */
+.page-title {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 200px;
+    margin-left: 1rem;
+    flex-shrink: 0;
+}
+
+.page-title h5 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.page-title small {
+    color: #6c757d;
+    font-size: 0.8rem;
+    line-height: 1.2;
+}
+
+/* Search Bar - Nằm ngang hàng */
+.search-container {
+    flex: 1;
+    max-width: 400px;
+    margin: 0 1rem;
+    flex-shrink: 0;
+}
+
+.search-form .input-group {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.search-form .input-group-text {
+    border: none;
+    background: white;
+    padding: 0.5rem 1rem;
+}
+
+.search-form .form-control {
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.search-form .form-control:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+.search-form .btn {
+    border: none;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    border-radius: 0 20px 20px 0;
+}
+
+/* Right Actions - Nằm ngang hàng */
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 300px;
+    justify-content: flex-end;
+    flex-shrink: 0;
+}
+
+.navbar-actions .dropdown {
+    position: relative;
+}
+
+.navbar-actions .btn {
+    border: 1px solid #dee2e6;
+    background: white;
+    color: #6c757d;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.navbar-actions .btn:hover {
+    background: #f8f9fa;
+    border-color: #adb5bd;
+    color: #495057;
+}
+
+.navbar-actions .btn:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+/* Mobile Menu Toggle */
+#toggle-sidebar {
+    color: #6c757d;
+    text-decoration: none;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+#toggle-sidebar:hover {
+    background: #f8f9fa;
+    color: #495057;
+}
+
+/* Dropdown menus styling */
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    border-radius: 12px;
+    padding: 0.5rem 0;
+    margin-top: 0.5rem;
+}
+
+.dropdown-item {
+    padding: 0.75rem 1.5rem;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+    margin: 0 0.5rem;
+}
+
+.dropdown-item:hover {
+    background: rgba(0, 123, 255, 0.1);
+    color: #007bff;
+    transform: translateX(5px);
+}
+
+.dropdown-header {
+    background: rgba(0, 123, 255, 0.05);
+    border-radius: 8px;
+    margin: 0 0.5rem 0.5rem 0.5rem;
+}
+
+/* Notification badge */
+.badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Avatar styling */
+.avatar-sm {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1400px) {
+    .page-title small {
+        display: none;
+    }
+    
+    .page-title {
+        min-width: 150px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .search-container {
+        max-width: 300px;
+    }
+    
+    .navbar-actions {
+        min-width: 250px;
+    }
+}
+
+@media (max-width: 992px) {
+    .page-title {
+        display: none;
+    }
+    
+    .search-container {
+        max-width: 250px;
+    }
+    
+    .navbar-actions {
+        min-width: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-custom {
+        left: 0 !important;
+        right: 0 !important;
+        padding: 0 0.5rem;
+    }
+    
+    .search-container {
+        display: none;
+    }
+    
+    .navbar-actions {
+        min-width: auto;
+        gap: 0.25rem;
+    }
+    
+    .navbar-actions .btn {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.8rem;
+    }
+    
+    .navbar-actions .btn span {
+        display: none;
+    }
+}
+
+/* Điều chỉnh content để không bị che bởi header */
+.page-wrapper {
+    margin-left: 260px;
+    margin-top: 70px;
+    transition: margin-left 0.3s ease;
+    min-height: calc(100vh - 70px);
+}
+
+.content {
+    padding-top: 20px;
+}
+
+/* Responsive navbar adjustments */
+@media (max-width: 768px) {
+    .page-wrapper {
+        margin-left: 0;
+        margin-top: 70px;
+    }
+    
+    .content {
+        padding-top: 20px;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .navbar-custom {
+        left: 200px;
+    }
+    
+    .page-wrapper {
+        margin-left: 200px;
+        margin-top: 70px;
+    }
+}
+
+/* Brand logo fixes */
+.brand {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.brand .logo img {
+    max-height: 40px;
+}
+
+/* Navigation menu fixes */
+.startbar-menu {
+    padding: 20px 0;
+}
+
+.nav-item .nav-link {
+    padding: 12px 20px;
+    color: rgba(255,255,255,0.8);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.nav-item .nav-link:hover,
+.nav-item .nav-link.active {
+    color: white;
+    background: rgba(255,255,255,0.1);
+}
+
+.nav-item .nav-link i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+.menu-label {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 20px 20px 10px;
+}
+
+/* Collapse submenu - Cải thiện */
+.collapse .nav-link {
+    padding-left: 3rem;
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.7);
+    transition: all 0.3s ease;
+}
+
+.collapse .nav-link:hover,
+.collapse .nav-link.active {
+    color: white;
+    background: rgba(255,255,255,0.05);
+    padding-left: 3.5rem;
+}
+
+/* Collapse animation */
+.collapse {
+    transition: all 0.3s ease;
+}
+
+.collapse.show {
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    margin: 0 10px;
+}
+
+/* Card enhancements */
+.card {
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Header title styling */
+.header-title {
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+/* Progress bar enhancement */
+.progress {
+    height: 10px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #e9ecef 0%, #dee2e6 100%);
+}
+
+.progress-bar {
+    border-radius: 10px;
+    background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+}
+
+/* Button group styling */
+.btn-group .btn {
+    border-radius: 20px !important;
+    margin: 0 2px;
+    padding: 6px 16px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.btn-group .btn.active {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border-color: #007bff;
+    color: white;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .content-page {
+        margin-left: 0;
+    }
+
+    .startbar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .startbar.show {
+        transform: translateX(0);
+    }
+
+    .navbar-custom {
+        left: 0 !important;
+        right: 0 !important;
+    }
+
+    .page-wrapper {
+        margin-left: 0;
+        margin-top: 70px;
+    }
+
+    .content {
+        padding-top: 20px;
+    }
+
+    .col-xl-3.col-md-6 {
+        margin-bottom: 1rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .btn-group {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .btn-group .btn {
+        margin: 2px;
+        flex: 1;
+        min-width: 60px;
+    }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .content-page {
+        margin-left: 200px;
+    }
+
+    .startbar {
+        width: 200px;
+    }
+
+    .navbar-custom {
+        left: 200px;
+    }
+    
+    .page-wrapper {
+        margin-left: 200px;
+        margin-top: 70px;
+    }
+}

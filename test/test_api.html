@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API - Categories & Products</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .api-section { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        .response-box { background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 10px; }
+        .method-get { color: #28a745; }
+        .method-post { color: #007bff; }
+        .method-put { color: #ffc107; }
+        .method-delete { color: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">Test API - Categories & Products</h1>
+        
+        <!-- Categories API Test -->
+        <div class="api-section">
+            <h3>📁 Categories API</h3>
+            
+            <!-- Get All Categories -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <span class="method-get fw-bold">GET</span> Lấy tất cả danh mục
+                </div>
+                <div class="card-body">
+                    <button class="btn btn-success" onclick="getAllCategories()">Test API</button>
+                    <div id="categories-response" class="response-box mt-2" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Create Category -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <span class="method-post fw-bold">POST</span> Tạo danh mục mới
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="text" id="cat-name" class="form-control mb-2" placeholder="Tên danh mục">
+                            <textarea id="cat-description" class="form-control mb-2" placeholder="Mô tả"></textarea>
+                            <input type="number" id="cat-sort-order" class="form-control mb-2" placeholder="Thứ tự sắp xếp" value="0">
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-primary" onclick="createCategory()">Tạo danh mục</button>
+                        </div>
+                    </div>
+                    <div id="create-category-response" class="response-box mt-2" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Update Category -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <span class="method-put fw-bold">PUT</span> Cập nhật danh mục
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="number" id="cat-update-id" class="form-control mb-2" placeholder="ID danh mục">
+                            <input type="text" id="cat-update-name" class="form-control mb-2" placeholder="Tên mới">
+                            <textarea id="cat-update-description" class="form-control mb-2" placeholder="Mô tả mới"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-warning" onclick="updateCategory()">Cập nhật</button>
+                        </div>
+                    </div>
+                    <div id="update-category-response" class="response-box mt-2" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Delete Category -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <span class="method-delete fw-bold">DELETE</span> Xóa danh mục
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="number" id="cat-delete-id" class="form-control mb-2" placeholder="ID danh mục">
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-danger" onclick="deleteCategory()">Xóa danh mục</button>
+                        </div>
+                    </div>
+                    <div id="delete-category-response" class="response-box mt-2" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products API Test -->
+        <div class="api-section">
+            <h3>📦 Products API</h3>
+            
+            <!-- Get All Products -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <span class="method-get fw-bold">GET</span> Lấy tất cả sản phẩm
+                </div>
+                <div class="card-body">
+                    <button class="btn btn-success" onclick="getAllProducts()">Test API</button>
+                    <div id="products-response" class="response-box mt-2" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Create Product -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <span class="method-post fw-bold">POST</span> Tạo sản phẩm mới
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="text" id="prod-name" class="form-control mb-2" placeholder="Tên sản phẩm">
+                            <input type="text" id="prod-sku" class="form-control mb-2" placeholder="SKU">
+                            <textarea id="prod-description" class="form-control mb-2" placeholder="Mô tả"></textarea>
+                            <input type="number" id="prod-price" class="form-control mb-2" placeholder="Giá" step="0.01">
+                            <input type="number" id="prod-stock" class="form-control mb-2" placeholder="Số lượng tồn kho">
+                            <select id="prod-category" class="form-control mb-2">
+                                <option value="">Chọn danh mục</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-primary" onclick="createProduct()">Tạo sản phẩm</button>
+                        </div>
+                    </div>
+                    <div id="create-product-response" class="response-box mt-2" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Search Products -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <span class="method-get fw-bold">GET</span> Tìm kiếm sản phẩm
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="text" id="search-keyword" class="form-control mb-2" placeholder="Từ khóa tìm kiếm">
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-info" onclick="searchProducts()">Tìm kiếm</button>
+                        </div>
+                    </div>
+                    <div id="search-response" class="response-box mt-2" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Load categories for product creation
+        window.onload = function() {
+            loadCategoriesForSelect();
+        };
+
+        // Load categories into select dropdown
+        function loadCategoriesForSelect() {
+            fetch('../api/categories.php')
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        const select = document.getElementById('prod-category');
+                        data.data.forEach(category => {
+                            const option = document.createElement('option');
+                            option.value = category.id;
+                            option.textContent = category.name;
+                            select.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Categories API Functions
+        function getAllCategories() {
+            fetch('../api/categories.php')
+                .then(response => response.json())
+                .then(data => {
+                    const responseBox = document.getElementById('categories-response');
+                    responseBox.style.display = 'block';
+                    responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                })
+                .catch(error => {
+                    const responseBox = document.getElementById('categories-response');
+                    responseBox.style.display = 'block';
+                    responseBox.innerHTML = `<div class="text-danger">Error: ${error.message}</div>`;
+                });
+        }
+
+        function createCategory() {
+            const name = document.getElementById('cat-name').value;
+            const description = document.getElementById('cat-description').value;
+            const sortOrder = document.getElementById('cat-sort-order').value;
+
+            if(!name) {
+                alert('Vui lòng nhập tên danh mục');
+                return;
+            }
+
+            const data = {
+                name: name,
+                description: description,
+                sort_order: parseInt(sortOrder)
+            };
+
+            fetch('../api/categories.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                const responseBox = document.getElementById('create-category-response');
+                responseBox.style.display = 'block';
+                responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                if(data.status === 'success') {
+                    // Reload categories
+                    loadCategoriesForSelect();
+                    // Clear form
+                    document.getElementById('cat-name').value = '';
+                    document.getElementById('cat-description').value = '';
+                    document.getElementById('cat-sort-order').value = '0';
+                }
+            })
+            .catch(error => {
+                const responseBox = document.getElementById('create-category-response');
+                responseBox.style.display = 'block';
+                responseBox.innerHTML = `<div class="text-danger">Error: ${error.message}</div>`;
+            });
+        }
+
+        function updateCategory() {
+            const id = document.getElementById('cat-update-id').value;
+            const name = document.getElementById('cat-update-name').value;
+            const description = document.getElementById('cat-update-description').value;
+
+            if(!id || !name) {
+                alert('Vui lòng nhập ID và tên danh mục');
+                return;
+            }
+
+            const data = {
+                id: parseInt(id),
+                name: name,
+                description: description
+            };
+
+            fetch('../api/categories.php', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                const responseBox = document.getElementById('update-category-response');
+                responseBox.style.display = 'block';
+                responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            })
+            .catch(error => {
+                const responseBox = document.getElementById('update-category-response');
+                responseBox.style.display = 'block';
+                responseBox.innerHTML = `<div class="text-danger">Error: ${error.message}</div>`;
+            });
+        }
+
+        function deleteCategory() {
+            const id = document.getElementById('cat-delete-id').value;
+
+            if(!id) {
+                alert('Vui lòng nhập ID danh mục');
+                return;
+            }
+
+            if(!confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
+                return;
+            }
+
+            fetch(`../api/categories.php?id=${id}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                const responseBox = document.getElementById('delete-category-response');
+                responseBox.style.display = 'block';
+                responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            })
+            .catch(error => {
+                const responseBox = document.getElementById('delete-category-response');
+                responseBox.style.display = 'block';
+                responseBox.innerHTML = `<div class="text-danger">Error: ${error.message}</div>`;
+            });
+        }
+
+        // Products API Functions
+        function getAllProducts() {
+            fetch('../api/products.php')
+                .then(response => response.json())
+                .then(data => {
+                    const responseBox = document.getElementById('products-response');
+                    responseBox.style.display = 'block';
+                    responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                })
+                .catch(error => {
+                    const responseBox = document.getElementById('products-response');
+                    responseBox.style.display = 'block';
+                    responseBox.innerHTML = `<div class="text-danger">Error: ${error.message}</div>`;
+                });
+        }
+
+        function createProduct() {
+            const name = document.getElementById('prod-name').value;
+            const sku = document.getElementById('prod-sku').value;
+            const description = document.getElementById('prod-description').value;
+            const price = document.getElementById('prod-price').value;
+            const stock = document.getElementById('prod-stock').value;
+            const categoryId = document.getElementById('prod-category').value;
+
+            if(!name || !sku) {
+                alert('Vui lòng nhập tên sản phẩm và SKU');
+                return;
+            }
+
+            const data = {
+                name: name,
+                sku: sku,
+                description: description,
+                price: parseFloat(price) || 0,
+                stock_quantity: parseInt(stock) || 0,
+                category_id: categoryId ? parseInt(categoryId) : null
+            };
+
+            fetch('../api/products.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                const responseBox = document.getElementById('create-product-response');
+                responseBox.style.display = 'block';
+                responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                if(data.status === 'success') {
+                    // Clear form
+                    document.getElementById('prod-name').value = '';
+                    document.getElementById('prod-sku').value = '';
+                    document.getElementById('prod-description').value = '';
+                    document.getElementById('prod-price').value = '';
+                    document.getElementById('prod-stock').value = '';
+                    document.getElementById('prod-category').value = '';
+                }
+            })
+            .catch(error => {
+                const responseBox = document.getElementById('create-product-response');
+                responseBox.style.display = 'block';
+                responseBox.innerHTML = `<div class="text-danger">Error: ${error.message}</div>`;
+            });
+        }
+
+        function searchProducts() {
+            const keyword = document.getElementById('search-keyword').value;
+
+            if(!keyword) {
+                alert('Vui lòng nhập từ khóa tìm kiếm');
+                return;
+            }
+
+            fetch(`../api/products.php?search=${encodeURIComponent(keyword)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const responseBox = document.getElementById('search-response');
+                    responseBox.style.display = 'block';
+                    responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                })
+                .catch(error => {
+                    const responseBox = document.getElementById('search-response');
+                    responseBox.style.display = 'block';
+                    responseBox.innerHTML = `<div class="text-danger">Error: ${error.message}</div>`;
+                });
+        }
+    </script>
+</body>
+</html>

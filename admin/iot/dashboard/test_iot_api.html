@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="vi" dir="ltr" data-startbar="light" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test IoT API - IoT System</title>
+    
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="../../../assets/images/favicon.ico">
+    
+    <!-- App css -->
+    <link href="../../../assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="../../../assets/css/icons.min.css" rel="stylesheet" type="text/css" />
+    <link href="../../../assets/css/app.min.css" rel="stylesheet" type="text/css" />
+    
+    <!-- Common Admin Layout CSS -->
+    <link href="../../partials/layout.css" rel="stylesheet" type="text/css" />
+    
+    <style>
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .section h3 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .response {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success { border-color: #28a745; background-color: #d4edda; }
+        .error { border-color: #dc3545; background-color: #f8d7da; }
+        .info { border-color: #17a2b8; background-color: #d1ecf1; }
+    </style>
+</head>
+<body>
+    <!-- Include sidebar -->
+    <div id="sidebar-placeholder"></div>
+
+    <!-- ============================================================== -->
+    <!-- Start Page Content here -->
+    <!-- ============================================================== -->
+
+    <div class="content-page">
+        <div class="content">
+            <!-- Include header -->
+            <div id="header-placeholder"></div>
+
+            <!-- Start Content-->
+            <div class="container-fluid">
+                <!-- start page title -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="page-title-box">
+                            <div class="page-title-right">
+                                <ol class="breadcrumb m-0">
+                                    <li class="breadcrumb-item"><a href="../../../index.php">Dashboard</a></li>
+                                    <li class="breadcrumb-item"><a href="../index.php">IoT Dashboard</a></li>
+                                    <li class="breadcrumb-item active">Test API</li>
+                                </ol>
+                            </div>
+                            <h4 class="page-title">Test IoT API</h4>
+                        </div>
+                    </div>
+                </div>
+                <!-- end page title -->
+
+                <div class="container">
+                    <h1>🧪 Test IoT API Endpoints</h1>
+                    <p>Trang này giúp bạn test các API endpoints của hệ thống IoT.</p>
+
+                    <!-- Test IoT Sensor API -->
+                    <div class="section">
+                        <h3>📡 Test IoT Sensor API</h3>
+                        <p>API để gửi dữ liệu từ cảm biến và lấy thông tin cảm biến.</p>
+                        
+                        <div class="form-group">
+                            <label>Endpoint:</label>
+                            <input type="text" value="../../api/iot-sensor.php" readonly>
+                        </div>
+
+                        <h4>POST - Gửi dữ liệu cảm biến</h4>
+                        <form id="sensorForm">
+                            <div class="form-group">
+                                <label for="sensorId">Sensor ID:</label>
+                                <input type="text" id="sensorId" value="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="temperature">Nhiệt độ (°C):</label>
+                                <input type="number" id="temperature" value="25.5" step="0.1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="humidity">Độ ẩm (%):</label>
+                                <input type="number" id="humidity" value="60" min="0" max="100" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="timestamp">Timestamp:</label>
+                                <input type="datetime-local" id="timestamp" required>
+                            </div>
+                            <button type="submit">Gửi dữ liệu</button>
+                        </form>
+                        <div id="sensorResponse" class="response"></div>
+
+                        <h4>GET - Lấy dữ liệu cảm biến</h4>
+                        <button onclick="getSensorData()">Lấy dữ liệu</button>
+                        <div id="sensorGetResponse" class="response"></div>
+                    </div>
+
+                    <!-- Test Dashboard Data API -->
+                    <div class="section">
+                        <h3>📊 Test Dashboard Data API</h3>
+                        <p>API để lấy dữ liệu cho dashboard IoT.</p>
+                        
+                        <div class="form-group">
+                            <label>Endpoint:</label>
+                            <input type="text" value="../../api/dashboard-data.php" readonly>
+                        </div>
+
+                        <h4>GET - Lấy dữ liệu dashboard</h4>
+                        <div class="form-group">
+                            <label for="dataType">Loại dữ liệu:</label>
+                            <select id="dataType">
+                                <option value="overview">Overview (Tổng quan)</option>
+                                <option value="temperature">Temperature Charts (Biểu đồ nhiệt độ)</option>
+                                <option value="warehouse">Warehouse Map (Bản đồ kho)</option>
+                                <option value="sensors">Sensor Status (Trạng thái cảm biến)</option>
+                            </select>
+                        </div>
+                        <button onclick="getDashboardData()">Lấy dữ liệu</button>
+                        <div id="dashboardResponse" class="response"></div>
+                    </div>
+
+                    <!-- Test Results Summary -->
+                    <div class="section">
+                        <h3>�� Kết quả test</h3>
+                        <div id="testSummary">
+                            <p>Chưa có kết quả test nào.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- end row -->
+        </div>
+        <!-- end container-fluid -->
+    </div>
+    <!-- end content -->
+
+    <!-- Include footer -->
+    <div id="footer-placeholder"></div>
+</div>
+<!-- end main content-->
+
+</div>
+<!-- END layout-wrapper -->
+
+<!-- Right bar overlay-->
+<div class="rightbar-overlay"></div>
+
+<!-- JAVASCRIPT -->
+<script src="../../../assets/libs/jquery/jquery.min.js"></script>
+<script src="../../../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../../../assets/libs/metismenu/metisMenu.min.js"></script>
+<script src="../../../assets/libs/simplebar/simplebar.min.js"></script>
+<script src="../../../assets/libs/node-waves/waves.min.js"></script>
+<script src="../../../assets/libs/jquery-sparkline/jquery.sparkline.min.js"></script>
+
+<!-- App js -->
+<script src="../../../assets/js/app.js"></script>
+
+<!-- Common Admin Layout -->
+<script src="../../partials/layout.js"></script>
+
+<script>
+        // Set default timestamp to current time
+        document.getElementById('timestamp').value = new Date().toISOString().slice(0, 16);
+
+        // Test IoT Sensor API - POST
+        document.getElementById('sensorForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('sensor_id', document.getElementById('sensorId').value);
+            formData.append('temperature', document.getElementById('temperature').value);
+            formData.append('humidity', document.getElementById('humidity').value);
+            formData.append('timestamp', document.getElementById('timestamp').value);
+
+            try {
+                const response = await fetch('../../api/iot-sensor.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                const responseDiv = document.getElementById('sensorResponse');
+                
+                if (result.success) {
+                    responseDiv.className = 'response success';
+                    responseDiv.textContent = '✅ Thành công!\n' + JSON.stringify(result, null, 2);
+                    updateTestSummary('IoT Sensor API POST', 'SUCCESS');
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.textContent = '❌ Lỗi!\n' + JSON.stringify(result, null, 2);
+                    updateTestSummary('IoT Sensor API POST', 'FAILED');
+                }
+            } catch (error) {
+                const responseDiv = document.getElementById('sensorResponse');
+                responseDiv.className = 'response error';
+                responseDiv.textContent = '❌ Lỗi kết nối!\n' + error.message;
+                updateTestSummary('IoT Sensor API POST', 'ERROR');
+            }
+        });
+
+        // Test IoT Sensor API - GET
+        async function getSensorData() {
+            try {
+                const response = await fetch('../../api/iot-sensor.php');
+                const result = await response.json();
+                const responseDiv = document.getElementById('sensorGetResponse');
+                
+                if (result.success) {
+                    responseDiv.className = 'response success';
+                    responseDiv.textContent = '✅ Thành công!\n' + JSON.stringify(result, null, 2);
+                    updateTestSummary('IoT Sensor API GET', 'SUCCESS');
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.textContent = '❌ Lỗi!\n' + JSON.stringify(result, null, 2);
+                    updateTestSummary('IoT Sensor API GET', 'FAILED');
+                }
+            } catch (error) {
+                const responseDiv = document.getElementById('sensorGetResponse');
+                responseDiv.className = 'response error';
+                responseDiv.textContent = '❌ Lỗi kết nối!\n' + error.message;
+                updateTestSummary('IoT Sensor API GET', 'ERROR');
+            }
+        }
+
+        // Test Dashboard Data API
+        async function getDashboardData() {
+            const dataType = document.getElementById('dataType').value;
+            
+            try {
+                const response = await fetch(`../../api/dashboard-data.php?type=${dataType}`);
+                const result = await response.json();
+                const responseDiv = document.getElementById('dashboardResponse');
+                
+                if (result.success) {
+                    responseDiv.className = 'response success';
+                    responseDiv.textContent = '✅ Thành công!\n' + JSON.stringify(result, null, 2);
+                    updateTestSummary(`Dashboard Data API (${dataType})`, 'SUCCESS');
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.textContent = '❌ Lỗi!\n' + JSON.stringify(result, null, 2);
+                    updateTestSummary(`Dashboard Data API (${dataType})`, 'FAILED');
+                }
+            } catch (error) {
+                const responseDiv = document.getElementById('dashboardResponse');
+                responseDiv.className = 'response error';
+                responseDiv.textContent = '❌ Lỗi kết nối!\n' + error.message;
+                updateTestSummary(`Dashboard Data API (${dataType})`, 'ERROR');
+            }
+        }
+
+        // Update test summary
+        function updateTestSummary(testName, status) {
+            const summaryDiv = document.getElementById('testSummary');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            let statusText = '';
+            let statusClass = '';
+            
+            switch(status) {
+                case 'SUCCESS':
+                    statusText = '✅ Thành công';
+                    statusClass = 'success';
+                    break;
+                case 'FAILED':
+                    statusText = '❌ Thất bại';
+                    statusClass = 'error';
+                    break;
+                case 'ERROR':
+                    statusText = '⚠️ Lỗi kết nối';
+                    statusClass = 'error';
+                    break;
+            }
+            
+            const newTestResult = document.createElement('div');
+            newTestResult.className = `response ${statusClass}`;
+            newTestResult.innerHTML = `<strong>${testName}</strong> - ${statusText} (${timestamp})`;
+            
+            // Remove "Chưa có kết quả test nào" if it exists
+            const noResultsText = summaryDiv.querySelector('p');
+            if (noResultsText && noResultsText.textContent === 'Chưa có kết quả test nào.') {
+                summaryDiv.removeChild(noResultsText);
+            }
+            
+            summaryDiv.appendChild(newTestResult);
+        }
+
+        // Auto-refresh data every 30 seconds
+        setInterval(() => {
+            console.log('Auto-refreshing dashboard data...');
+            getDashboardData();
+        }, 30000);
+    </script>
+</body>
+</html>
