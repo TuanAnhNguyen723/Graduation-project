@@ -109,7 +109,7 @@ try {
                                 <h2 class="text-white"><?php echo count($sensors); ?></h2>
                             </div>
                             <div class="align-self-center">
-                                <i class="iconoir-sensor fa-2x text-white-50"></i>
+                                <i class="iconoir-cpu fa-2x text-white-50"></i>
                             </div>
                         </div>
                     </div>
@@ -171,7 +171,6 @@ try {
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="iconoir-sensor text-primary"></i>
                             Danh sách cảm biến
                         </h5>
                     </div>
@@ -205,9 +204,47 @@ try {
                                     </div>
                                     
                                     <div class="mt-3">
-                                        <small class="text-muted">
+                                        <small class="text-muted d-block">
                                             <i class="iconoir-calendar"></i> Cập nhật: <?php echo $sensor['updated_at'] ? date('d/m/Y H:i', strtotime($sensor['updated_at'])) : 'N/A'; ?>
                                         </small>
+                                        <div class="mt-1 small text-muted">
+                                            <?php if (!empty($sensor['manufacturer']) || !empty($sensor['model'])): ?>
+                                                <div><i class="iconoir-cog"></i>
+                                                    <?php echo htmlspecialchars(trim(($sensor['manufacturer'] ?? '') . ' ' . ($sensor['model'] ?? ''))); ?>
+                                                </div>
+                                            <?php endif; ?>
+
+                        						<?php if (!empty($sensor['serial_number'])): ?>
+                                                <div><i class="iconoir-hash"></i> Serial: <?php echo htmlspecialchars($sensor['serial_number']); ?></div>
+                                            <?php endif; ?>
+
+                                            <?php if (!empty($sensor['installation_date'])): ?>
+                                                <div><i class="iconoir-calendar"></i> Lắp đặt: <?php echo date('d/m/Y', strtotime($sensor['installation_date'])); ?></div>
+                                            <?php endif; ?>
+
+                                            <?php if (!empty($sensor['last_calibration'])): ?>
+                                                <div><i class="iconoir-calendar"></i> Hiệu chuẩn cuối: <?php echo date('d/m/Y', strtotime($sensor['last_calibration'])); ?></div>
+                                            <?php endif; ?>
+
+                                            <?php if (isset($sensor['min_threshold']) || isset($sensor['max_threshold'])): ?>
+                                                <div><i class="iconoir-warning-triangle"></i> Ngưỡng: 
+                                                    <?php echo ($sensor['min_threshold'] !== null && $sensor['min_threshold'] !== '' ? htmlspecialchars($sensor['min_threshold']) : '—'); ?> - 
+                                                    <?php echo ($sensor['max_threshold'] !== null && $sensor['max_threshold'] !== '' ? htmlspecialchars($sensor['max_threshold']) : '—'); ?>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <?php if (!empty($sensor['description'])): ?>
+                                                <div class="mt-1"><i class="iconoir-notes"></i>
+                                                    <?php $desc = (string)$sensor['description']; echo htmlspecialchars(mb_substr($desc, 0, 80)) . (mb_strlen($desc) > 80 ? '…' : ''); ?>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <?php if (!empty($sensor['notes'])): ?>
+                                                <div class="mt-1"><i class="iconoir-notes"></i>
+                                                    <?php $notes = (string)$sensor['notes']; echo htmlspecialchars(mb_substr($notes, 0, 80)) . (mb_strlen($notes) > 80 ? '…' : ''); ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
                                     
                                     <div class="mt-3">
@@ -225,7 +262,6 @@ try {
                 </div>
                         <?php else: ?>
                             <div class="text-center py-5">
-                                <i class="iconoir-sensor fa-3x text-muted mb-3"></i>
                                 <h5 class="text-muted">Chưa có cảm biến nào</h5>
                                 <p class="text-muted">Hãy thêm cảm biến đầu tiên để bắt đầu giám sát</p>
                                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSensorModal">

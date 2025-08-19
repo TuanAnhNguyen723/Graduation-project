@@ -25,7 +25,7 @@ if ($admin_index !== false) {
         </div>
 
         <!-- Search Bar -->
-        <div class="search-container" style="flex: 1; max-width: 400px; margin: 0 1rem; flex-shrink: 0;">
+        <div class="search-container" style="flex: 1; max-width: 500px; margin: 0 1rem; flex-shrink: 0;">
             <form class="search-form">
                 <div class="input-group">
                     <span class="input-group-text bg-white border-end-0">

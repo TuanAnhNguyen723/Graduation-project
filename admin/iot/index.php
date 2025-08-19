@@ -49,6 +49,9 @@ try {
     <!-- Common Admin Layout CSS -->
     <link href="../partials/layout.css" rel="stylesheet" type="text/css" />
     
+    <!-- Custom Modal CSS -->
+    <link href="widgets/create-sensor.css" rel="stylesheet" type="text/css" />
+    
     <style>
         .temperature-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -117,6 +120,42 @@ try {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
+        
+        /* Custom button styling */
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .page-title {
+            color: #495057;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .custom-css {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Sensor status scrollable area */
+        #sensorStatus {
+            height: 420px; /* cố định chiều cao */
+            overflow-y: auto; /* cho phép cuộn dọc */
+            padding-right: 6px;
+            -webkit-overflow-scrolling: touch;
+        }
+        #sensorStatus::-webkit-scrollbar { width: 6px; }
+        #sensorStatus::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+        #sensorStatus::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+        #sensorStatus::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
     </style>
 </head>
 <body>
@@ -139,6 +178,22 @@ try {
                     </div>
                 <?php else: ?>
 
+                <!-- Header with Add Button -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2 class="page-title">
+                                <i class="iconoir-dashboard me-2"></i>
+                                IoT Dashboard
+                            </h2>
+                            <button type="button" class="btn btn-primary btn-lg" onclick="openCreateSensorModal()">
+                                <i class="iconoir-plus me-2"></i>
+                                Thêm Cảm Biến Mới
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Overview Cards -->
                 <div class="row">
                     <div class="col-xl-3 col-md-6">
@@ -150,7 +205,7 @@ try {
                                         <p class="text-white-50 mb-0">Cảm biến hoạt động</p>
                                     </div>
                                     <div class="align-self-center">
-                                        <i class="iconoir-thermometer text-white" style="font-size: 3rem;"></i>
+                                        <i class="iconoir-cpu text-white" style="font-size: 3rem;"></i>
                                     </div>
                                 </div>
                             </div>
@@ -180,7 +235,7 @@ try {
                                         <p class="text-white-50 mb-0">Nhiệt độ trung bình</p>
                                     </div>
                                     <div class="align-self-center">
-                                        <i class="iconoir-temperature text-white" style="font-size: 3rem;"></i>
+                                        <i class="iconoir-cloud-sunny text-white" style="font-size: 3rem;"></i>
                                     </div>
                                 </div>
                             </div>
@@ -195,7 +250,7 @@ try {
                                         <p class="text-white-50 mb-0">Nhiệt độ cao nhất</p>
                                     </div>
                                     <div class="align-self-center">
-                                        <i class="iconoir-arrow-up text-white" style="font-size: 3rem;"></i>
+                                        <i class="iconoir-fire-flame text-white" style="font-size: 3rem;"></i>
                                     </div>
                                 </div>
                             </div>
@@ -210,10 +265,10 @@ try {
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h4 class="header-title mb-0">
-                                        <i class="iconoir-thermometer text-primary me-2"></i>
+                                        <i class="iconoir-cloud-sunny text-primary me-2"></i>
                                         Biểu đồ nhiệt độ theo thời gian
                                     </h4>
-                                    <div class="btn-group btn-group-sm" role="group">
+                                    <div class="btn-group btn-group-sm" role="group" style="border: 1px solid #ddd;">
                                         <button type="button" class="btn btn-outline-primary active" onclick="updateChartPeriod('24h')">24h</button>
                                         <button type="button" class="btn btn-outline-primary" onclick="updateChartPeriod('7d')">7 ngày</button>
                                         <button type="button" class="btn btn-outline-primary" onclick="updateChartPeriod('30d')">30 ngày</button>
@@ -257,7 +312,7 @@ try {
                         <div class="card">
                             <div class="card-body">
                                 <h4 class="header-title">
-                                    <i class="iconoir-sensor text-success me-2"></i>
+                                    <i class="iconoir-cpu text-success me-2"></i>
                                     Trạng thái cảm biến
                                 </h4>
                                 <div id="sensorStatus">
@@ -276,10 +331,26 @@ try {
                                                 </span>
                                             </div>
                                             <div class="mt-2">
-                                                <small class="text-muted">
-                                                    <i class="iconoir-calendar me-1"></i>
-                                                    Cập nhật: <?php echo $sensor['updated_at'] ? date('d/m/Y H:i', strtotime($sensor['updated_at'])) : 'N/A'; ?>
-                                                </small>
+                                                <div class="mt-1 small text-muted">
+                                                    <?php if (!empty($sensor['installation_date'])): ?>
+                                                        <div class="custom-css"><i class="iconoir-calendar me-1"></i> Lắp đặt: <?php echo date('d/m/Y', strtotime($sensor['installation_date'])); ?></div>
+                                                    <?php endif; ?>
+
+                                                    <?php if (!empty($sensor['last_calibration'])): ?>
+                                                        <div class="custom-css"><i class="iconoir-calendar me-1"></i> Hiệu chuẩn cuối: <?php echo date('d/m/Y', strtotime($sensor['last_calibration'])); ?></div>
+                                                    <?php endif; ?>
+
+                                                    <?php if (!empty($sensor['serial_number'])): ?>
+                                                        <div class="custom-css"><i class="iconoir-hash me-1"></i> Serial: <?php echo htmlspecialchars($sensor['serial_number']); ?></div>
+                                                    <?php endif; ?>
+
+                                                    <?php if (isset($sensor['min_threshold']) || isset($sensor['max_threshold'])): ?>
+                                                        <div class="custom-css"><i class="iconoir-warning-triangle me-1"></i> Ngưỡng: 
+                                                            <?php echo ($sensor['min_threshold'] !== null && $sensor['min_threshold'] !== '' ? htmlspecialchars($sensor['min_threshold']) : '—'); ?> - 
+                                                            <?php echo ($sensor['max_threshold'] !== null && $sensor['max_threshold'] !== '' ? htmlspecialchars($sensor['max_threshold']) : '—'); ?>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </div>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
@@ -396,6 +467,8 @@ try {
         </div>
         <!-- content -->
 
+        <!-- Include Widgets -->
+        <?php include 'widgets/create-sensor.php'; ?>
         
     </div>
 
@@ -414,6 +487,9 @@ try {
     
     <!-- Common Admin Layout JavaScript -->
     <script src="../../admin/partials/layout.js"></script>
+    
+    <!-- Custom Modal JavaScript -->
+    <script src="widgets/create-sensor.js"></script>
 
     <script>
         // Dữ liệu mẫu cho biểu đồ

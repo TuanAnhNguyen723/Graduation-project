@@ -68,11 +68,10 @@
     top: 0;
     bottom: 0;
     width: 260px;
-    z-index: 1000;
-    background: #ffffff; /* Thay đổi từ #2c3e50 sang màu trắng */
-    color: #333333; /* Thay đổi text color sang màu tối */
-    border-right: 1px solid #e9ecef; /* Thêm border để phân tách */
-    box-shadow: 2px 0 10px rgba(0,0,0,0.1); /* Thêm shadow để tạo độ sâu */
+    background: #ffffff;
+    color: #333333;
+    border-right: 1px solid #e9ecef;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
 }
 
 /* Brand/Logo styling cho sidebar trắng */
