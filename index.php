@@ -74,6 +74,66 @@ $recent_categories = $category->getAll(5);
         .startbar .startbar-menu .navbar-nav .nav-item.active .nav-link.active {
             color: white !important;
         }
+        
+        /* Fix notification dropdown positioning */
+        .navbar-custom .dropdown-menu {
+            position: absolute !important;
+            z-index: 9999 !important;
+            max-height: none !important;
+            overflow: visible !important;
+        }
+        
+        .navbar-custom .dropdown-menu.show {
+            display: block !important;
+            position: absolute !important;
+            z-index: 9999 !important;
+        }
+        
+        /* Ensure dropdown content is not clipped */
+        .navbar-custom .dropdown-body {
+            max-height: none !important;
+            overflow: visible !important;
+        }
+        
+        /* Fix container overflow issues */
+        .content-page {
+            overflow: visible !important;
+        }
+        
+        .content {
+            overflow: visible !important;
+        }
+        
+        .container-fluid {
+            overflow: visible !important;
+        }
+        
+        /* Additional fixes for dropdown positioning */
+        .navbar-custom {
+            overflow: visible !important;
+        }
+        
+        .navbar-actions {
+            overflow: visible !important;
+        }
+        
+        .navbar-actions .dropdown {
+            overflow: visible !important;
+        }
+        
+        /* Ensure dropdown is not constrained by parent containers */
+        .dropdown-menu {
+            position: fixed !important;
+            z-index: 99999 !important;
+        }
+        
+        /* Fix for notification dropdown specifically */
+        .navbar-custom .dropdown-menu[style*="width: 350px"] {
+            position: fixed !important;
+            z-index: 99999 !important;
+            max-height: none !important;
+            overflow: visible !important;
+        }
     </style>
 </head>
 
@@ -86,7 +146,9 @@ $recent_categories = $category->getAll(5);
 
     <!-- Main Content Area -->
     <div class="content-page">
-        <div class="page-content">
+        <div class="content">
+            
+            <!-- Start Content-->
             <div class="container-fluid">
                 <!-- Thống kê tổng quan -->
                 <div class="row mb-4">
@@ -308,8 +370,8 @@ $recent_categories = $category->getAll(5);
     <!-- Scripts -->
     <!-- Bootstrap JS -->
     <script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- App JS -->
-    <script src="assets/js/app.js"></script>
+    <!-- Simplebar -->
+    <script src="assets/libs/simplebar/simplebar.min.js"></script>
     <!-- Common Layout JS -->
     <script src="admin/partials/layout.js"></script>
 </body>

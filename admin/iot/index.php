@@ -478,10 +478,6 @@ try {
 
     <!-- Bootstrap JS -->
     <script src="../../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- Vendor js -->
-    <script src="../../assets/js/vendor.min.js"></script>
-    <!-- App js -->
-    <script src="../../assets/js/app.min.js"></script>
     <!-- Simplebar -->
     <script src="../../assets/libs/simplebar/simplebar.min.js"></script>
     
