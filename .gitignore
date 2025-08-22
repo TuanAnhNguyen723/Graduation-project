@@ -1,0 +1,56 @@
+# Bỏ qua các ảnh được tạo tự động
+assets/images/products/product_*.jpg
+assets/images/products/product_*.png
+assets/images/products/product_*.jpeg
+assets/images/products/product_*.gif
+
+# Bỏ qua các file tạm thời
+*.tmp
+*.temp
+*.log
+*.cache
+
+# Bỏ qua các file cấu hình môi trường
+.env
+.env.local
+.env.production
+
+# Bỏ qua các file database
+*.db
+*.sqlite
+
+# Bỏ qua các file backup
+*.bak
+*.backup
+*~
+
+# Bỏ qua các thư mục hệ thống
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Bỏ qua các thư mục vendor (nếu sử dụng Composer)
+vendor/
+
+# Bỏ qua các file upload tạm thời
+uploads/temp/
+temp/
+tmp/
+
+# Bỏ qua các file log
+logs/
+*.log
+
+# Bỏ qua các file cấu hình IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Bỏ qua các file session PHP
+sessions/
+*.sess
+
+# Bỏ qua các file cache
+cache/
+*.cache

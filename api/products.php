@@ -131,12 +131,20 @@ try {
 
         case 'POST':
             // Tạo sản phẩm mới
-            $data = json_decode(file_get_contents("php://input"), true);
+            // Xử lý cả JSON và FormData
+            $data = [];
+            if (isset($_POST) && !empty($_POST)) {
+                // FormData từ widget
+                $data = $_POST;
+            } else {
+                // JSON data
+                $data = json_decode(file_get_contents("php://input"), true);
+            }
             
             if(!isset($data['name']) || empty($data['name'])) {
                 http_response_code(400);
                 echo json_encode([
-                    'status' => 'error',
+                    'success' => false,
                     'message' => 'Tên sản phẩm không được để trống'
                 ]);
                 break;
@@ -145,7 +153,7 @@ try {
             if(!isset($data['sku']) || empty($data['sku'])) {
                 http_response_code(400);
                 echo json_encode([
-                    'status' => 'error',
+                    'success' => false,
                     'message' => 'SKU không được để trống'
                 ]);
                 break;
@@ -155,10 +163,31 @@ try {
             if($product->skuExists($data['sku'])) {
                 http_response_code(400);
                 echo json_encode([
-                    'status' => 'error',
+                    'success' => false,
                     'message' => 'SKU đã tồn tại'
                 ]);
                 break;
+            }
+
+            // Xử lý upload hình ảnh
+            $image_path = '';
+            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                $upload_dir = '../assets/images/products/';
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0755, true);
+                }
+                
+                $file_extension = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+                $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
+                
+                if (in_array($file_extension, $allowed_extensions)) {
+                    $filename = 'product_' . time() . '_' . uniqid() . '.' . $file_extension;
+                    $upload_path = $upload_dir . $filename;
+                    
+                    if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
+                        $image_path = 'assets/images/products/' . $filename;
+                    }
+                }
             }
 
             $product->name = $data['name'];
@@ -170,20 +199,20 @@ try {
             $product->stock_quantity = isset($data['stock_quantity']) ? (int)$data['stock_quantity'] : 0;
             $product->category_id = isset($data['category_id']) ? (int)$data['category_id'] : null;
             $product->brand = isset($data['brand']) ? $data['brand'] : '';
-            $product->images = isset($data['images']) ? $data['images'] : '';
+            $product->images = $image_path; // Sử dụng images như trong model
             $product->is_active = isset($data['is_active']) ? (int)$data['is_active'] : 1;
 
             $id = $product->create();
             if($id) {
                 echo json_encode([
-                    'status' => 'success',
+                    'success' => true,
                     'message' => 'Tạo sản phẩm thành công',
                     'data' => ['id' => $id]
                 ]);
             } else {
                 http_response_code(500);
                 echo json_encode([
-                    'status' => 'error',
+                    'success' => false,
                     'message' => 'Không thể tạo sản phẩm'
                 ]);
             }

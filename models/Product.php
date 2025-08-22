@@ -190,7 +190,8 @@ class Product {
         $this->description = htmlspecialchars(strip_tags($this->description));
         $this->sku = htmlspecialchars(strip_tags($this->sku));
         $this->brand = htmlspecialchars(strip_tags($this->brand));
-        $this->images = htmlspecialchars(strip_tags($this->images));
+        // Không xử lý images với htmlspecialchars vì có thể chứa đường dẫn file
+        $this->images = $this->images ?: '';
 
         // Bind parameters
         $stmt->bindParam(":name", $this->name);
@@ -230,7 +231,8 @@ class Product {
         $this->description = htmlspecialchars(strip_tags($this->description));
         $this->sku = htmlspecialchars(strip_tags($this->sku));
         $this->brand = htmlspecialchars(strip_tags($this->brand));
-        $this->images = htmlspecialchars(strip_tags($this->images));
+        // Không xử lý images với htmlspecialchars vì có thể chứa đường dẫn file
+        $this->images = $this->images ?: '';
 
         // Bind parameters
         $stmt->bindParam(":name", $this->name);

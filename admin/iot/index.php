@@ -49,8 +49,8 @@ try {
     <!-- Common Admin Layout CSS -->
     <link href="../partials/layout.css" rel="stylesheet" type="text/css" />
     
-    <!-- Custom Modal CSS -->
-    <link href="widgets/create-sensor.css" rel="stylesheet" type="text/css" />
+    <!-- Unified Widgets CSS -->
+    <link href="../../assets/css/widget.css" rel="stylesheet" type="text/css" />
     
     <style>
         .temperature-card {
@@ -468,7 +468,7 @@ try {
         <!-- content -->
 
         <!-- Include Widgets -->
-        <?php include 'widgets/create-sensor.php'; ?>
+        <?php include '../../assets/widgets/create-sensor.php'; ?>
         
     </div>
 
@@ -484,8 +484,8 @@ try {
     <!-- Common Admin Layout JavaScript -->
     <script src="../../admin/partials/layout.js"></script>
     
-    <!-- Custom Modal JavaScript -->
-    <script src="widgets/create-sensor.js"></script>
+    <!-- Unified Widgets JavaScript -->
+    <script src="../../assets/js/widget.js"></script>
 
     <script>
         // Dữ liệu mẫu cho biểu đồ
