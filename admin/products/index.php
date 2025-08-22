@@ -228,20 +228,6 @@ if ($categories_result) {
             font-size: 0.8rem;
         }
         
-        .search-section .form-select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 0.5rem center;
-            background-size: 16px 12px;
-            padding-right: 2rem;
-            min-width: 160px;
-            font-size: 0.85rem;
-        }
-        
-        .search-section .form-select:focus {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23007bff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
-        }
-        
         .search-section .btn-outline-secondary {
             background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
             border: none;
