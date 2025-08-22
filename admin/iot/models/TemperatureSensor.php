@@ -6,7 +6,7 @@ class TemperatureSensor {
         $this->db = $db;
     }
     
-    // Lấy tất cả cảm biến
+    // Lấy tất cả cảm 
     public function getAllSensors() {
         $query = "SELECT ts.*, wl.location_code, wl.location_name 
                   FROM temperature_sensors ts 
