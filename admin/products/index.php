@@ -594,15 +594,16 @@ if ($categories_result) {
                                             
                                             <!-- Nút hành động -->
                                             <div class="d-flex justify-content-between mb-3">
-                                                <a href="edit.php?id=<?php echo $prod['id']; ?>" 
-                                                   class="btn btn-outline-primary">
+                                                <button type="button" 
+                                                        class="btn btn-outline-primary" 
+                                                        onclick="openEditProductModal(<?php echo $prod['id']; ?>, '<?php echo htmlspecialchars(addslashes($prod['name'])); ?>', '<?php echo htmlspecialchars(addslashes($prod['sku'])); ?>', '<?php echo htmlspecialchars(addslashes($prod['description'])); ?>', <?php echo $prod['category_id']; ?>, '<?php echo htmlspecialchars(addslashes($prod['brand'])); ?>', <?php echo $prod['price']; ?>, <?php echo $prod['sale_price'] ?: 0; ?>, <?php echo $prod['stock_quantity']; ?>, <?php echo $prod['is_active']; ?>, '<?php echo htmlspecialchars(addslashes($prod['images'])); ?>')">
                                                     <i class="iconoir-edit"></i> Sửa
-                                                </a>
-                                                <a href="delete.php?id=<?php echo $prod['id']; ?>" 
-                                                   class="btn btn-outline-danger" 
-                                                   onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">
+                                                </button>
+                                                <button type="button" 
+                                                        class="btn btn-outline-danger" 
+                                                        onclick="deleteProduct(<?php echo $prod['id']; ?>, '<?php echo htmlspecialchars(addslashes($prod['name'])); ?>')">
                                                     <i class="iconoir-trash"></i> Xóa
-                                                </a>
+                                                </button>
                                             </div>
                                         </div>
 
@@ -650,6 +651,9 @@ if ($categories_result) {
     <!-- Include Product Creation Modal Widget -->
     <?php include '../../assets/widgets/create-product.php'; ?>
     
+    <!-- Include Product Edit Modal Widget -->
+    <?php include '../../assets/widgets/edit-product.php'; ?>
+    
     <!-- Include Unified Widgets JavaScript -->
     <script src="../../assets/js/widget.js"></script>
     
@@ -658,6 +662,25 @@ if ($categories_result) {
         function refreshProductList() {
             // Reload the page to show updated product list
             window.location.reload();
+        }
+        
+        // Function hiển thị thông báo
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = `
+                top: 80px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                border-radius: 8px;
+                border: none;
+                font-weight: 500;
+            `;
+            notification.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+            document.body.appendChild(notification);
+            setTimeout(() => { if (notification.parentNode) { notification.remove(); } }, 3000);
         }
     </script>
 </body>

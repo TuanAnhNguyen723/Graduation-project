@@ -153,6 +153,904 @@
   window.submitCreateProductForm = submitCreateProductForm;
 })();
 
+// Categories widget
+(function() {
+  let isCategoryModalOpen = false;
+
+  function openCreateCategoryModal() {
+    const modal = document.getElementById('createCategoryModal');
+    if (modal) {
+      modal.classList.add('show');
+      setTimeout(() => { modal.querySelector('.custom-modal').classList.add('show'); }, 10);
+      isCategoryModalOpen = true;
+      resetCreateCategoryForm();
+      const first = document.getElementById('categoryName'); if (first) first.focus();
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeCreateCategoryModal() {
+    const modal = document.getElementById('createCategoryModal');
+    if (modal) {
+      modal.querySelector('.custom-modal').classList.remove('show');
+      setTimeout(() => { modal.classList.remove('show'); }, 300);
+      isCategoryModalOpen = false;
+      document.body.style.overflow = '';
+      resetCreateCategoryForm();
+    }
+  }
+
+  function resetCreateCategoryForm() {
+    const form = document.getElementById('createCategoryForm');
+    if (!form) return;
+    form.reset();
+    clearAllErrors();
+    hideSuccessMessage();
+    form.querySelectorAll('.form-input, .form-select, .form-textarea').forEach(el => el.classList.remove('error','success'));
+    
+    // Reset image preview
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    const preview = document.getElementById('categoryImagePreview');
+    if (previewContainer) previewContainer.style.display = 'none';
+    if (preview) preview.src = '';
+  }
+  
+  // Preview image
+  function previewCategoryImage(input) {
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    const preview = document.getElementById('categoryImagePreview');
+    
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+        previewContainer.style.display = 'block';
+      };
+      reader.readAsDataURL(input.files[0]);
+    } else {
+      previewContainer.style.display = 'none';
+      preview.src = '';
+    }
+  }
+
+  function clearAllErrors() {
+    document.querySelectorAll('#createCategoryModal .field-error').forEach(el => { el.textContent=''; el.classList.remove('show'); });
+  }
+
+  function showFieldError(fieldId, message) {
+    const errorEl = document.getElementById(fieldId + 'Error');
+    if (errorEl) {
+      errorEl.textContent = message; errorEl.classList.add('show');
+      const input = document.getElementById(fieldId); if (input) { input.classList.add('error'); input.classList.remove('success'); }
+    }
+  }
+
+  function clearFieldError(fieldId) {
+    const errorEl = document.getElementById(fieldId + 'Error');
+    if (errorEl) { errorEl.textContent=''; errorEl.classList.remove('show'); }
+    const input = document.getElementById(fieldId); if (input) input.classList.remove('error');
+  }
+
+  function showSuccessMessage() { const el = document.querySelector('#createCategoryModal #successMessageCategory'); if (el) el.classList.add('show'); }
+  function hideSuccessMessage() { const el = document.querySelector('#createCategoryModal #successMessageCategory'); if (el) el.classList.remove('show'); }
+
+  function validateCreateCategoryForm() {
+    let isValid = true; clearAllErrors();
+    const name = document.getElementById('categoryName')?.value.trim() || '';
+    if (!name) { showFieldError('categoryName','Tên danh mục là bắt buộc'); isValid = false; } else if (name.length < 3) { showFieldError('categoryName','Tên danh mục phải có ít nhất 3 ký tự'); isValid = false; }
+    const status = document.getElementById('categoryStatus')?.value || '';
+    if (status === '') { showFieldError('categoryStatus','Vui lòng chọn trạng thái'); isValid = false; }
+    return isValid;
+  }
+
+  async function submitCreateCategoryForm() {
+    if (!validateCreateCategoryForm()) return;
+    const btn = document.getElementById('createCategorySubmitBtn');
+    const original = btn?.innerHTML || '';
+    try {
+      if (btn) { btn.disabled = true; btn.classList.add('loading'); btn.innerHTML = 'Đang tạo...'; }
+      const form = document.getElementById('createCategoryForm');
+      const formData = new FormData();
+      if (form) {
+        Array.from(form.elements).forEach(el => {
+          if (!el.name) return;
+          if (el.type === 'file' && el.files && el.files.length > 0) formData.append(el.name, el.files[0]);
+          else if (el.type !== 'file' && el.value) formData.append(el.name, el.value);
+        });
+      }
+      formData.append('created_at', new Date().toISOString());
+      const response = await fetch('../../api/categories.php', { method: 'POST', body: formData });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const result = await response.json();
+      if (result.success) {
+        showSuccessMessage();
+        resetCreateCategoryForm();
+        setTimeout(() => {
+          closeCreateCategoryModal();
+          if (typeof window.refreshCategoryList === 'function') window.refreshCategoryList(); else window.location.reload();
+        }, 1500);
+      } else {
+        alert('Có lỗi xảy ra: ' + (result.message || 'Không thể tạo danh mục'));
+      }
+    } catch (err) {
+      console.error('Error creating category:', err);
+      alert('Có lỗi xảy ra khi tạo danh mục: ' + err.message);
+    } finally {
+      if (btn) { btn.disabled = false; btn.classList.remove('loading'); btn.innerHTML = original || 'Tạo danh mục'; }
+    }
+  }
+
+  function setupRealTimeValidation() {
+    const nameInput = document.getElementById('categoryName');
+    if (nameInput) nameInput.addEventListener('input', function(){ const v=this.value.trim(); if (v.length>=3){ this.classList.add('success'); this.classList.remove('error'); clearFieldError('categoryName'); } else if (v.length>0){ this.classList.remove('success'); this.classList.add('error'); showFieldError('categoryName','Tên danh mục phải có ít nhất 3 ký tự'); } else { this.classList.remove('success','error'); clearFieldError('categoryName'); }});
+    const statusSelect = document.getElementById('categoryStatus');
+    if (statusSelect) statusSelect.addEventListener('change', function(){ if (this.value !== ''){ this.classList.add('success'); this.classList.remove('error'); clearFieldError('categoryStatus'); } else { this.classList.remove('success'); this.classList.add('error'); showFieldError('categoryStatus','Vui lòng chọn trạng thái'); }});
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    setupRealTimeValidation();
+    document.addEventListener('click', function(e){ const modal = document.getElementById('createCategoryModal'); if (modal && e.target === modal) closeCreateCategoryModal(); });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && isCategoryModalOpen) closeCreateCategoryModal(); });
+  });
+
+  window.openCreateCategoryModal = openCreateCategoryModal;
+  window.closeCreateCategoryModal = closeCreateCategoryModal;
+  window.submitCreateCategoryForm = submitCreateCategoryForm;
+  window.previewCategoryImage = previewCategoryImage;
+  
+  // Edit Category Modal Functions
+  let isEditCategoryModalOpen = false;
+  let currentEditCategoryId = null;
+
+  function openEditCategoryModal(categoryId, name, slug, description, parentId, sortOrder, isActive, image) {
+    currentEditCategoryId = categoryId;
+    
+    // Populate form fields
+    document.getElementById('editCategoryId').value = categoryId;
+    document.getElementById('editCategoryName').value = name;
+    document.getElementById('editCategorySlug').value = slug;
+    document.getElementById('editCategoryDescription').value = description;
+    document.getElementById('editSortOrder').value = sortOrder;
+    document.getElementById('editCategoryStatus').value = isActive;
+    
+    // Set parent category
+    const parentSelect = document.getElementById('editParentId');
+    if (parentSelect) {
+      parentSelect.value = parentId || '';
+    }
+    
+    // Handle image display
+    const currentImageContainer = document.getElementById('currentImageContainer');
+    const currentImage = document.getElementById('currentCategoryImage');
+    
+    if (image && image.trim() !== '') {
+      currentImage.src = '../../' + image;
+      currentImageContainer.style.display = 'block';
+    } else {
+      currentImageContainer.style.display = 'none';
+    }
+    
+    // Reset image preview
+    document.getElementById('editImagePreviewContainer').style.display = 'none';
+    document.getElementById('editCategoryImage').value = '';
+    
+    // Load parent categories for dropdown
+    loadParentCategoriesForEdit();
+    
+    // Show modal
+    const modal = document.getElementById('editCategoryModal');
+    if (modal) {
+      modal.classList.add('show');
+      setTimeout(() => { modal.querySelector('.custom-modal').classList.add('show'); }, 10);
+      isEditCategoryModalOpen = true;
+      document.body.style.overflow = 'hidden';
+      
+      // Focus on first field
+      const first = document.getElementById('editCategoryName'); 
+      if (first) first.focus();
+    }
+  }
+
+  function closeEditCategoryModal() {
+    const modal = document.getElementById('editCategoryModal');
+    if (modal) {
+      modal.querySelector('.custom-modal').classList.remove('show');
+      setTimeout(() => { modal.classList.remove('show'); }, 300);
+      isEditCategoryModalOpen = false;
+      document.body.style.overflow = '';
+      currentEditCategoryId = null;
+    }
+  }
+
+  function resetEditCategoryForm() {
+    const form = document.getElementById('editCategoryForm');
+    if (form) form.reset();
+    clearEditCategoryErrors();
+    hideEditCategorySuccessMessage();
+    
+    // Reset image previews
+    document.getElementById('editImagePreviewContainer').style.display = 'none';
+    document.getElementById('currentImageContainer').style.display = 'none';
+  }
+
+  function clearEditCategoryErrors() {
+    document.querySelectorAll('#editCategoryModal .field-error').forEach(el => { 
+      el.textContent=''; 
+      el.classList.remove('show'); 
+    });
+  }
+
+  function showEditCategoryFieldError(fieldId, message) {
+    const errorEl = document.getElementById(fieldId + 'Error');
+    if (errorEl) {
+      errorEl.textContent = message; 
+      errorEl.classList.add('show');
+      const input = document.getElementById(fieldId); 
+      if (input) { 
+        input.classList.add('error'); 
+        input.classList.remove('success'); 
+      }
+    }
+  }
+
+  function clearEditCategoryFieldError(fieldId) {
+    const errorEl = document.getElementById(fieldId + 'Error');
+    if (errorEl) { 
+      errorEl.textContent=''; 
+      errorEl.classList.remove('show'); 
+    }
+    const input = document.getElementById(fieldId); 
+    if (input) input.classList.remove('error');
+  }
+
+  function showEditCategorySuccessMessage() { 
+    const el = document.querySelector('#editCategoryModal #successMessageEditCategory'); 
+    if (el) el.classList.add('show'); 
+  }
+  
+  function hideEditCategorySuccessMessage() { 
+    const el = document.querySelector('#editCategoryModal #successMessageEditCategory'); 
+    if (el) el.classList.remove('show'); 
+  }
+
+  function validateEditCategoryForm() {
+    let isValid = true; 
+    clearEditCategoryErrors();
+    
+    const name = document.getElementById('editCategoryName')?.value.trim() || '';
+    if (!name) { 
+      showEditCategoryFieldError('editCategoryName','Tên danh mục là bắt buộc'); 
+      isValid = false; 
+    } else if (name.length < 3) { 
+      showEditCategoryFieldError('editCategoryName','Tên danh mục phải có ít nhất 3 ký tự'); 
+      isValid = false; 
+    }
+    
+    const status = document.getElementById('editCategoryStatus')?.value || '';
+    if (status === '') { 
+      showEditCategoryFieldError('editCategoryStatus','Vui lòng chọn trạng thái'); 
+      isValid = false; 
+    }
+    
+    return isValid;
+  }
+
+  async function submitEditCategoryForm() {
+    if (!validateEditCategoryForm()) return;
+    
+    const btn = document.getElementById('editCategorySubmitBtn');
+    const original = btn?.innerHTML || '';
+    
+    try {
+      if (btn) { 
+        btn.disabled = true; 
+        btn.classList.add('loading'); 
+        btn.innerHTML = 'Đang cập nhật...'; 
+      }
+      
+      const form = document.getElementById('editCategoryForm');
+      const formData = new FormData();
+      
+      if (form) {
+        Array.from(form.elements).forEach(el => {
+          if (!el.name) return;
+          if (el.type === 'file' && el.files && el.files.length > 0) {
+            formData.append(el.name, el.files[0]);
+          } else if (el.type !== 'file' && el.value !== undefined) {
+            formData.append(el.name, el.value);
+          }
+        });
+      }
+      
+      // Add category ID
+      formData.append('id', currentEditCategoryId);
+      
+      const response = await fetch('../../api/categories.php', { 
+        method: 'POST', 
+        body: formData 
+      });
+      
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const result = await response.json();
+      if (result.success) {
+        showEditCategorySuccessMessage();
+        setTimeout(() => {
+          closeEditCategoryModal();
+          // Refresh the page to show updated data
+          window.location.reload();
+        }, 1500);
+      } else {
+        throw new Error(result.message || 'Không thể cập nhật danh mục');
+      }
+    } catch (err) {
+      console.error('Error updating category:', err);
+      alert('Có lỗi xảy ra khi cập nhật danh mục: ' + err.message);
+    } finally {
+      if (btn) { 
+        btn.disabled = false; 
+        btn.classList.remove('loading'); 
+        btn.innerHTML = original || 'Cập nhật danh mục'; 
+      }
+    }
+  }
+
+  function loadParentCategoriesForEdit() {
+    fetch('../../api/categories.php?parent')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && data.data) {
+          const parentSelect = document.getElementById('editParentId');
+          if (parentSelect) {
+            // Keep the first option (Không có danh mục cha)
+            const firstOption = parentSelect.firstElementChild;
+            parentSelect.innerHTML = '';
+            parentSelect.appendChild(firstOption);
+            
+            // Add parent categories, excluding current category
+            data.data.forEach(category => {
+              if (category.id != currentEditCategoryId) {
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                parentSelect.appendChild(option);
+              }
+            });
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error loading parent categories:', error);
+      });
+  }
+
+  function previewEditCategoryImage(input) {
+    const previewContainer = document.getElementById('editImagePreviewContainer');
+    const preview = document.getElementById('editCategoryImagePreview');
+    
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+        previewContainer.style.display = 'block';
+      };
+      reader.readAsDataURL(input.files[0]);
+    } else {
+      previewContainer.style.display = 'none';
+      preview.src = '';
+    }
+  }
+
+  // Setup edit category real-time validation
+  function setupEditCategoryRealTimeValidation() {
+    const nameInput = document.getElementById('editCategoryName');
+    if (nameInput) {
+      nameInput.addEventListener('input', function(){
+        const v = this.value.trim(); 
+        if (v.length >= 3){
+          this.classList.add('success'); 
+          this.classList.remove('error'); 
+          clearEditCategoryFieldError('editCategoryName'); 
+        } else if (v.length > 0){
+          this.classList.remove('success'); 
+          this.classList.add('error'); 
+          showEditCategoryFieldError('editCategoryName','Tên danh mục phải có ít nhất 3 ký tự'); 
+        } else { 
+          this.classList.remove('success','error'); 
+          clearEditCategoryFieldError('editCategoryName'); 
+        }
+      });
+    }
+    
+    const statusSelect = document.getElementById('editCategoryStatus');
+    if (statusSelect) {
+      statusSelect.addEventListener('change', function(){
+        if (this.value !== ''){
+          this.classList.add('success'); 
+          this.classList.remove('error'); 
+          clearEditCategoryFieldError('editCategoryStatus'); 
+        } else { 
+          this.classList.remove('success'); 
+          this.classList.add('error'); 
+          showEditCategoryFieldError('editCategoryStatus','Vui lòng chọn trạng thái'); 
+        }
+      });
+    }
+  }
+
+  // Add event listeners for edit modal
+  document.addEventListener('DOMContentLoaded', function(){
+    setupEditCategoryRealTimeValidation();
+    document.addEventListener('click', function(e){ 
+      const modal = document.getElementById('editCategoryModal'); 
+      if (modal && e.target === modal) closeEditCategoryModal(); 
+    });
+    document.addEventListener('keydown', function(e){ 
+      if (e.key === 'Escape' && isEditCategoryModalOpen) closeEditCategoryModal(); 
+    });
+  });
+
+  // Export functions to window
+  window.openEditCategoryModal = openEditCategoryModal;
+  window.closeEditCategoryModal = closeEditCategoryModal;
+  window.submitEditCategoryForm = submitEditCategoryForm;
+  window.previewEditCategoryImage = previewEditCategoryImage;
+  
+  // Product Management Functions
+  function deleteProduct(productId, productName) {
+    if (confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${productName}"?`)) {
+      // Hiển thị loading trên button
+      const deleteBtn = event.target.closest('.btn-outline-danger');
+      const originalText = deleteBtn.innerHTML;
+      deleteBtn.disabled = true;
+      deleteBtn.innerHTML = '<i class="iconoir-loading"></i> Đang xóa...';
+      
+      // Gọi API xóa sản phẩm
+      fetch(`../../api/products.php?id=${productId}`, {
+        method: 'DELETE'
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Hiển thị thông báo thành công
+          showNotification('Xóa sản phẩm thành công!', 'success');
+          
+          // Xóa card sản phẩm khỏi giao diện
+          const productCard = deleteBtn.closest('.col-lg-4');
+          productCard.style.opacity = '0.5';
+          productCard.style.transform = 'scale(0.95)';
+          
+          setTimeout(() => {
+            productCard.remove();
+            
+            // Kiểm tra xem còn sản phẩm nào không
+            const remainingProducts = document.querySelectorAll('.product-card');
+            if (remainingProducts.length === 0) {
+              // Hiển thị trạng thái trống
+              const container = document.querySelector('.row');
+              container.innerHTML = `
+                <div class="col-12 text-center py-5">
+                  <div class="empty-state">
+                    <i class="iconoir-package" style="font-size: 64px; color: #dee2e6; margin-bottom: 20px;"></i>
+                    <h4 class="text-muted mb-3">Chưa có sản phẩm nào</h4>
+                    <p class="text-muted mb-4">Bắt đầu tạo sản phẩm đầu tiên để quản lý</p>
+                    <button type="button" class="btn btn-primary btn-lg" onclick="openCreateProductModal()">
+                      <i class="iconoir-plus"></i> Tạo sản phẩm đầu tiên
+                    </button>
+                  </div>
+                </div>
+              `;
+            }
+          }, 300);
+        } else {
+          throw new Error(data.message || 'Có lỗi xảy ra khi xóa sản phẩm');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showNotification('Lỗi: ' + error.message, 'error');
+        
+        // Khôi phục button
+        deleteBtn.disabled = false;
+        deleteBtn.innerHTML = originalText;
+      });
+    }
+  }
+
+  // Edit Product Modal Functions
+  let isEditProductModalOpen = false;
+  let currentEditProductId = null;
+
+  function openEditProductModal(productId, name, sku, description, categoryId, brand, price, salePrice, stockQuantity, isActive, images) {
+    currentEditProductId = productId;
+    
+    // Populate form fields
+    document.getElementById('editProductId').value = productId;
+    document.getElementById('editProductName').value = name;
+    document.getElementById('editProductSku').value = sku;
+    document.getElementById('editProductDescription').value = description;
+    document.getElementById('editProductBrand').value = brand;
+    document.getElementById('editProductPrice').value = price;
+    document.getElementById('editProductSalePrice').value = salePrice;
+    document.getElementById('editStockQuantity').value = stockQuantity;
+    document.getElementById('editProductStatus').value = isActive;
+    
+    // Set category
+    const categorySelect = document.getElementById('editProductCategory');
+    if (categorySelect) {
+      categorySelect.value = categoryId || '';
+    }
+    
+    // Handle image display
+    const currentImageContainer = document.getElementById('currentProductImageContainer');
+    const currentImage = document.getElementById('currentProductImage');
+    
+    if (images && images.trim() !== '') {
+      currentImage.src = '../../' + images;
+      currentImageContainer.style.display = 'block';
+    } else {
+      currentImageContainer.style.display = 'none';
+    }
+    
+    // Reset image preview
+    document.getElementById('editImagePreviewContainer').style.display = 'none';
+    document.getElementById('editProductImage').value = '';
+    
+    // Load categories for dropdown
+    loadCategoriesForEdit();
+    
+    // Show modal
+    const modal = document.getElementById('editProductModal');
+    if (modal) {
+      modal.classList.add('show');
+      setTimeout(() => { modal.querySelector('.custom-modal').classList.add('show'); }, 10);
+      isEditProductModalOpen = true;
+      document.body.style.overflow = 'hidden';
+      
+      // Focus on first field
+      const first = document.getElementById('editProductName'); 
+      if (first) first.focus();
+    }
+  }
+
+  function closeEditProductModal() {
+    const modal = document.getElementById('editProductModal');
+    if (modal) {
+      modal.querySelector('.custom-modal').classList.remove('show');
+      setTimeout(() => { modal.classList.remove('show'); }, 300);
+      isEditProductModalOpen = false;
+      document.body.style.overflow = '';
+      currentEditProductId = null;
+    }
+  }
+
+  function resetEditProductForm() {
+    const form = document.getElementById('editProductForm');
+    if (form) form.reset();
+    clearEditProductErrors();
+    hideEditProductSuccessMessage();
+    
+    // Reset image previews
+    document.getElementById('editImagePreviewContainer').style.display = 'none';
+    document.getElementById('currentProductImageContainer').style.display = 'none';
+  }
+
+  function clearEditProductErrors() {
+    document.querySelectorAll('#editProductModal .field-error').forEach(el => { 
+      el.textContent=''; 
+      el.classList.remove('show'); 
+    });
+  }
+
+  function showEditProductFieldError(fieldId, message) {
+    const errorEl = document.getElementById(fieldId + 'Error');
+    if (errorEl) {
+      errorEl.textContent = message; 
+      errorEl.classList.add('show');
+      const input = document.getElementById(fieldId); 
+      if (input) { 
+        input.classList.add('error'); 
+        input.classList.remove('success'); 
+      }
+    }
+  }
+
+  function clearEditProductFieldError(fieldId) {
+    const errorEl = document.getElementById(fieldId + 'Error');
+    if (errorEl) { 
+      errorEl.textContent=''; 
+      errorEl.classList.remove('show'); 
+    }
+    const input = document.getElementById(fieldId); 
+    if (input) input.classList.remove('error');
+  }
+
+  function showEditProductSuccessMessage() { 
+    const el = document.querySelector('#editProductModal #successMessageEditProduct'); 
+    if (el) el.classList.add('show'); 
+  }
+  
+  function hideEditProductSuccessMessage() { 
+    const el = document.querySelector('#editProductModal #successMessageEditProduct'); 
+    if (el) el.classList.remove('show'); 
+  }
+
+  function validateEditProductForm() {
+    let isValid = true; 
+    clearEditProductErrors();
+    
+    const name = document.getElementById('editProductName')?.value.trim() || '';
+    if (!name) { 
+      showEditProductFieldError('editProductName','Tên sản phẩm là bắt buộc'); 
+      isValid = false; 
+    } else if (name.length < 3) { 
+      showEditProductFieldError('editProductName','Tên sản phẩm phải có ít nhất 3 ký tự'); 
+      isValid = false; 
+    }
+    
+    const sku = document.getElementById('editProductSku')?.value.trim() || '';
+    if (!sku) { 
+      showEditProductFieldError('editProductSku','SKU là bắt buộc'); 
+      isValid = false; 
+    }
+    
+    const price = document.getElementById('editProductPrice')?.value || '';
+    if (!price || price <= 0) { 
+      showEditProductFieldError('editProductPrice','Giá sản phẩm phải lớn hơn 0'); 
+      isValid = false; 
+    }
+    
+    const stockQuantity = document.getElementById('editStockQuantity')?.value || '';
+    if (!stockQuantity || stockQuantity < 0) { 
+      showEditProductFieldError('editStockQuantity','Số lượng tồn kho phải lớn hơn hoặc bằng 0'); 
+      isValid = false; 
+    }
+    
+    const categoryId = document.getElementById('editProductCategory')?.value || '';
+    if (!categoryId) { 
+      showEditProductFieldError('editProductCategory','Vui lòng chọn danh mục'); 
+      isValid = false; 
+    }
+    
+    const status = document.getElementById('editProductStatus')?.value || '';
+    if (status === '') { 
+      showEditProductFieldError('editProductStatus','Vui lòng chọn trạng thái'); 
+      isValid = false; 
+    }
+    
+    return isValid;
+  }
+
+  async function submitEditProductForm() {
+    if (!validateEditProductForm()) return;
+    
+    const btn = document.getElementById('editProductSubmitBtn');
+    const original = btn?.innerHTML || '';
+    
+    try {
+      if (btn) { 
+        btn.disabled = true; 
+        btn.classList.add('loading'); 
+        btn.innerHTML = 'Đang cập nhật...'; 
+      }
+      
+      const form = document.getElementById('editProductForm');
+      const formData = new FormData();
+      
+      if (form) {
+        Array.from(form.elements).forEach(el => {
+          if (!el.name) return;
+          if (el.type === 'file' && el.files && el.files.length > 0) {
+            formData.append(el.name, el.files[0]);
+          } else if (el.type !== 'file' && el.value !== undefined) {
+            formData.append(el.name, el.value);
+          }
+        });
+      }
+      
+      // Add product ID
+      formData.append('id', currentEditProductId);
+      
+      const response = await fetch('../../api/products.php', { 
+        method: 'POST', 
+        body: formData 
+      });
+      
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const result = await response.json();
+      if (result.success) {
+        showEditProductSuccessMessage();
+        setTimeout(() => {
+          closeEditProductModal();
+          // Refresh the page to show updated data
+          window.location.reload();
+        }, 1500);
+      } else {
+        throw new Error(result.message || 'Không thể cập nhật sản phẩm');
+      }
+    } catch (err) {
+      console.error('Error updating product:', err);
+      alert('Có lỗi xảy ra khi cập nhật sản phẩm: ' + err.message);
+    } finally {
+      if (btn) { 
+        btn.disabled = false; 
+        btn.classList.remove('loading'); 
+        btn.innerHTML = original || 'Cập nhật sản phẩm'; 
+      }
+    }
+  }
+
+  function loadCategoriesForEdit() {
+    fetch('../../api/categories.php')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && data.data) {
+          const categorySelect = document.getElementById('editProductCategory');
+          if (categorySelect) {
+            // Keep the first option (Chọn danh mục)
+            const firstOption = categorySelect.firstElementChild;
+            categorySelect.innerHTML = '';
+            categorySelect.appendChild(firstOption);
+            
+            // Add categories
+            data.data.forEach(category => {
+              const option = document.createElement('option');
+              option.value = category.id;
+              option.textContent = category.name;
+              categorySelect.appendChild(option);
+            });
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error loading categories:', error);
+      });
+  }
+
+  function previewEditProductImage(input) {
+    const previewContainer = document.getElementById('editImagePreviewContainer');
+    const preview = document.getElementById('editProductImagePreview');
+    
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+        previewContainer.style.display = 'block';
+      };
+      reader.readAsDataURL(input.files[0]);
+    } else {
+      previewContainer.style.display = 'none';
+      preview.src = '';
+    }
+  }
+
+  // Setup edit product real-time validation
+  function setupEditProductRealTimeValidation() {
+    const nameInput = document.getElementById('editProductName');
+    if (nameInput) {
+      nameInput.addEventListener('input', function(){
+        const v = this.value.trim(); 
+        if (v.length >= 3){
+          this.classList.add('success'); 
+          this.classList.remove('error'); 
+          clearEditProductFieldError('editProductName'); 
+        } else if (v.length > 0){
+          this.classList.remove('success'); 
+          this.classList.add('error'); 
+          showEditProductFieldError('editProductName','Tên sản phẩm phải có ít nhất 3 ký tự'); 
+        } else { 
+          this.classList.remove('success','error'); 
+          clearEditProductFieldError('editProductName'); 
+        }
+      });
+    }
+    
+    const skuInput = document.getElementById('editProductSku');
+    if (skuInput) {
+      skuInput.addEventListener('input', function(){
+        const v = this.value.trim(); 
+        if (v.length > 0){
+          this.classList.add('success'); 
+          this.classList.remove('error'); 
+          clearEditProductFieldError('editProductSku'); 
+        } else { 
+          this.classList.remove('success'); 
+          this.classList.add('error'); 
+          showEditProductFieldError('editProductSku','SKU là bắt buộc'); 
+        }
+      });
+    }
+    
+    const priceInput = document.getElementById('editProductPrice');
+    if (priceInput) {
+      priceInput.addEventListener('input', function(){
+        const v = parseFloat(this.value); 
+        if (v > 0){
+          this.classList.add('success'); 
+          this.classList.remove('error'); 
+          clearEditProductFieldError('editProductPrice'); 
+        } else if (this.value.length > 0){
+          this.classList.remove('success'); 
+          this.classList.add('error'); 
+          showEditProductFieldError('editProductPrice','Giá sản phẩm phải lớn hơn 0'); 
+        } else { 
+          this.classList.remove('success','error'); 
+          clearEditProductFieldError('editProductPrice'); 
+        }
+      });
+    }
+    
+    const stockInput = document.getElementById('editStockQuantity');
+    if (stockInput) {
+      stockInput.addEventListener('input', function(){
+        const v = parseInt(this.value); 
+        if (v >= 0){
+          this.classList.add('success'); 
+          this.classList.remove('error'); 
+          clearEditProductFieldError('editStockQuantity'); 
+        } else if (this.value.length > 0){
+          this.classList.remove('success'); 
+          this.classList.add('error'); 
+          showEditProductFieldError('editStockQuantity','Số lượng tồn kho phải lớn hơn hoặc bằng 0'); 
+        } else { 
+          this.classList.remove('success','error'); 
+          clearEditProductFieldError('editStockQuantity'); 
+        }
+      });
+    }
+    
+    const categorySelect = document.getElementById('editProductCategory');
+    if (categorySelect) {
+      categorySelect.addEventListener('change', function(){
+        if (this.value !== ''){
+          this.classList.add('success'); 
+          this.classList.remove('error'); 
+          clearEditProductFieldError('editProductCategory'); 
+        } else { 
+          this.classList.remove('success'); 
+          this.classList.add('error'); 
+          showEditProductFieldError('editProductCategory','Vui lòng chọn danh mục'); 
+        }
+      });
+    }
+    
+    const statusSelect = document.getElementById('editProductStatus');
+    if (statusSelect) {
+      statusSelect.addEventListener('change', function(){
+        if (this.value !== ''){
+          this.classList.add('success'); 
+          this.classList.remove('error'); 
+          clearEditProductFieldError('editProductStatus'); 
+        } else { 
+          this.classList.remove('success'); 
+          this.classList.add('error'); 
+          showEditProductFieldError('editProductStatus','Vui lòng chọn trạng thái'); 
+        }
+      });
+    }
+  }
+
+  // Add event listeners for edit product modal
+  document.addEventListener('DOMContentLoaded', function(){
+    setupEditProductRealTimeValidation();
+    document.addEventListener('click', function(e){ 
+      const modal = document.getElementById('editProductModal'); 
+      if (modal && e.target === modal) closeEditProductModal(); 
+    });
+    document.addEventListener('keydown', function(e){ 
+      if (e.key === 'Escape' && isEditProductModalOpen) closeEditProductModal(); 
+    });
+  });
+
+  // Export functions to window
+  window.deleteProduct = deleteProduct;
+  window.openEditProductModal = openEditProductModal;
+  window.closeEditProductModal = closeEditProductModal;
+  window.submitEditProductForm = submitEditProductForm;
+  window.previewEditProductImage = previewEditProductImage;
+})();
+
 // IoT widget
 (function() {
   let isSensorModalOpen = false;

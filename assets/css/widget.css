@@ -65,8 +65,9 @@
 }
 
 /* Theming per modal container */
-#createProductModal .custom-modal-header { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
-#createSensorModal  .custom-modal-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+#createProductModal   .custom-modal-header { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+#createSensorModal    .custom-modal-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+#createCategoryModal  .custom-modal-header { background: linear-gradient(135deg, #f02d8f 0%, #d70b71 100%) !important; }
 
 .custom-modal .header-content {
     display: flex;
@@ -108,6 +109,7 @@
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.3);
+    z-index: 10;
 }
 
 .custom-modal .modal-close-btn:hover { background: rgba(255, 255, 255, 0.3); transform: scale(1.1); }
@@ -144,8 +146,8 @@
 .custom-modal .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f8f9fa; }
 .custom-modal .section-header i { width: 40px; height: 40px; background: rgba(255,255,255,0.25); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; }
 /* Themed section icons for better contrast on white sections */
-#createProductModal .custom-modal .section-header i { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
-#createSensorModal  .custom-modal .section-header i { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+#createProductModal  .custom-modal .section-header i { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+#createSensorModal   .custom-modal .section-header i { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
 .custom-modal .section-header h5 { margin: 0; color: #2c3e50; font-weight: 600; font-size: 18px; }
 
 /* Form Grid */
@@ -190,11 +192,13 @@
 .custom-modal .btn { padding: 12px 24px; border-radius: 10px; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s ease; border: 2px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
 
 /* Themed primary buttons per modal */
-#createProductModal .custom-modal .btn-primary { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border-color: #28a745; }
-#createProductModal .custom-modal .btn-primary:hover { background: linear-gradient(135deg, #218838 0%, #1ea085 100%); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(40,167,69,0.3); }
+#createProductModal  .custom-modal .btn-primary { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border-color: #28a745; }
+#createProductModal  .custom-modal .btn-primary:hover { background: linear-gradient(135deg, #218838 0%, #1ea085 100%); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(40,167,69,0.3); }
 
-#createSensorModal .custom-modal .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-#createSensorModal .custom-modal .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.5); }
+#createSensorModal   .custom-modal .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+#createSensorModal   .custom-modal .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.5); }
+
+#createCategoryModal .custom-modal .btn-primary:hover { background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(13,110,253,0.35); }
 
 .custom-modal .btn-secondary { background: #6c757d; color: white; border-color: #6c757d; }
 .custom-modal .btn-secondary:hover { background: #5a6268; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(108,117,125,0.3); }

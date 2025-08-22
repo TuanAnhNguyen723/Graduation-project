@@ -21,13 +21,13 @@ try {
                 $result = $product->getById($_GET['id']);
                 if($result) {
                     echo json_encode([
-                        'status' => 'success',
+                        'success' => true,
                         'data' => $result
                     ]);
                 } else {
                     http_response_code(404);
                     echo json_encode([
-                        'status' => 'error',
+                        'success => false',
                         'message' => 'Không tìm thấy sản phẩm'
                     ]);
                 }
@@ -36,13 +36,13 @@ try {
                 $result = $product->getBySlug($_GET['slug']);
                 if($result) {
                     echo json_encode([
-                        'status' => 'success',
+                        'success' => true,
                         'data' => $result
                     ]);
                 } else {
                     http_response_code(404);
                     echo json_encode([
-                        'status' => 'error',
+                        'success => false',
                         'message' => 'Không tìm thấy sản phẩm'
                     ]);
                 }
@@ -57,7 +57,7 @@ try {
                     $products[] = $row;
                 }
                 echo json_encode([
-                    'status' => 'success',
+                    'success' => true,
                     'data' => $products,
                     'total' => count($products)
                 ]);
@@ -72,7 +72,7 @@ try {
                     $products[] = $row;
                 }
                 echo json_encode([
-                    'status' => 'success',
+                    'success' => true,
                     'data' => $products,
                     'total' => count($products)
                 ]);
@@ -85,7 +85,7 @@ try {
                     $products[] = $row;
                 }
                 echo json_encode([
-                    'status' => 'success',
+                    'success' => true,
                     'data' => $products
                 ]);
             } elseif(isset($_GET['price_range'])) {
@@ -101,13 +101,13 @@ try {
                         $products[] = $row;
                     }
                     echo json_encode([
-                        'status' => 'success',
+                        'success' => true,
                         'data' => $products
                     ]);
                 } else {
                     http_response_code(400);
                     echo json_encode([
-                        'status' => 'error',
+                        'success => false',
                         'message' => 'min_price và max_price không được để trống'
                     ]);
                 }
@@ -122,7 +122,7 @@ try {
                     $products[] = $row;
                 }
                 echo json_encode([
-                    'status' => 'success',
+                    'success' => true,
                     'data' => $products,
                     'total' => count($products)
                 ]);
@@ -130,7 +130,7 @@ try {
             break;
 
         case 'POST':
-            // Tạo sản phẩm mới
+            // Tạo sản phẩm mới hoặc cập nhật sản phẩm
             // Xử lý cả JSON và FormData
             $data = [];
             if (isset($_POST) && !empty($_POST)) {
@@ -149,6 +149,91 @@ try {
                 ]);
                 break;
             }
+            
+            // Kiểm tra xem có phải cập nhật không
+            if(isset($data['id']) && !empty($data['id'])) {
+                // Cập nhật sản phẩm
+                $product_id = (int)$data['id'];
+                
+                // Lấy thông tin sản phẩm hiện tại
+                $current_product = $product->getById($product_id);
+                if(!$current_product) {
+                    http_response_code(404);
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Không tìm thấy sản phẩm cần cập nhật'
+                    ]);
+                    break;
+                }
+                
+                // Kiểm tra SKU đã tồn tại chưa (trừ chính nó)
+                if(isset($data['sku']) && !empty($data['sku'])) {
+                    if($product->skuExists($data['sku'], $product_id)) {
+                        http_response_code(400);
+                        echo json_encode([
+                            'success' => false,
+                            'message' => 'SKU đã tồn tại'
+                        ]);
+                        break;
+                    }
+                }
+                
+                // Xử lý upload hình ảnh mới (nếu có)
+                $image_path = $current_product['images']; // Giữ ảnh cũ
+                if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                    $upload_dir = '../assets/images/products/';
+                    if (!is_dir($upload_dir)) {
+                        mkdir($upload_dir, 0755, true);
+                    }
+                    
+                    $file_extension = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+                    $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
+                    
+                    if (in_array($file_extension, $allowed_extensions)) {
+                        $filename = 'product_' . time() . '_' . uniqid() . '.' . $file_extension;
+                        $upload_path = $upload_dir . $filename;
+                        
+                        if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
+                            // Xóa ảnh cũ nếu có
+                            if(!empty($current_product['images']) && file_exists('../' . $current_product['images'])) {
+                                unlink('../' . $current_product['images']);
+                            }
+                            $image_path = 'assets/images/products/' . $filename;
+                        }
+                    }
+                }
+
+                // Cập nhật sản phẩm
+                $product->id = $product_id;
+                $product->name = $data['name'];
+                $product->slug = isset($data['slug']) ? $data['slug'] : $product->createSlug($data['name']);
+                $product->description = isset($data['description']) ? $data['description'] : '';
+                $product->sku = isset($data['sku']) ? $data['sku'] : $current_product['sku'];
+                $product->price = isset($data['price']) ? (float)$data['price'] : 0;
+                $product->sale_price = isset($data['sale_price']) ? (float)$data['sale_price'] : null;
+                $product->stock_quantity = isset($data['stock_quantity']) ? (int)$data['stock_quantity'] : 0;
+                $product->category_id = isset($data['category_id']) ? (int)$data['category_id'] : null;
+                $product->brand = isset($data['brand']) ? $data['brand'] : '';
+                $product->images = $image_path;
+                $product->is_active = isset($data['is_active']) ? (int)$data['is_active'] : 1;
+
+                if($product->update()) {
+                    echo json_encode([
+                        'success' => true,
+                        'message' => 'Cập nhật sản phẩm thành công',
+                        'data' => ['id' => $product_id]
+                    ]);
+                } else {
+                    http_response_code(500);
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Không thể cập nhật sản phẩm'
+                    ]);
+                }
+                break;
+            }
+            
+            // Tạo sản phẩm mới
 
             if(!isset($data['sku']) || empty($data['sku'])) {
                 http_response_code(400);
@@ -225,7 +310,7 @@ try {
             if(!isset($data['id']) || !isset($data['name'])) {
                 http_response_code(400);
                 echo json_encode([
-                    'status' => 'error',
+                    'success => false',
                     'message' => 'ID và tên sản phẩm không được để trống'
                 ]);
                 break;
@@ -235,7 +320,7 @@ try {
             if(isset($data['sku']) && $product->skuExists($data['sku'], $data['id'])) {
                 http_response_code(400);
                 echo json_encode([
-                    'status' => 'error',
+                    'success => false',
                     'message' => 'SKU đã tồn tại'
                 ]);
                 break;
@@ -256,13 +341,13 @@ try {
 
             if($product->update()) {
                 echo json_encode([
-                    'status' => 'success',
+                    'success' => true,
                     'message' => 'Cập nhật sản phẩm thành công'
                 ]);
             } else {
                 http_response_code(500);
                 echo json_encode([
-                    'status' => 'error',
+                    'success => false',
                     'message' => 'Không thể cập nhật sản phẩm'
                 ]);
             }
@@ -273,20 +358,20 @@ try {
             if(isset($_GET['id'])) {
                 if($product->delete($_GET['id'])) {
                     echo json_encode([
-                        'status' => 'success',
+                        'success' => true,
                         'message' => 'Xóa sản phẩm thành công'
                     ]);
                 } else {
                     http_response_code(500);
                     echo json_encode([
-                        'status' => 'error',
+                        'success' => false,
                         'message' => 'Không thể xóa sản phẩm'
                     ]);
                 }
             } else {
                 http_response_code(400);
                 echo json_encode([
-                    'status' => 'error',
+                    'success' => false,
                     'message' => 'ID sản phẩm không được để trống'
                 ]);
             }
@@ -295,7 +380,7 @@ try {
         default:
             http_response_code(405);
             echo json_encode([
-                'status' => 'error',
+                'success => false',
                 'message' => 'Method không được hỗ trợ'
             ]);
             break;
@@ -303,7 +388,7 @@ try {
 } catch(Exception $e) {
     http_response_code(500);
     echo json_encode([
-        'status' => 'error',
+        'success => false',
         'message' => 'Lỗi server: ' . $e->getMessage()
     ]);
 }
