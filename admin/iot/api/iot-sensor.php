@@ -69,7 +69,7 @@ try {
                 $sensorModel->updateCurrentValues($sensorCode, $temperature, $humidity);
 
                 // Lấy thông tin cảm biến để trả về
-                $sensor = $sensorModel->getSensorById($sensorCode);
+                $sensor = $sensorModel->getSensorByCode($sensorCode);
                 
                 $response = [
                     'success' => true,
