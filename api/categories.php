@@ -54,7 +54,7 @@ try {
                     $categories[] = $row;
                 }
                 echo json_encode([
-                    'success => true',
+                    'success' => true,
                     'data' => $categories
                 ]);
             } elseif(isset($_GET['sub'])) {
@@ -65,7 +65,7 @@ try {
                     $categories[] = $row;
                 }
                 echo json_encode([
-                    'success => true',
+                    'success' => true,
                     'data' => $categories
                 ]);
             } elseif(isset($_GET['with_products'])) {
@@ -76,7 +76,7 @@ try {
                     $categories[] = $row;
                 }
                 echo json_encode([
-                    'success => true',
+                    'success' => true,
                     'data' => $categories
                 ]);
             } else {
@@ -87,7 +87,7 @@ try {
                     $categories[] = $row;
                 }
                 echo json_encode([
-                    'success => true',
+                    'success' => true,
                     'data' => $categories,
                     'total' => count($categories)
                 ]);
@@ -362,7 +362,7 @@ try {
         default:
             http_response_code(405);
             echo json_encode([
-                'success => false',
+                'success' => false,
                 'message' => 'Method không được hỗ trợ'
             ]);
             break;
@@ -370,7 +370,7 @@ try {
 } catch(Exception $e) {
     http_response_code(500);
     echo json_encode([
-        'success => false',
+        'success' => false,
         'message' => 'Lỗi server: ' . $e->getMessage()
     ]);
 }

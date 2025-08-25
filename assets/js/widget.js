@@ -14,6 +14,9 @@
       resetCreateProductForm();
       const first = document.getElementById('productName'); if (first) first.focus();
       document.body.style.overflow = 'hidden';
+      
+      // Load categories when modal opens
+      loadCategoriesForCreate();
     }
   }
 
@@ -148,9 +151,37 @@
     document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && isProductModalOpen) closeCreateProductModal(); });
   });
 
+  // Load categories for product creation
+  async function loadCategoriesForCreate() {
+    try {
+      const response = await fetch('../../api/categories.php');
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        const categorySelect = document.getElementById('productCategory');
+        if (categorySelect) {
+          // Clear existing options except the first one
+          categorySelect.innerHTML = '<option value="">Chọn danh mục</option>';
+          
+          // Add new options
+          result.data.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            categorySelect.appendChild(option);
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  }
+
   window.openCreateProductModal = openCreateProductModal;
   window.closeCreateProductModal = closeCreateProductModal;
   window.submitCreateProductForm = submitCreateProductForm;
+  window.loadCategoriesForCreate = loadCategoriesForCreate;
 })();
 
 // Categories widget
@@ -675,12 +706,6 @@
     document.getElementById('editStockQuantity').value = stockQuantity;
     document.getElementById('editProductStatus').value = isActive;
     
-    // Set category
-    const categorySelect = document.getElementById('editProductCategory');
-    if (categorySelect) {
-      categorySelect.value = categoryId || '';
-    }
-    
     // Handle image display
     const currentImageContainer = document.getElementById('currentProductImageContainer');
     const currentImage = document.getElementById('currentProductImage');
@@ -696,8 +721,22 @@
     document.getElementById('editImagePreviewContainer').style.display = 'none';
     document.getElementById('editProductImage').value = '';
     
-    // Load categories for dropdown
-    loadCategoriesForEdit();
+    // Load categories for dropdown trước, sau đó set giá trị danh mục
+    loadCategoriesForEdit().then(() => {
+      // Sau khi load xong danh mục, set giá trị danh mục
+      const categorySelect = document.getElementById('editProductCategory');
+      if (categorySelect && categoryId) {
+        categorySelect.value = categoryId;
+        // Xóa lỗi validation
+        categorySelect.classList.remove('error');
+        categorySelect.classList.add('success');
+        const errorEl = document.getElementById('editProductCategoryError');
+        if (errorEl) {
+          errorEl.textContent = '';
+          errorEl.classList.remove('show');
+        }
+      }
+    });
     
     // Show modal
     const modal = document.getElementById('editProductModal');
@@ -882,7 +921,7 @@
   }
 
   function loadCategoriesForEdit() {
-    fetch('../../api/categories.php')
+    return fetch('../../api/categories.php')
       .then(response => response.json())
       .then(data => {
         if (data.success && data.data) {
