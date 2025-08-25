@@ -1,6 +1,7 @@
 <?php
 class TemperatureReading {
     private $db;
+    private $table_name = "temperature_readings";
     
     public function __construct($db) {
         $this->db = $db;

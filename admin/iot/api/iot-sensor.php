@@ -10,13 +10,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit();
 }
 
-require_once '../config/database.php';
+require_once '../../../config/database.php';
 require_once '../models/TemperatureReading.php';
 require_once '../models/TemperatureSensor.php';
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    // $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    $db = new Database();
+    $pdo = $db->getConnection();
+    if (!$pdo) {
+        throw new Exception('Không thể kết nối database');
+    }
     
     $readingModel = new TemperatureReading($pdo);
     $sensorModel = new TemperatureSensor($pdo);
@@ -59,8 +65,11 @@ try {
             $success = $readingModel->addReadingFromIoT($sensorCode, $temperature, $humidity);
             
             if ($success) {
+                //Update bang sensor
+                $sensorModel->updateCurrentValues($sensorCode, $temperature, $humidity);
+
                 // Lấy thông tin cảm biến để trả về
-                $sensor = $sensorModel->getSensorById($sensorCode);
+                $sensor = $sensorModel->getSensorByCode($sensorCode);
                 
                 $response = [
                     'success' => true,

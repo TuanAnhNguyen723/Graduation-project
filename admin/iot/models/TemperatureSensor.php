@@ -1,12 +1,13 @@
 <?php
 class TemperatureSensor {
     private $db;
-    
+    private $table_name = "temperature_sensors";
+
     public function __construct($db) {
         $this->db = $db;
     }
     
-    // Lấy tất cả cảm 
+    // Lấy tất cả cảm biến
     public function getAllSensors() {
         $query = "SELECT ts.*, wl.location_code, wl.location_name 
                   FROM temperature_sensors ts 
@@ -29,6 +30,27 @@ class TemperatureSensor {
         $stmt = $this->db->prepare($query);
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // Lấy cảm biến theo code
+    public function getSensorByCode($sensorCode) {
+        $query = "SELECT ts.*, wl.location_code, wl.location_name 
+                  FROM temperature_sensors ts 
+                  LEFT JOIN warehouse_locations wl ON ts.location_id = wl.id 
+                  WHERE ts.sensor_code = ? AND ts.is_active = 1";
+        
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$sensorCode]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // Cập nhật giá trị hiện tại
+    public function updateCurrentValues($sensorCode, $temperature, $humidity = null) {
+        $query = "UPDATE temperature_sensors 
+                  SET current_temperature = ?, humidity = ?, updated_at = CURRENT_TIMESTAMP 
+                  WHERE sensor_code = ?";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([$temperature, $humidity, $sensorCode]);
     }
     
     // Tạo cảm biến mới
