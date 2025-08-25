@@ -93,6 +93,28 @@
           else if (el.type !== 'file' && el.value) formData.append(el.name, el.value);
         });
       }
+      
+      // Lấy thông tin nhiệt độ từ category và thêm vào formData
+      const categoryId = document.getElementById('productCategory')?.value;
+      if (categoryId) {
+        try {
+          const tempResponse = await fetch(`../../api/products.php?temperature_info=1&category_id=${categoryId}`);
+          if (tempResponse.ok) {
+            const tempResult = await tempResponse.json();
+            if (tempResult.success && tempResult.data) {
+              const tempData = tempResult.data;
+              formData.append('ideal_temperature_min', tempData.ideal_min);
+              formData.append('ideal_temperature_max', tempData.ideal_max);
+              formData.append('dangerous_temperature_min', tempData.dangerous_min);
+              formData.append('dangerous_temperature_max', tempData.dangerous_max);
+            }
+          }
+        } catch (tempError) {
+          console.error('Error loading temperature info:', tempError);
+          // Không dừng quá trình tạo sản phẩm nếu có lỗi lấy nhiệt độ
+        }
+      }
+      
       formData.append('created_at', new Date().toISOString());
       const response = await fetch('../../api/products.php', { method: 'POST', body: formData });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -171,12 +193,16 @@
             option.textContent = category.name;
             categorySelect.appendChild(option);
           });
+          
+
         }
       }
     } catch (error) {
       console.error('Error loading categories:', error);
     }
   }
+
+
 
   window.openCreateProductModal = openCreateProductModal;
   window.closeCreateProductModal = closeCreateProductModal;
@@ -333,7 +359,7 @@
   let isEditCategoryModalOpen = false;
   let currentEditCategoryId = null;
 
-  function openEditCategoryModal(categoryId, name, slug, description, parentId, sortOrder, isActive, image) {
+  function openEditCategoryModal(categoryId, name, slug, description, parentId, sortOrder, isActive, image, temperatureType) {
     currentEditCategoryId = categoryId;
     
     // Populate form fields
@@ -343,6 +369,7 @@
     document.getElementById('editCategoryDescription').value = description;
     document.getElementById('editSortOrder').value = sortOrder;
     document.getElementById('editCategoryStatus').value = isActive;
+    document.getElementById('editTemperatureType').value = temperatureType || 'ambient';
     
     // Set parent category
     const parentSelect = document.getElementById('editParentId');
@@ -895,7 +922,11 @@
         body: formData 
       });
       
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+      }
       
       const result = await response.json();
       if (result.success) {

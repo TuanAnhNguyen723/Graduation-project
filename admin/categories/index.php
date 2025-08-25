@@ -597,13 +597,30 @@ if(!empty($search_results)) {
                                             
                                             <!-- Thông tin thứ tự và trạng thái -->
                                             <div class="row text-center mb-3">
-                                                <div class="col-6">
+                                                <div class="col-4">
                                                     <small class="text-muted d-block mb-1">Thứ tự</small>
                                                     <div class="fw-bold text-primary fs-6">
                                                         <?php echo $cat['sort_order']; ?>
                                                     </div>
                                                 </div>
-                                                <div class="col-6">
+                                                <div class="col-4">
+                                                    <small class="text-muted d-block mb-1">Nhiệt độ</small>
+                                                    <div>
+                                                        <?php 
+                                                        $temp_type = isset($cat['temperature_type']) ? $cat['temperature_type'] : 'ambient';
+                                                        $temp_labels = [
+                                                            'frozen' => ['Đông lạnh', 'bg-info-subtle text-info'],
+                                                            'chilled' => ['Lạnh mát', 'bg-primary-subtle text-primary'],
+                                                            'ambient' => ['Nhiệt độ phòng', 'bg-warning-subtle text-warning']
+                                                        ];
+                                                        $temp_info = $temp_labels[$temp_type] ?? $temp_labels['ambient'];
+                                                        ?>
+                                                        <span class="badge <?php echo $temp_info[1]; ?>">
+                                                            <?php echo $temp_info[0]; ?>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
                                                     <small class="text-muted d-block mb-1">Trạng thái</small>
                                                     <div>
                                                         <span class="badge <?php echo (isset($cat['is_active']) && $cat['is_active'] == 1) ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'; ?>">
@@ -617,7 +634,7 @@ if(!empty($search_results)) {
                                             <div class="d-flex justify-content-between mb-3">
                                                 <button type="button" 
                                                         class="btn btn-outline-primary" 
-                                                        onclick="openEditCategoryModal(<?php echo $cat['id']; ?>, '<?php echo htmlspecialchars(addslashes($cat['name'])); ?>', '<?php echo htmlspecialchars(addslashes($cat['slug'])); ?>', '<?php echo htmlspecialchars(addslashes($cat['description'])); ?>', <?php echo $cat['parent_id'] ?: 'null'; ?>, <?php echo $cat['sort_order']; ?>, <?php echo $cat['is_active']; ?>, '<?php echo htmlspecialchars(addslashes($cat['image'])); ?>')">
+                                                        onclick="openEditCategoryModal(<?php echo $cat['id']; ?>, '<?php echo htmlspecialchars(addslashes($cat['name'])); ?>', '<?php echo htmlspecialchars(addslashes($cat['slug'])); ?>', '<?php echo htmlspecialchars(addslashes($cat['description'])); ?>', <?php echo $cat['parent_id'] ?: 'null'; ?>, <?php echo $cat['sort_order']; ?>, <?php echo $cat['is_active']; ?>, '<?php echo htmlspecialchars(addslashes($cat['image'])); ?>', '<?php echo isset($cat['temperature_type']) ? $cat['temperature_type'] : 'ambient'; ?>')">
                                                     <i class="iconoir-edit"></i> Sửa
                                                 </button>
                                                 <button type="button" 

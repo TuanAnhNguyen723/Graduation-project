@@ -184,6 +184,7 @@ try {
                 $category->description = trim($data['description']);
                 $category->parent_id = !empty($data['parent_id']) ? (int)$data['parent_id'] : null;
                 $category->image = $image_path;
+                $category->temperature_type = isset($data['temperature_type']) ? $data['temperature_type'] : 'ambient';
                 $category->is_active = isset($data['is_active']) ? (int)$data['is_active'] : 1;
                 $category->sort_order = isset($data['sort_order']) ? (int)$data['sort_order'] : 0;
 
@@ -260,6 +261,7 @@ try {
             $category->description = isset($data['description']) ? $data['description'] : '';
             $category->parent_id = isset($data['parent_id']) ? $data['parent_id'] : null;
             $category->image = $image_path;
+            $category->temperature_type = isset($data['temperature_type']) ? $data['temperature_type'] : 'ambient';
             $category->is_active = isset($data['is_active']) ? $data['is_active'] : 1;
             $category->sort_order = isset($data['sort_order']) ? $data['sort_order'] : 0;
 
@@ -298,6 +300,7 @@ try {
             $category->description = isset($data['description']) ? $data['description'] : '';
             $category->parent_id = isset($data['parent_id']) ? $data['parent_id'] : null;
             $category->image = isset($data['image']) ? $data['image'] : '';
+            $category->temperature_type = isset($data['temperature_type']) ? $data['temperature_type'] : 'ambient';
             $category->is_active = isset($data['is_active']) ? $data['is_active'] : 1;
             $category->sort_order = isset($data['sort_order']) ? $data['sort_order'] : 0;
 

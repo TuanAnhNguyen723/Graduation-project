@@ -15,6 +15,7 @@ class Category {
     public $description;
     public $parent_id;
     public $image;
+    public $temperature_type;
     public $is_active;
     public $sort_order;
     public $created_at;
@@ -82,8 +83,8 @@ class Category {
      */
     public function create() {
         $query = "INSERT INTO " . $this->table_name . " 
-                  (name, slug, description, parent_id, image, is_active, sort_order) 
-                  VALUES (:name, :slug, :description, :parent_id, :image, :is_active, :sort_order)";
+                  (name, slug, description, parent_id, image, temperature_type, is_active, sort_order) 
+                  VALUES (:name, :slug, :description, :parent_id, :image, :temperature_type, :is_active, :sort_order)";
 
         $stmt = $this->conn->prepare($query);
 
@@ -99,6 +100,7 @@ class Category {
         $stmt->bindParam(":description", $this->description);
         $stmt->bindParam(":parent_id", $this->parent_id);
         $stmt->bindParam(":image", $this->image);
+        $stmt->bindParam(":temperature_type", $this->temperature_type);
         $stmt->bindParam(":is_active", $this->is_active);
         $stmt->bindParam(":sort_order", $this->sort_order);
 
@@ -114,8 +116,8 @@ class Category {
     public function update() {
         $query = "UPDATE " . $this->table_name . " 
                   SET name = :name, slug = :slug, description = :description, 
-                      parent_id = :parent_id, image = :image, is_active = :is_active, 
-                      sort_order = :sort_order 
+                      parent_id = :parent_id, image = :image, temperature_type = :temperature_type, 
+                      is_active = :is_active, sort_order = :sort_order 
                   WHERE id = :id";
 
         $stmt = $this->conn->prepare($query);
@@ -132,6 +134,7 @@ class Category {
         $stmt->bindParam(":description", $this->description);
         $stmt->bindParam(":parent_id", $this->parent_id);
         $stmt->bindParam(":image", $this->image);
+        $stmt->bindParam(":temperature_type", $this->temperature_type);
         $stmt->bindParam(":is_active", $this->is_active);
         $stmt->bindParam(":sort_order", $this->sort_order);
         $stmt->bindParam(":id", $this->id);

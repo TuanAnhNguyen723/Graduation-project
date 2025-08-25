@@ -385,5 +385,46 @@ class Product {
         $stmt->execute();
         return $stmt;
     }
+
+    /**
+     * Lấy thông tin nhiệt độ từ category
+     */
+    public function getTemperatureInfoFromCategory($category_id) {
+        $query = "SELECT temperature_type FROM categories WHERE id = :category_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":category_id", $category_id);
+        $stmt->execute();
+        $result = $stmt->fetch();
+        
+        if ($result) {
+            $temperature_type = $result['temperature_type'];
+            
+            // Định nghĩa nhiệt độ theo loại
+            $temperature_ranges = [
+                'frozen' => [
+                    'ideal_min' => -50.0,
+                    'ideal_max' => -18.0,
+                    'dangerous_min' => -50,
+                    'dangerous_max' => -18
+                ],
+                'chilled' => [
+                    'ideal_min' => 0.0,
+                    'ideal_max' => 5.0,
+                    'dangerous_min' => -1,
+                    'dangerous_max' => 5
+                ],
+                'ambient' => [
+                    'ideal_min' => 15.0,
+                    'ideal_max' => 33.0,
+                    'dangerous_min' => 14,
+                    'dangerous_max' => 33
+                ]
+            ];
+            
+            return $temperature_ranges[$temperature_type] ?? $temperature_ranges['ambient'];
+        }
+        
+        return null;
+    }
 }
 ?>

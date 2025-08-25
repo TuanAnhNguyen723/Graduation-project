@@ -1,4 +1,13 @@
 -- ==============================================================
+-- CẬP NHẬT DATABASE HIỆN TẠI
+-- ==============================================================
+
+-- Thêm trường temperature_type vào bảng categories nếu chưa có
+ALTER TABLE categories ADD COLUMN IF NOT EXISTS temperature_type ENUM('frozen', 'chilled', 'ambient') DEFAULT 'ambient' COMMENT 'Loại nhiệt độ: frozen(≤-18°C), chilled(0-5°C), ambient(15-33°C)';
+
+-- Cập nhật dữ liệu mẫu với temperature_type
+UPDATE categories SET temperature_type = 'ambient' WHERE temperature_type IS NULL OR temperature_type = '';
+-- ==============================================================
 -- DATABASE SCHEMA CHO DỰ ÁN GRADUATION PROJECT
 -- Hệ thống quản lý E-commerce & IoT Warehouse Management
 -- ==============================================================
@@ -19,6 +28,7 @@ CREATE TABLE IF NOT EXISTS categories (
     description TEXT,
     parent_id INT DEFAULT NULL,
     image VARCHAR(255),
+    temperature_type ENUM('frozen', 'chilled', 'ambient') DEFAULT 'ambient' COMMENT 'Loại nhiệt độ: frozen(≤-18°C), chilled(0-5°C), ambient(15-33°C)',
     is_active BOOLEAN DEFAULT TRUE,
     sort_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

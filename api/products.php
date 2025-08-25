@@ -27,7 +27,7 @@ try {
                 } else {
                     http_response_code(404);
                     echo json_encode([
-                        'success => false',
+                        'success' => false,
                         'message' => 'Không tìm thấy sản phẩm'
                     ]);
                 }
@@ -42,7 +42,7 @@ try {
                 } else {
                     http_response_code(404);
                     echo json_encode([
-                        'success => false',
+                        'success' => false,
                         'message' => 'Không tìm thấy sản phẩm'
                     ]);
                 }
@@ -107,8 +107,33 @@ try {
                 } else {
                     http_response_code(400);
                     echo json_encode([
-                        'success => false',
-                        'message' => 'min_price và max_price không được để trống'
+                        'success' => false,
+                        'message' => 'Thiếu thông tin khoảng giá'
+                    ]);
+                }
+            } elseif(isset($_GET['temperature_info'])) {
+                // Lấy thông tin nhiệt độ từ category
+                if(isset($_GET['category_id'])) {
+                    $category_id = (int)$_GET['category_id'];
+                    $temp_info = $product->getTemperatureInfoFromCategory($category_id);
+                    
+                    if($temp_info) {
+                        echo json_encode([
+                            'success' => true,
+                            'data' => $temp_info
+                        ]);
+                    } else {
+                        http_response_code(404);
+                        echo json_encode([
+                            'success' => false,
+                            'message' => 'Không tìm thấy thông tin nhiệt độ cho category này'
+                        ]);
+                    }
+                } else {
+                    http_response_code(400);
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Thiếu category_id'
                     ]);
                 }
             } else {
@@ -140,6 +165,10 @@ try {
                 // JSON data
                 $data = json_decode(file_get_contents("php://input"), true);
             }
+            
+            // Debug logging
+            error_log("POST data received: " . print_r($data, true));
+            error_log("FILES data received: " . print_r($_FILES, true));
             
             if(!isset($data['name']) || empty($data['name'])) {
                 http_response_code(400);
@@ -210,9 +239,9 @@ try {
                 $product->description = isset($data['description']) ? $data['description'] : '';
                 $product->sku = isset($data['sku']) ? $data['sku'] : $current_product['sku'];
                 $product->price = isset($data['price']) ? (float)$data['price'] : 0;
-                $product->sale_price = isset($data['sale_price']) ? (float)$data['sale_price'] : null;
+                $product->sale_price = isset($data['sale_price']) && !empty($data['sale_price']) ? (float)$data['sale_price'] : null;
                 $product->stock_quantity = isset($data['stock_quantity']) ? (int)$data['stock_quantity'] : 0;
-                $product->category_id = isset($data['category_id']) ? (int)$data['category_id'] : null;
+                $product->category_id = isset($data['category_id']) && !empty($data['category_id']) ? (int)$data['category_id'] : null;
                 $product->brand = isset($data['brand']) ? $data['brand'] : '';
                 $product->images = $image_path;
                 $product->is_active = isset($data['is_active']) ? (int)$data['is_active'] : 1;
@@ -310,7 +339,7 @@ try {
             if(!isset($data['id']) || !isset($data['name'])) {
                 http_response_code(400);
                 echo json_encode([
-                    'success => false',
+                    'success' => false,
                     'message' => 'ID và tên sản phẩm không được để trống'
                 ]);
                 break;
@@ -320,7 +349,7 @@ try {
             if(isset($data['sku']) && $product->skuExists($data['sku'], $data['id'])) {
                 http_response_code(400);
                 echo json_encode([
-                    'success => false',
+                    'success' => false,
                     'message' => 'SKU đã tồn tại'
                 ]);
                 break;
@@ -347,7 +376,7 @@ try {
             } else {
                 http_response_code(500);
                 echo json_encode([
-                    'success => false',
+                    'success' => false,
                     'message' => 'Không thể cập nhật sản phẩm'
                 ]);
             }
@@ -380,7 +409,7 @@ try {
         default:
             http_response_code(405);
             echo json_encode([
-                'success => false',
+                'success' => false,
                 'message' => 'Method không được hỗ trợ'
             ]);
             break;
@@ -388,7 +417,7 @@ try {
 } catch(Exception $e) {
     http_response_code(500);
     echo json_encode([
-        'success => false',
+        'success' => false,
         'message' => 'Lỗi server: ' . $e->getMessage()
     ]);
 }

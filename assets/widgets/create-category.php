@@ -77,12 +77,27 @@
                         </div>
 
                         <div class="form-field">
+                            <label for="temperatureType" class="field-label">Loại nhiệt độ <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <select class="form-select" id="temperatureType" name="temperature_type" required>
+                                    <option value="ambient">Nhiệt độ phòng (15-33°C)</option>
+                                    <option value="chilled">Lạnh mát (0-5°C)</option>
+                                    <option value="frozen">Đông lạnh (<-18°C)</option>
+                                </select>
+                                <small class="text-muted">Chọn loại nhiệt độ phù hợp cho danh mục</small>
+                            </div>
+                            <div class="field-error" id="temperatureTypeError"></div>
+                        </div>
+
+                        <div class="form-field">
                             <label for="sortOrder" class="field-label">Thứ tự</label>
                             <div class="input-wrapper">
                                 <input type="number" class="form-input" id="sortOrder" name="sort_order" placeholder="0" min="0" value="0">
                             </div>
                         </div>
+                    </div>
 
+                    <div class="form-grid">
                         <div class="form-field">
                             <label for="categoryStatus" class="field-label">Trạng thái <span class="required">*</span></label>
                             <div class="input-wrapper">

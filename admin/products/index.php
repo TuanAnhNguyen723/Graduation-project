@@ -581,9 +581,11 @@ if ($categories_result) {
                                                 <div>
                                             <?php 
                                             $cat_name = 'N/A';
+                                            $cat_temp_type = 'ambient';
                                             foreach ($categories as $cat) {
                                                 if ($cat['id'] == $prod['category_id']) {
                                                     $cat_name = $cat['name'];
+                                                    $cat_temp_type = isset($cat['temperature_type']) ? $cat['temperature_type'] : 'ambient';
                                                     break;
                                                 }
                                             }
@@ -591,9 +593,46 @@ if ($categories_result) {
                                                     <span class="badge bg-info-subtle text-info"><?php echo htmlspecialchars($cat_name); ?></span>
                                                 </div>
                                             </div>
+                                            <!-- Nhiệt độ bảo quản (theo loại danh mục) -->
+                                             <div class="d-flex align-items-center justify-content-between gap-3">
+                                                 <div class="mb-3">
+                                                     <div>
+                                                         <small class="text-muted d-block mb-1">Nhiệt độ bảo quản</small>
+                                                     </div>
+     
+                                                     <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                         <?php 
+                                                         $temp_labels = [
+                                                             'frozen' => ['Đông lạnh (< -18°C)', 'bg-info-subtle text-info'],
+                                                             'chilled' => ['Lạnh mát (0 - 5°C)', 'bg-primary-subtle text-primary'],
+                                                             'ambient' => ['Nhiệt độ phòng (15 - 33°C)', 'bg-warning-subtle text-warning']
+                                                         ];
+                                                         $temp_info = $temp_labels[$cat_temp_type] ?? $temp_labels['ambient'];
+     
+                                                         // Lấy thông tin nhiệt độ (bao gồm dangerous_min/max) từ model
+                                                         $temp_info_detail = $product->getTemperatureInfoFromCategory($prod['category_id']);
+                                                         $danger_min = $temp_info_detail ? $temp_info_detail['dangerous_min'] : -50.0;
+                                                         $danger_max = $temp_info_detail ? $temp_info_detail['dangerous_max'] : 50.0;
+                                                         ?>
+                                                         <span class="badge rounded-pill <?php echo $temp_info[1]; ?> d-inline-flex align-items-center">
+                                                             <?php echo $temp_info[0]; ?>
+                                                         </span>
+                                                     </div>
+                                                 </div>
+                                                 <div class="vr mx-2 opacity-25" style="height: 40px;"></div>
+                                                 <div class="mb-3">
+                                                     <div>
+                                                         <small class="text-muted">Nhiệt độ nguy hiểm</small>
+                                                     </div>
+                                                     <span class="badge rounded-pill bg-danger-subtle text-danger d-inline-flex align-items-center ms-1">
+                                                         < <?php echo $danger_min; ?>°C hoặc > <?php echo $danger_max; ?>°C
+                                                     </span>
+                                                 </div>
+                                             </div>
+
                                             
                                             <!-- Nút hành động -->
-                                            <div class="d-flex justify-content-between mb-3">
+                                            <div class="d-flex justify-content-between">
                                                 <button type="button" 
                                                         class="btn btn-outline-primary" 
                                                         onclick="openEditProductModal(<?php echo $prod['id']; ?>, '<?php echo htmlspecialchars(addslashes($prod['name'])); ?>', '<?php echo htmlspecialchars(addslashes($prod['sku'])); ?>', '<?php echo htmlspecialchars(addslashes($prod['description'])); ?>', <?php echo $prod['category_id']; ?>, '<?php echo htmlspecialchars(addslashes($prod['brand'])); ?>', <?php echo $prod['price']; ?>, <?php echo $prod['sale_price'] ?: 0; ?>, <?php echo $prod['stock_quantity']; ?>, <?php echo $prod['is_active']; ?>, '<?php echo htmlspecialchars(addslashes($prod['images'])); ?>')">
