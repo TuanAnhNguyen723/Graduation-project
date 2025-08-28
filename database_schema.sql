@@ -7,6 +7,10 @@ ALTER TABLE categories ADD COLUMN IF NOT EXISTS temperature_type ENUM('frozen', 
 
 -- Cập nhật dữ liệu mẫu với temperature_type
 UPDATE categories SET temperature_type = 'ambient' WHERE temperature_type IS NULL OR temperature_type = '';
+
+--Cập nhật cột humidity vào temperature_sensor
+ALTER TABLE temperature_sensors
+ADD COLUMN humidity DECIMAL(5,2) AFTER current_temperature;
 -- ==============================================================
 -- DATABASE SCHEMA CHO DỰ ÁN GRADUATION PROJECT
 -- Hệ thống quản lý E-commerce & IoT Warehouse Management

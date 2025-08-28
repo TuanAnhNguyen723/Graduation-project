@@ -106,7 +106,7 @@ try {
                         <div class="d-flex justify-content-between">
                             <div>
                                 <h6 class="card-title text-white-50">Tổng cảm biến</h6>
-                                <h2 class="text-white"><?php echo count($sensors); ?></h2>
+                                <h2 class="text-white" id="total-sensors"><?php echo count($sensors); ?></h2>
                             </div>
                             <div class="align-self-center">
                                 <i class="iconoir-cpu fa-2x text-white-50"></i>
@@ -122,7 +122,7 @@ try {
                         <div class="d-flex justify-content-between">
                             <div>
                                 <h6 class="card-title text-white-50">Cảm biến hoạt động</h6>
-                                <h2 class="text-white"><?php echo count(array_filter($sensors, function($s) { return $s['status'] === 'active'; })); ?></h2>
+                                <h2 class="text-white" id="active-sensors"><?php echo count(array_filter($sensors, function($s) { return $s['status'] === 'active'; })); ?></h2>
                             </div>
                             <div class="align-self-center">
                                 <i class="iconoir-check-circle fa-2x text-white-50"></i>
@@ -138,7 +138,7 @@ try {
                         <div class="d-flex justify-content-between">
                             <div>
                                 <h6 class="card-title text-white-50">Cảm biến bảo trì</h6>
-                                <h2 class="text-white"><?php echo count(array_filter($sensors, function($s) { return $s['status'] === 'maintenance'; })); ?></h2>
+                                <h2 class="text-white" id="maintenance-sensors"><?php echo count(array_filter($sensors, function($s) { return $s['status'] === 'maintenance'; })); ?></h2>
                             </div>
                             <div class="align-self-center">
                                 <i class="iconoir-tools fa-2x text-white-50"></i>
@@ -154,7 +154,7 @@ try {
                         <div class="d-flex justify-content-between">
                             <div>
                                 <h6 class="card-title text-white-50">Cảm biến lỗi</h6>
-                                <h2 class="text-white"><?php echo count(array_filter($sensors, function($s) { return $s['status'] === 'error'; })); ?></h2>
+                                <h2 class="text-white" id="error-sensors"><?php echo count(array_filter($sensors, function($s) { return $s['status'] === 'error'; })); ?></h2>
                             </div>
                             <div class="align-self-center">
                                 <i class="iconoir-warning-triangle fa-2x text-white-50"></i>
@@ -177,7 +177,7 @@ try {
                     <div class="card-body">
                         <?php if (!empty($sensors)): ?>
                             <!-- Sensors Grid -->
-                <div class="row">
+                <div class="row" id="sensor-container">
                     <?php foreach ($sensors as $sensor): ?>
                         <div class="col-xl-4 col-md-6">
                             <div class="card sensor-card sensor-<?php echo $sensor['status']; ?>">
@@ -404,6 +404,137 @@ try {
                 });
             }
         }
+        // Hàm render lại giao diện cảm biến từ dữ liệu mới
+        function renderSensors(sensors) {
+            const container = document.getElementById("sensor-container");
+            container.innerHTML = "";
+
+            sensors.forEach(sensor => {
+                // Format thời gian
+                let updatedAt = sensor.updated_at 
+                    ? new Date(sensor.updated_at).toLocaleString("vi-VN") 
+                    : "N/A";
+
+                let installationDate = sensor.installation_date
+                    ? new Date(sensor.installation_date).toLocaleDateString("vi-VN")
+                    : null;
+
+                let lastCalibration = sensor.last_calibration
+                    ? new Date(sensor.last_calibration).toLocaleDateString("vi-VN")
+                    : null;
+
+                // Format ngưỡng min - max
+                let threshold = (sensor.min_threshold ?? "—") + " - " + (sensor.max_threshold ?? "—");
+
+                // Format description, notes
+                let description = sensor.description 
+                    ? (sensor.description.length > 80 ? sensor.description.substring(0,80) + "…" : sensor.description)
+                    : "";
+
+                let notes = sensor.notes 
+                    ? (sensor.notes.length > 80 ? sensor.notes.substring(0,80) + "…" : sensor.notes)
+                    : "";
+
+                container.innerHTML += `
+                    <div class="col-xl-4 col-md-6">
+                        <div class="card sensor-card sensor-${sensor.status}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h5 class="card-title">${sensor.sensor_name}</h5>
+                                        <p class="text-muted mb-0">${sensor.location_name ?? 'Chưa gán vị trí'}</p>
+                                    </div>
+                                    <span class="badge bg-${
+                                        sensor.status === 'active' ? 'success' : 
+                                        (sensor.status === 'maintenance' ? 'warning' : 'danger')
+                                    }">
+                                        ${sensor.status}
+                                    </span>
+                                </div>
+
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <h4 class="text-primary">${sensor.current_temperature ?? 'N/A'}°C</h4>
+                                        <p class="text-muted mb-0">Nhiệt độ hiện tại</p>
+                                    </div>
+                                    <div class="col-6">
+                                        <h4 class="text-info">${sensor.humidity ?? 'N/A'}%</h4>
+                                        <p class="text-muted mb-0">Độ ẩm</p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <small class="text-muted d-block">
+                                        <i class="iconoir-calendar"></i> Cập nhật: ${updatedAt}
+                                    </small>
+                                    <div class="mt-1 small text-muted">
+                                        ${sensor.manufacturer || sensor.model ? `
+                                            <div><i class="iconoir-cog"></i>
+                                                ${[sensor.manufacturer, sensor.model].filter(Boolean).join(" ")}
+                                            </div>` : ""
+                                        }
+
+                                        ${sensor.serial_number ? `
+                                            <div><i class="iconoir-hash"></i> Serial: ${sensor.serial_number}</div>` : ""
+                                        }
+
+                                        ${installationDate ? `
+                                            <div><i class="iconoir-calendar"></i> Lắp đặt: ${installationDate}</div>` : ""
+                                        }
+
+                                        ${lastCalibration ? `
+                                            <div><i class="iconoir-calendar"></i> Hiệu chuẩn cuối: ${lastCalibration}</div>` : ""
+                                        }
+
+                                        ${(sensor.min_threshold !== null || sensor.max_threshold !== null) ? `
+                                            <div><i class="iconoir-warning-triangle"></i> Ngưỡng: ${threshold}</div>` : ""
+                                        }
+
+                                        ${description ? `
+                                            <div class="mt-1"><i class="iconoir-notes"></i> ${description}</div>` : ""
+                                        }
+
+                                        ${notes ? `
+                                            <div class="mt-1"><i class="iconoir-notes"></i> ${notes}</div>` : ""
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <button class="btn btn-sm btn-outline-primary me-2" onclick="editSensor(${sensor.id})">
+                                        <i class="iconoir-edit"></i> Sửa
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteSensor(${sensor.id})">
+                                        <i class="iconoir-trash"></i> Xóa
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        
+            // Cập nhật thống kê
+            document.getElementById("total-sensors").textContent = sensors.length;
+            document.getElementById("active-sensors").textContent = activeCount;
+            document.getElementById("maintenance-sensors").textContent = maintenanceCount;
+            document.getElementById("error-sensors").textContent = errorCount;
+        }
+
+        // Kết nối SSE
+        const evtSource = new EventSource("../api/iot-sensor-stream.php");
+
+        evtSource.onmessage = function(event) {
+            try {
+                const sensors = JSON.parse(event.data);
+                renderSensors(sensors);
+        } catch (e) {
+            console.error("Lỗi parse SSE:", e, event.data);
+        }
+    };
+
+    evtSource.onerror = function(err) {
+        console.error("Lỗi SSE:", err);
+    };
     </script>
 </body>
 </html>
