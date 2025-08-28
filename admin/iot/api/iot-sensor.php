@@ -119,7 +119,8 @@ try {
                 ];
             } else {
                 // Lấy dữ liệu của tất cả cảm biến
-                $data = $readingModel->getAllReadings($limit);
+                // $data = $readingModel->getAllReadings($limit);
+                $sensors = $sensorModel->getAllSensors();
                 
                 $response = [
                     'success' => true,
