@@ -51,6 +51,23 @@ if ($categories_result) {
     <link href="../partials/layout.css" rel="stylesheet" type="text/css" />
     
     <style>
+        /* Global Font Settings for Vietnamese Text */
+        body, html {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+        }
+        
+        /* Ensure consistent font rendering for all text elements */
+        p, div, span, small, h1, h2, h3, h4, h5, h6 {
+            font-family: inherit;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
         /* Enhanced Product Cards */
         .product-card {
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -114,6 +131,25 @@ if ($categories_result) {
             line-height: 1.4;
             color: #6c757d;
             margin-bottom: 0.6rem;
+        }
+        
+        .product-description {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.5;
+            max-height: 3em;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            word-wrap: break-word;
+            word-break: break-word;
         }
         
         .product-card .badge {
@@ -553,8 +589,8 @@ if ($categories_result) {
                                             </div>
                                             
                                             <!-- Mô tả sản phẩm -->
-                                            <p class="card-text mb-3">
-                                                <?php echo htmlspecialchars(substr($prod['description'], 0, 80)) . (strlen($prod['description']) > 80 ? '...' : ''); ?>
+                                            <p class="card-text mb-3 product-description">
+                                                <?php echo htmlspecialchars($prod['description']); ?>
                                             </p>
                                             
                                             <!-- Thông tin giá và tồn kho -->
