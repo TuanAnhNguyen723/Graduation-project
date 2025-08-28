@@ -408,6 +408,159 @@ if(!empty($search_results)) {
         .quick-action:hover::before {
             left: 100%;
         }
+        
+        /* Global Font Settings for Vietnamese Text */
+        body, html {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+        }
+        
+        /* Ensure consistent font rendering for all text elements */
+        p, div, span, small, h1, h2, h3, h4, h5, h6 {
+            font-family: inherit;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Loading Animation for Search */
+        .loading {
+            position: relative;
+            pointer-events: none;
+        }
+        
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading .btn-text {
+            opacity: 0;
+        }
+        
+        .loading .btn-icon {
+            opacity: 0;
+        }
+        
+        /* Fade animation for content reload */
+        .content-fade {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Enhanced search input focus */
+        #searchInput:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+            transform: translateY(-1px);
+        }
+        
+        /* Enhanced Search Highlighting */
+        mark {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%) !important;
+            color: #856404 !important;
+            padding: 2px 6px !important;
+            border-radius: 4px !important;
+            font-weight: 600 !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+            border: 1px solid rgba(255,193,7,0.3) !important;
+            animation: highlightPulse 0.6s ease-in-out !important;
+        }
+        
+        @keyframes highlightPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Search Results Counter */
+        .search-results-info {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border: 1px solid #90caf9;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            color: #1565c0;
+            font-weight: 500;
+        }
+        
+        .search-results-info i {
+            margin-right: 0.5rem;
+            color: #1976d2;
+        }
+        
+        /* Enhanced Empty State for Search */
+        .search-empty-state {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border: 2px dashed #ffb74d;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .search-empty-state i {
+            font-size: 4rem;
+            color: #ff9800;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .search-empty-state h5 {
+            color: #e65100;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .search-empty-state p {
+            color: #bf360c;
+            margin-bottom: 1.5rem;
+        }
+        
+        .search-suggestions {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-left: 4px solid #007bff;
+        }
+        
+        .search-suggestions h6 {
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .search-suggestions ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+        
+        .search-suggestions li {
+            color: #6c757d;
+            margin-bottom: 0.25rem;
+        }
     </style>
 </head>
 <body>
@@ -516,25 +669,30 @@ if(!empty($search_results)) {
 
                     <!-- Phần tìm kiếm và lọc -->
                     <div class="search-section mb-4">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <form method="GET" class="d-flex">
-                                    <input type="text" name="search" class="form-control me-2" 
-                                           placeholder="Tìm kiếm danh mục theo tên hoặc mô tả..." 
-                                           value="<?php echo htmlspecialchars($search_keyword); ?>">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="iconoir-search me-2"></i> Tìm kiếm
-                                    </button>
-                                </form>
+                        <form method="GET" id="searchForm">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="d-flex">
+                                        <input type="text" name="search" class="form-control me-2" 
+                                               placeholder="Tìm kiếm danh mục... (Ctrl+K)" 
+                                               value="<?php echo htmlspecialchars($search_keyword); ?>"
+                                               id="searchInput"
+                                               title="Nhấn Ctrl+K để focus vào ô tìm kiếm">
+                                        <button type="submit" class="btn btn-primary" id="searchBtn">
+                                            <i class="iconoir-search me-2" id="searchIcon"></i> 
+                                            <span id="searchText">Tìm kiếm</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-end" style="display: flex; align-items: center; justify-content: flex-end;">
+                                    <?php if(!empty($search_keyword)): ?>
+                                        <a href="index.php" class="btn btn-outline-secondary quick-action" id="clearFilters">
+                                            Xóa bộ lọc
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
                             </div>
-                            <div class="col-md-4 text-end">
-                                <?php if(!empty($search_keyword)): ?>
-                                    <a href="index.php" class="btn btn-outline-secondary quick-action">
-                                        <i class="iconoir-close me-2"></i> Xóa bộ lọc
-                                    </a>
-                                <?php endif; ?>
-                            </div>
-                        </div>
+                        </form>
                     </div>
 
                     <!-- Nút tạo danh mục mới -->
@@ -546,27 +704,42 @@ if(!empty($search_results)) {
                         </div>
                     </div>
 
+                    <!-- Search Results Info -->
+                    <?php if(!empty($search_keyword)): ?>
+                        <div class="search-results-info">
+                            <i class="iconoir-search"></i>
+                            Tìm thấy <?php echo count($display_categories); ?> danh mục với từ khóa "<strong><?php echo htmlspecialchars($search_keyword); ?></strong>"
+                        </div>
+                    <?php endif; ?>
+
                     <!-- Danh sách danh mục -->
-                    <div class="row">
+                    <div class="row content-fade" id="categoryList">
                         <?php if(empty($display_categories)): ?>
                             <div class="col-12">
-                                <div class="card empty-state">
-                                    <div class="card-body text-center py-5">
-                                        <i class="iconoir-folder"></i>
-                                        <h5 class="mt-3">
-                                            <?php if(!empty($search_keyword)): ?>
-                                                Không tìm thấy danh mục nào với từ khóa "<?php echo htmlspecialchars($search_keyword); ?>"
-                                            <?php else: ?>
-                                                Chưa có danh mục nào
-                                            <?php endif; ?>
-                                        </h5>
-                                        <?php if(empty($search_keyword)): ?>
+                                <?php if(!empty($search_keyword)): ?>
+                                    <div class="search-empty-state">
+                                        <i class="iconoir-search"></i>
+                                        <h5>Không tìm thấy danh mục nào</h5>
+                                        <p>Không có danh mục nào khớp với từ khóa "<strong><?php echo htmlspecialchars($search_keyword); ?></strong>".</p>
+                                        <div class="search-suggestions">
+                                            <h6><i class="iconoir-lightbulb"></i> Gợi ý tìm kiếm:</h6>
+                                            <ul>
+                                                <li>Kiểm tra chính tả từ khóa tìm kiếm</li>
+                                                <li>Thử từ khóa ngắn hơn hoặc khác</li>
+                                                <li>Xóa bộ lọc để xem tất cả danh mục</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="card empty-state">
+                                        <div class="card-body text-center py-5">
+                                            <h5 class="mt-3">Chưa có danh mục nào</h5>
                                             <button type="button" class="btn btn-primary mt-3 quick-action" onclick="openCreateCategoryModal()">
                                                 <i class="iconoir-plus me-2"></i> Tạo danh mục đầu tiên
                                             </button>
-                                        <?php endif; ?>
+                                        </div>
                                     </div>
-                                </div>
+                                <?php endif; ?>
                             </div>
                         <?php else: ?>
                             <?php foreach($display_categories as $cat): ?>
@@ -776,6 +949,219 @@ if(!empty($search_results)) {
                 }
             }, 3000);
         }
+        
+        // Enhanced Search and Filter Functionality for Categories
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchForm = document.getElementById('searchForm');
+            const searchBtn = document.getElementById('searchBtn');
+            const searchIcon = document.getElementById('searchIcon');
+            const searchText = document.getElementById('searchText');
+            const categoryList = document.getElementById('categoryList');
+            const clearFilters = document.getElementById('clearFilters');
+            
+            // Function to show loading animation
+            function showLoading() {
+                searchBtn.classList.add('loading');
+                searchIcon.style.display = 'none';
+                searchText.textContent = 'Đang tìm...';
+                searchBtn.disabled = true;
+                
+                // Add fade out effect to category list
+                categoryList.style.opacity = '0.5';
+                categoryList.style.transform = 'translateY(10px)';
+            }
+            
+            // Function to hide loading animation
+            function hideLoading() {
+                searchBtn.classList.remove('loading');
+                searchIcon.style.display = 'inline';
+                searchText.textContent = 'Tìm kiếm';
+                searchBtn.disabled = false;
+                
+                // Add fade in effect to category list
+                categoryList.style.opacity = '1';
+                categoryList.style.transform = 'translateY(0)';
+                categoryList.classList.add('content-fade');
+            }
+            
+            // Handle form submission
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                showLoading();
+                
+                // Submit form after a short delay for better UX
+                setTimeout(() => {
+                    searchForm.submit();
+                }, 300);
+            });
+            
+            // Handle clear filters
+            if (clearFilters) {
+                clearFilters.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showLoading();
+                    
+                    // Redirect to clean URL
+                    setTimeout(() => {
+                        window.location.href = 'index.php';
+                    }, 300);
+                });
+            }
+            
+            // Add enter key support for search input
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    showLoading();
+                    
+                    setTimeout(() => {
+                        searchForm.submit();
+                    }, 300);
+                }
+            });
+            
+            // Add real-time search suggestions and input validation
+            let searchTimeout;
+            searchInput.addEventListener('input', function() {
+                const input = this.value.trim();
+                
+                // Clear previous timeout
+                clearTimeout(searchTimeout);
+                
+                // Add visual feedback for input
+                if (input.length > 0) {
+                    this.style.borderColor = '#28a745';
+                    this.style.boxShadow = '0 0 0 0.2rem rgba(40,167,69,0.25)';
+                } else {
+                    this.style.borderColor = '#e9ecef';
+                    this.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
+                }
+                
+                // Debounced search suggestions
+                searchTimeout = setTimeout(() => {
+                    if (input.length >= 2) {
+                        // Could add AJAX search suggestions here
+                        showSearchSuggestions(input);
+                    } else {
+                        hideSearchSuggestions();
+                    }
+                }, 300);
+            });
+            
+            // Add search input focus effects
+            searchInput.addEventListener('focus', function() {
+                this.style.transform = 'translateY(-1px)';
+                this.style.boxShadow = '0 0 0 0.2rem rgba(0,123,255,0.25)';
+            });
+            
+            searchInput.addEventListener('blur', function() {
+                this.style.transform = 'translateY(0)';
+                if (this.value.trim().length === 0) {
+                    this.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
+                }
+            });
+            
+            // Add search highlighting for results
+            const searchKeyword = '<?php echo htmlspecialchars($search_keyword); ?>';
+            if (searchKeyword) {
+                highlightSearchResults(searchKeyword);
+            }
+        });
+        
+        // Function to highlight search results
+        function highlightSearchResults(keyword) {
+            const categoryCards = document.querySelectorAll('.category-card');
+            categoryCards.forEach(card => {
+                const title = card.querySelector('.card-title');
+                const description = card.querySelector('.card-text');
+                
+                if (title && title.textContent.toLowerCase().includes(keyword.toLowerCase())) {
+                    title.innerHTML = title.textContent.replace(
+                        new RegExp(keyword, 'gi'), 
+                        `<mark>$&</mark>`
+                    );
+                }
+                
+                if (description && description.textContent.toLowerCase().includes(keyword.toLowerCase())) {
+                    description.innerHTML = description.textContent.replace(
+                        new RegExp(keyword, 'gi'), 
+                        `<mark>$&</mark>`
+                    );
+                }
+            });
+        }
+        
+        // Function to show search suggestions
+        function showSearchSuggestions(input) {
+            // Remove existing suggestions
+            hideSearchSuggestions();
+            
+            // Create suggestions container
+            const suggestionsContainer = document.createElement('div');
+            suggestionsContainer.id = 'searchSuggestions';
+            suggestionsContainer.className = 'search-suggestions';
+            suggestionsContainer.innerHTML = `
+                <h6><i class="iconoir-lightbulb"></i> Gợi ý tìm kiếm:</h6>
+                <ul>
+                    <li>Tìm theo tên danh mục</li>
+                    <li>Tìm theo slug</li>
+                    <li>Tìm theo mô tả</li>
+                    <li>Sử dụng từ khóa ngắn gọn</li>
+                </ul>
+            `;
+            
+            // Insert after search form
+            const searchForm = document.getElementById('searchForm');
+            searchForm.parentNode.insertBefore(suggestionsContainer, searchForm.nextSibling);
+            
+            // Add fade in animation
+            suggestionsContainer.style.opacity = '0';
+            suggestionsContainer.style.transform = 'translateY(-10px)';
+            setTimeout(() => {
+                suggestionsContainer.style.transition = 'all 0.3s ease';
+                suggestionsContainer.style.opacity = '1';
+                suggestionsContainer.style.transform = 'translateY(0)';
+            }, 10);
+        }
+        
+        // Function to hide search suggestions
+        function hideSearchSuggestions() {
+            const existingSuggestions = document.getElementById('searchSuggestions');
+            if (existingSuggestions) {
+                existingSuggestions.style.transition = 'all 0.3s ease';
+                existingSuggestions.style.opacity = '0';
+                existingSuggestions.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    if (existingSuggestions.parentNode) {
+                        existingSuggestions.remove();
+                    }
+                }, 300);
+            }
+        }
+        
+        // Enhanced search with keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + K to focus search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) {
+                    searchInput.focus();
+                    searchInput.select();
+                }
+            }
+            
+            // Escape to clear search
+            if (e.key === 'Escape') {
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput && document.activeElement === searchInput) {
+                    searchInput.value = '';
+                    searchInput.blur();
+                    hideSearchSuggestions();
+                }
+            }
+        });
     </script>
     
     <!-- Include Widgets Modal -->
