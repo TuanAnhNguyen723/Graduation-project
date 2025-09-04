@@ -9,9 +9,35 @@ header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 require_once '../models/Category.php';
+require_once '../config/database.php';
 
 $category = new Category();
 $method = $_SERVER['REQUEST_METHOD'];
+
+/**
+ * Tạo thông báo khi thêm danh mục mới
+ */
+function createCategoryNotification($category_id, $category_name, $temperature_type) {
+    try {
+        $db = new Database();
+        $conn = $db->getConnection();
+        
+        $title = "Danh mục mới được thêm";
+        $message = "Đã thêm danh mục mới \"{$category_name}\" (Loại nhiệt độ: {$temperature_type}) vào hệ thống.";
+        
+        $stmt = $conn->prepare("
+            INSERT INTO notifications (title, message, type, icon, icon_color, related_id, related_type) 
+            VALUES (?, ?, 'product', 'iconoir-folder', 'success', ?, 'category')
+        ");
+        
+        $stmt->execute([$title, $message, $category_id]);
+        
+        return true;
+    } catch (Exception $e) {
+        error_log("Error creating category notification: " . $e->getMessage());
+        return false;
+    }
+}
 
 try {
     switch($method) {
@@ -267,6 +293,9 @@ try {
 
             $id = $category->create();
             if($id) {
+                // Tạo thông báo khi thêm danh mục mới
+                createCategoryNotification($id, $data['name'], $data['temperature_type']);
+                
                 echo json_encode([
                     'success' => true,
                     'message' => 'Tạo danh mục thành công',

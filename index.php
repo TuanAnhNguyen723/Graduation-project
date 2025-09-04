@@ -355,25 +355,6 @@ $recent_categories = $category->getAll(5);
             color: white !important;
         }
         
-        /* Fix notification dropdown positioning */
-        .navbar-custom .dropdown-menu {
-            position: absolute !important;
-            z-index: 9999 !important;
-            max-height: none !important;
-            overflow: visible !important;
-        }
-        
-        .navbar-custom .dropdown-menu.show {
-            display: block !important;
-            position: absolute !important;
-            z-index: 9999 !important;
-        }
-        
-        .navbar-custom .dropdown-body {
-            max-height: none !important;
-            overflow: visible !important;
-        }
-        
         .content-page {
             overflow: visible !important;
         }
@@ -401,13 +382,6 @@ $recent_categories = $category->getAll(5);
         .dropdown-menu {
             position: fixed !important;
             z-index: 99999 !important;
-        }
-        
-        .navbar-custom .dropdown-menu[style*="width: 350px"] {
-            position: fixed !important;
-            z-index: 99999 !important;
-            max-height: none !important;
-            overflow: visible !important;
         }
     </style>
 </head>

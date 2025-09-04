@@ -42,7 +42,7 @@ try {
     <link href="../../../assets/css/app.min.css" rel="stylesheet" type="text/css" />
     
     <!-- Common Admin Layout CSS -->
-    <link href="../../partials/layout.css" rel="stylesheet" type="text/css" />
+    <link href="../../../admin/partials/layout.css" rel="stylesheet" type="text/css" />
     
     <style>
         .sensor-card {
@@ -85,7 +85,7 @@ try {
     </style>
 </head>
 <body>
-    <?php include '../../partials/sidebar.php'; ?>
+    <?php include '../../../admin/partials/sidebar.php'; ?>
 
     <!-- ============================================================== -->
     <!-- Start Page Content here -->
@@ -93,7 +93,7 @@ try {
 
     <div class="content-page">
         <div class="content">
-            <?php include '../../partials/header.php'; ?>
+            <?php include '../../../admin/partials/header.php'; ?>
 
             <!-- Start Content-->
             <div class="container-fluid">
@@ -336,13 +336,22 @@ try {
 
     <!-- Bootstrap JS -->
     <script src="../../../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- Bootstrap JS -->
-    <script src="../../../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
     <!-- Simplebar -->
     <script src="../../../assets/libs/simplebar/simplebar.min.js"></script>
     
     <!-- Common Admin Layout JavaScript -->
     <script src="../../../admin/partials/layout.js"></script>
+
+    <script>
+        // Khởi tạo Bootstrap dropdown
+        document.addEventListener('DOMContentLoaded', function() {
+            // Khởi tạo tất cả dropdown
+            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+            var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+                return new bootstrap.Dropdown(dropdownToggleEl);
+            });
+        });
+    </script>
 
     <script>
         // Lưu cảm biến mới
@@ -409,7 +418,16 @@ try {
             const container = document.getElementById("sensor-container");
             container.innerHTML = "";
 
+            // Đếm số lượng cảm biến theo trạng thái
+            let activeCount = 0;
+            let maintenanceCount = 0;
+            let errorCount = 0;
+
             sensors.forEach(sensor => {
+                // Đếm trạng thái
+                if (sensor.status === 'active') activeCount++;
+                else if (sensor.status === 'maintenance') maintenanceCount++;
+                else if (sensor.status === 'error') errorCount++;
                 // Format thời gian
                 let updatedAt = sensor.updated_at 
                     ? new Date(sensor.updated_at).toLocaleString("vi-VN") 

@@ -9,9 +9,35 @@ header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 require_once '../models/Product.php';
+require_once '../config/database.php';
 
 $product = new Product();
 $method = $_SERVER['REQUEST_METHOD'];
+
+/**
+ * Tạo thông báo khi thêm sản phẩm mới
+ */
+function createProductNotification($product_id, $product_name, $product_sku) {
+    try {
+        $db = new Database();
+        $conn = $db->getConnection();
+        
+        $title = "Sản phẩm mới được thêm";
+        $message = "Đã thêm sản phẩm mới \"{$product_name}\" (SKU: {$product_sku}) vào hệ thống.";
+        
+        $stmt = $conn->prepare("
+            INSERT INTO notifications (title, message, type, icon, icon_color, related_id, related_type) 
+            VALUES (?, ?, 'product', 'iconoir-shopping-bag', 'primary', ?, 'product')
+        ");
+        
+        $stmt->execute([$title, $message, $product_id]);
+        
+        return true;
+    } catch (Exception $e) {
+        error_log("Error creating product notification: " . $e->getMessage());
+        return false;
+    }
+}
 
 try {
     switch($method) {
@@ -318,6 +344,9 @@ try {
 
             $id = $product->create();
             if($id) {
+                // Tạo thông báo khi thêm sản phẩm mới
+                createProductNotification($id, $data['name'], $data['sku']);
+                
                 echo json_encode([
                     'success' => true,
                     'message' => 'Tạo sản phẩm thành công',

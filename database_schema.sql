@@ -204,6 +204,44 @@ CREATE INDEX idx_temperature_readings_sensor_id ON temperature_readings(sensor_i
 CREATE INDEX idx_temperature_readings_timestamp ON temperature_readings(reading_timestamp);
 
 -- ==============================================================
+-- BẢNG NOTIFICATIONS (THÔNG BÁO)
+-- ==============================================================
+
+CREATE TABLE IF NOT EXISTS notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    type ENUM('product', 'sensor', 'system', 'alert') DEFAULT 'system',
+    icon VARCHAR(100) DEFAULT 'iconoir-bell',
+    icon_color VARCHAR(50) DEFAULT 'primary',
+    is_read BOOLEAN DEFAULT FALSE,
+    related_id INT DEFAULT NULL COMMENT 'ID của sản phẩm, cảm biến hoặc entity liên quan',
+    related_type VARCHAR(50) DEFAULT NULL COMMENT 'Loại entity liên quan: product, sensor, category',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Indexes cho bảng notifications
+CREATE INDEX idx_notifications_type ON notifications(type);
+CREATE INDEX idx_notifications_is_read ON notifications(is_read);
+CREATE INDEX idx_notifications_created_at ON notifications(created_at);
+CREATE INDEX idx_notifications_related ON notifications(related_type, related_id);
+
+-- ==============================================================
+-- INSERT DỮ LIỆU MẪU CHO BẢNG NOTIFICATIONS
+-- ==============================================================
+
+INSERT INTO notifications (title, message, type, icon, icon_color, related_id, related_type, is_read, created_at) VALUES
+('Sản phẩm mới được thêm', 'Đã thêm sản phẩm mới "iPhone 15 Pro" vào hệ thống.', 'product', 'iconoir-shopping-bag', 'primary', 1, 'product', 0, NOW() - INTERVAL 2 MINUTE),
+('Danh mục đã được cập nhật', 'Danh mục "Điện tử" đã được cập nhật thành công.', 'product', 'iconoir-folder', 'success', 1, 'category', 0, NOW() - INTERVAL 10 MINUTE),
+('Cảm biến nhiệt độ báo động', 'Nhiệt độ tại vị trí A-01-01 vượt quá ngưỡng cho phép (25°C).', 'alert', 'iconoir-thermometer', 'warning', 1, 'sensor', 0, NOW() - INTERVAL 15 MINUTE),
+('Cảm biến hoạt động bình thường', 'Cảm biến SENSOR_B1 đã hoạt động trở lại bình thường.', 'sensor', 'iconoir-check-circle', 'success', 3, 'sensor', 1, NOW() - INTERVAL 1 HOUR),
+('Hệ thống cập nhật', 'Hệ thống đã được cập nhật lên phiên bản mới nhất.', 'system', 'iconoir-settings', 'info', NULL, NULL, 1, NOW() - INTERVAL 2 HOUR),
+('Cảnh báo độ ẩm cao', 'Độ ẩm tại vị trí C-01-01 đang ở mức cao (85%).', 'alert', 'iconoir-water-drop', 'danger', 5, 'sensor', 0, NOW() - INTERVAL 30 MINUTE),
+('Sản phẩm sắp hết hàng', 'Sản phẩm "Samsung Galaxy S24" chỉ còn 5 sản phẩm trong kho.', 'product', 'iconoir-warning-triangle', 'warning', 2, 'product', 0, NOW() - INTERVAL 45 MINUTE),
+('Bảo trì cảm biến', 'Cảm biến SENSOR_C2 đang trong quá trình bảo trì.', 'sensor', 'iconoir-settings', 'info', 6, 'sensor', 1, NOW() - INTERVAL 3 HOUR);
+
+-- ==============================================================
 -- CẬP NHẬT AUTO_INCREMENT
 -- ==============================================================
 
@@ -212,3 +250,4 @@ ALTER TABLE products AUTO_INCREMENT = 6;
 ALTER TABLE warehouse_locations AUTO_INCREMENT = 7;
 ALTER TABLE temperature_sensors AUTO_INCREMENT = 7;
 ALTER TABLE temperature_readings AUTO_INCREMENT = 19;
+ALTER TABLE notifications AUTO_INCREMENT = 9;

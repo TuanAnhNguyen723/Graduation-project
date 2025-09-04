@@ -23,7 +23,9 @@ if ($admin_index !== false) {
 $active_page = '';
 
 // Kiểm tra theo thứ tự ưu tiên - CHÍNH XÁC HƠN
-if (strpos($current_path, '/admin/iot/locations/') !== false) {
+if (strpos($current_path, '/admin/notifications/') !== false) {
+    $active_page = 'notifications';
+} elseif (strpos($current_path, '/admin/iot/locations/') !== false) {
     $active_page = 'iot_locations';
 } elseif (strpos($current_path, '/admin/iot/sensors/') !== false) {
     $active_page = 'iot_sensors';

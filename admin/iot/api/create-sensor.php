@@ -7,6 +7,28 @@ header('Access-Control-Allow-Headers: Content-Type');
 require_once '../../../config/database.php';
 require_once '../models/TemperatureSensor.php';
 
+/**
+ * Tạo thông báo khi thêm cảm biến mới
+ */
+function createSensorNotification($sensor_id, $sensor_name, $sensor_code, $sensor_type, $pdo) {
+    try {
+        $title = "Cảm biến mới được thêm";
+        $message = "Đã thêm cảm biến mới \"{$sensor_name}\" (Mã: {$sensor_code}, Loại: {$sensor_type}) vào hệ thống.";
+        
+        $stmt = $pdo->prepare("
+            INSERT INTO notifications (title, message, type, icon, icon_color, related_id, related_type) 
+            VALUES (?, ?, 'sensor', 'iconoir-cpu', 'info', ?, 'sensor')
+        ");
+        
+        $stmt->execute([$title, $message, $sensor_id]);
+        
+        return true;
+    } catch (Exception $e) {
+        error_log("Error creating sensor notification: " . $e->getMessage());
+        return false;
+    }
+}
+
 try {
     // Kiểm tra method
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -120,6 +142,9 @@ try {
     
     if ($result) {
         $sensorId = $pdo->lastInsertId();
+        
+        // Tạo thông báo khi thêm cảm biến mới
+        createSensorNotification($sensorId, $sensorName, $sensorCode, $sensorType, $pdo);
         
         // Trả về thành công
         echo json_encode([
