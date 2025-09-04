@@ -378,11 +378,6 @@ $recent_categories = $category->getAll(5);
         .navbar-actions .dropdown {
             overflow: visible !important;
         }
-        
-        .dropdown-menu {
-            position: fixed !important;
-            z-index: 99999 !important;
-        }
     </style>
 </head>
 
