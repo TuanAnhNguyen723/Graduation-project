@@ -2,6 +2,7 @@
 session_start();
 require_once '../../config/database.php';
 require_once '../../models/Category.php';
+require_once '../../models/Product.php';
 
 $category = new Category();
 
@@ -751,7 +752,7 @@ if(!empty($search_results)) {
                                                 <?php echo htmlspecialchars(substr($cat['description'], 0, 80)) . (strlen($cat['description']) > 80 ? '...' : ''); ?>
                                             </p>
                                             
-                                            <!-- Thông tin thứ tự và trạng thái -->
+                                            <!-- Thông tin cơ bản -->
                                             <div class="row text-center mb-3">
                                                 <div class="col-4">
                                                     <small class="text-muted d-block mb-1">Thứ tự</small>
@@ -777,6 +778,27 @@ if(!empty($search_results)) {
                                                     </div>
                                                 </div>
                                                 <div class="col-4">
+                                                    <small class="text-muted d-block mb-1">Độ ẩm</small>
+                                                    <div>
+                                                        <?php 
+                                                        $humidity_type = isset($cat['humidity_type']) ? $cat['humidity_type'] : 'ambient';
+                                                        $humidity_labels = [
+                                                            'frozen' => ['Đông lạnh (85-95%)', 'bg-info-subtle text-info'],
+                                                            'chilled' => ['Lạnh mát (85-90%)', 'bg-primary-subtle text-primary'],
+                                                            'ambient' => ['Phòng (50-60%)', 'bg-warning-subtle text-warning']
+                                                        ];
+                                                        $humidity_info = $humidity_labels[$humidity_type] ?? $humidity_labels['ambient'];
+                                                        ?>
+                                                        <span class="badge <?php echo $humidity_info[1]; ?>">
+                                                            <?php echo $humidity_info[0]; ?>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Thông tin nguy hiểm và trạng thái -->
+                                            <div class="row text-center mb-3">
+                                                <div class="col-4">
                                                     <small class="text-muted d-block mb-1">Trạng thái</small>
                                                     <div>
                                                         <span class="badge <?php echo (isset($cat['is_active']) && $cat['is_active'] == 1) ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'; ?>">
@@ -784,13 +806,68 @@ if(!empty($search_results)) {
                                                         </span>
                                                     </div>
                                                 </div>
+                                                <div class="col-4">
+                                                    <small class="text-muted d-block mb-1">Nhiệt độ nguy hiểm</small>
+                                                    <div>
+                                                        <?php 
+                                                        // Lấy thông tin nhiệt độ chi tiết từ model Product
+                                                        $product = new Product();
+                                                        $temp_info_detail = $product->getTemperatureInfoFromCategory($cat['id']);
+                                                        
+                                                        if ($temp_info_detail) {
+                                                            $danger_min = isset($temp_info_detail['dangerous_min']) ? $temp_info_detail['dangerous_min'] : null;
+                                                            $danger_max = $temp_info_detail['dangerous_max'] ?? 50.0;
+                                                            
+                                                            if ($danger_min !== null) {
+                                                                echo '<span class="badge bg-danger-subtle text-danger">';
+                                                                echo '< ' . $danger_min . '°C và > ' . $danger_max . '°C';
+                                                                echo '</span>';
+                                                            } else {
+                                                                echo '<span class="badge bg-danger-subtle text-danger">';
+                                                                echo '> ' . $danger_max . '°C';
+                                                                echo '</span>';
+                                                            }
+                                                        } else {
+                                                            echo '<span class="badge bg-secondary-subtle text-secondary">N/A</span>';
+                                                        }
+                                                        ?>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <small class="text-muted d-block mb-1">Độ ẩm nguy hiểm</small>
+                                                    <div>
+                                                        <?php 
+                                                        // Lấy thông tin độ ẩm chi tiết từ model Product
+                                                        $humidity_info_detail = $product->getHumidityInfoFromCategory($cat['id']);
+                                                        
+                                                        if ($humidity_info_detail) {
+                                                            $humidity_danger_min = isset($humidity_info_detail['dangerous_min']) ? $humidity_info_detail['dangerous_min'] : null;
+                                                            $humidity_danger_max = isset($humidity_info_detail['dangerous_max']) ? $humidity_info_detail['dangerous_max'] : null;
+                                                            
+                                                            if ($humidity_danger_min !== null && $humidity_danger_max !== null) {
+                                                                echo '<span class="badge bg-danger-subtle text-danger">';
+                                                                echo '< ' . $humidity_danger_min . '% và > ' . $humidity_danger_max . '%';
+                                                                echo '</span>';
+                                                            } elseif ($humidity_danger_min !== null) {
+                                                                echo '<span class="badge bg-danger-subtle text-danger">';
+                                                                echo '< ' . $humidity_danger_min . '%';
+                                                                echo '</span>';
+                                                            } else {
+                                                                echo '<span class="badge bg-secondary-subtle text-secondary">N/A</span>';
+                                                            }
+                                                        } else {
+                                                            echo '<span class="badge bg-secondary-subtle text-secondary">N/A</span>';
+                                                        }
+                                                        ?>
+                                                    </div>
+                                                </div>
                                             </div>
                                             
                                             <!-- Nút hành động -->
-                                            <div class="d-flex justify-content-between mb-3">
+                                            <div class="d-flex justify-content-between mt-5">
                                                 <button type="button" 
                                                         class="btn btn-outline-primary" 
-                                                        onclick="openEditCategoryModal(<?php echo $cat['id']; ?>, '<?php echo htmlspecialchars(addslashes($cat['name'])); ?>', '<?php echo htmlspecialchars(addslashes($cat['slug'])); ?>', '<?php echo htmlspecialchars(addslashes($cat['description'])); ?>', <?php echo $cat['parent_id'] ?: 'null'; ?>, <?php echo $cat['sort_order']; ?>, <?php echo $cat['is_active']; ?>, '<?php echo htmlspecialchars(addslashes($cat['image'])); ?>', '<?php echo isset($cat['temperature_type']) ? $cat['temperature_type'] : 'ambient'; ?>')">
+                                                        onclick="openEditCategoryModal(<?php echo $cat['id']; ?>, '<?php echo htmlspecialchars(addslashes($cat['name'])); ?>', '<?php echo htmlspecialchars(addslashes($cat['slug'])); ?>', '<?php echo htmlspecialchars(addslashes($cat['description'])); ?>', <?php echo $cat['parent_id'] ?: 'null'; ?>, <?php echo $cat['sort_order']; ?>, <?php echo $cat['is_active']; ?>, '<?php echo htmlspecialchars(addslashes($cat['image'])); ?>', '<?php echo isset($cat['temperature_type']) ? $cat['temperature_type'] : 'ambient'; ?>', '<?php echo isset($cat['humidity_type']) ? $cat['humidity_type'] : 'ambient'; ?>')">
                                                     <i class="iconoir-edit"></i> Sửa
                                                 </button>
                                                 <button type="button" 
@@ -808,9 +885,6 @@ if(!empty($search_results)) {
                                                     <i class="iconoir-calendar"></i> 
                                                     <?php echo date('d/m/Y H:i', strtotime($cat['created_at'])); ?>
                                                 </small>
-                                                <span class="badge <?php echo (isset($cat['is_active']) && $cat['is_active'] == 1) ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'; ?>">
-                                                    <?php echo (isset($cat['is_active']) && $cat['is_active'] == 1) ? 'Hoạt động' : 'Không hoạt động'; ?>
-                                                </span>
                                             </div>
                                         </div>
                                     </div>

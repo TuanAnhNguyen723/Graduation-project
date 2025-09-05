@@ -86,18 +86,53 @@ try {
         exit;
     }
 
-    // Validate thresholds
-    if ($min_threshold !== null && $max_threshold !== null) {
-        $min = floatval($min_threshold);
-        $max = floatval($max_threshold);
-        if ($min >= $max) {
-            http_response_code(400);
-            echo json_encode([
-                'success' => false,
-                'message' => 'Ngưỡng tối đa phải lớn hơn ngưỡng tối thiểu'
-            ]);
-            exit;
-        }
+    // Validate thresholds - bắt buộc nhập cả 2
+    if (empty($min_threshold)) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Ngưỡng tối thiểu là bắt buộc'
+        ]);
+        exit;
+    }
+    
+    if (empty($max_threshold)) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Ngưỡng tối đa là bắt buộc'
+        ]);
+        exit;
+    }
+    
+    if (!is_numeric($min_threshold)) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Ngưỡng tối thiểu phải là số hợp lệ'
+        ]);
+        exit;
+    }
+    
+    if (!is_numeric($max_threshold)) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Ngưỡng tối đa phải là số hợp lệ'
+        ]);
+        exit;
+    }
+    
+    // Kiểm tra ngưỡng tối đa > ngưỡng tối thiểu
+    $min = floatval($min_threshold);
+    $max = floatval($max_threshold);
+    if ($min >= $max) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Ngưỡng tối đa phải lớn hơn ngưỡng tối thiểu'
+        ]);
+        exit;
     }
 
     // Kết nối database

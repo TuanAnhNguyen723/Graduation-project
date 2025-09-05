@@ -75,6 +75,19 @@
                         </div>
 
                         <div class="form-field">
+                            <label for="editHumidityType" class="field-label">Loại độ ẩm <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <select class="form-select" id="editHumidityType" name="humidity_type" required>
+                                    <option value="ambient">Độ ẩm phòng (50-60%)</option>
+                                    <option value="frozen">Độ ẩm đông lạnh (85-95%)</option>
+                                    <option value="chilled">Độ ẩm lạnh (85-90%)</option>
+                                </select>
+                                <small class="text-muted">Chọn loại độ ẩm phù hợp cho danh mục</small>
+                            </div>
+                            <div class="field-error" id="editHumidityTypeError"></div>
+                        </div>
+
+                        <div class="form-field">
                             <label for="editSortOrder" class="field-label">Thứ tự</label>
                             <div class="input-wrapper">
                                 <input type="number" class="form-input" id="editSortOrder" name="sort_order" placeholder="0" min="0" value="0">

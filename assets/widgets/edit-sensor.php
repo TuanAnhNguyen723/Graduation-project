@@ -129,17 +129,19 @@
 
                     <div class="form-grid">
                         <div class="form-field">
-                            <label for="editMinThreshold" class="field-label">Ngưỡng tối thiểu (°C)</label>
+                            <label for="editMinThreshold" class="field-label">Ngưỡng tối thiểu (°C) <span class="required">*</span></label>
                             <div class="input-wrapper">
-                                <input type="number" class="form-input" id="editMinThreshold" name="min_threshold" placeholder="0" step="0.1">
+                                <input type="number" class="form-input" id="editMinThreshold" name="min_threshold" placeholder="0" step="0.1" required>
                             </div>
+                            <div class="field-error" id="editMinThresholdError"></div>
                         </div>
 
                         <div class="form-field">
-                            <label for="editMaxThreshold" class="field-label">Ngưỡng tối đa (°C)</label>
+                            <label for="editMaxThreshold" class="field-label">Ngưỡng tối đa (°C) <span class="required">*</span></label>
                             <div class="input-wrapper">
-                                <input type="number" class="form-input" id="editMaxThreshold" name="max_threshold" placeholder="50" step="0.1">
+                                <input type="number" class="form-input" id="editMaxThreshold" name="max_threshold" placeholder="50" step="0.1" required>
                             </div>
+                            <div class="field-error" id="editMaxThresholdError"></div>
                         </div>
                     </div>
                 </div>

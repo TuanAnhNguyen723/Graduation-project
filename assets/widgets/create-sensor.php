@@ -170,17 +170,19 @@
                     
                     <div class="form-grid">
                         <div class="form-field">
-                            <label for="minThreshold" class="field-label">Ngưỡng tối thiểu</label>
+                            <label for="minThreshold" class="field-label">Ngưỡng tối thiểu <span class="required">*</span></label>
                             <div class="input-wrapper">
-                                <input type="number" class="form-input" id="minThreshold" name="min_threshold" step="0.1" placeholder="VD: 20.5">
+                                <input type="number" class="form-input" id="minThreshold" name="min_threshold" step="0.1" placeholder="VD: 20.5" required>
                             </div>
+                            <div class="field-error" id="minThresholdError"></div>
                         </div>
                         
                         <div class="form-field">
-                            <label for="maxThreshold" class="field-label">Ngưỡng tối đa</label>
+                            <label for="maxThreshold" class="field-label">Ngưỡng tối đa <span class="required">*</span></label>
                             <div class="input-wrapper">
-                                <input type="number" class="form-input" id="maxThreshold" name="max_threshold" step="0.1" placeholder="VD: 30.5">
+                                <input type="number" class="form-input" id="maxThreshold" name="max_threshold" step="0.1" placeholder="VD: 30.5" required>
                             </div>
+                            <div class="field-error" id="maxThresholdError"></div>
                         </div>
                     </div>
                 </div>

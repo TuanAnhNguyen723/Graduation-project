@@ -424,5 +424,107 @@ class Product {
         
         return null;
     }
+
+    /**
+     * Lấy thông tin độ ẩm từ category
+     */
+    public function getHumidityInfoFromCategory($category_id) {
+        $query = "SELECT humidity_type FROM categories WHERE id = :category_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":category_id", $category_id);
+        $stmt->execute();
+        $result = $stmt->fetch();
+        
+        if ($result) {
+            $humidity_type = $result['humidity_type'];
+            
+            // Định nghĩa độ ẩm theo loại
+            $humidity_ranges = [
+                'frozen' => [
+                    'ideal_min' => 85.0,
+                    'ideal_max' => 95.0,
+                    'dangerous_min' => 80.0
+                ],
+                'chilled' => [
+                    'ideal_min' => 85.0,
+                    'ideal_max' => 90.0,
+                    'dangerous_min' => 80.0
+                ],
+                'ambient' => [
+                    'ideal_min' => 50.0,
+                    'ideal_max' => 60.0,
+                    'dangerous_min' => 40.0,
+                    'dangerous_max' => 65.0
+                ]
+            ];
+            
+            return $humidity_ranges[$humidity_type] ?? $humidity_ranges['ambient'];
+        }
+        
+        return null;
+    }
+
+    /**
+     * Lấy thông tin nhiệt độ và độ ẩm từ category
+     */
+    public function getTemperatureAndHumidityInfoFromCategory($category_id) {
+        $query = "SELECT temperature_type, humidity_type FROM categories WHERE id = :category_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":category_id", $category_id);
+        $stmt->execute();
+        $result = $stmt->fetch();
+        
+        if ($result) {
+            $temperature_type = $result['temperature_type'];
+            $humidity_type = $result['humidity_type'];
+            
+            // Định nghĩa nhiệt độ theo loại
+            $temperature_ranges = [
+                'frozen' => [
+                    'ideal_min' => -50.0,
+                    'ideal_max' => -18.0,
+                    'dangerous_max' => -18.0
+                ],
+                'chilled' => [
+                    'ideal_min' => 0.0,
+                    'ideal_max' => 5.0,
+                    'dangerous_max' => 8.0
+                ],
+                'ambient' => [
+                    'ideal_min' => 15.0,
+                    'ideal_max' => 33.0,
+                    'dangerous_min' => 0.0,
+                    'dangerous_max' => 37.0
+                ]
+            ];
+            
+            // Định nghĩa độ ẩm theo loại
+            $humidity_ranges = [
+                'frozen' => [
+                    'ideal_min' => 85.0,
+                    'ideal_max' => 95.0,
+                    'dangerous_min' => 80.0
+                ],
+                'chilled' => [
+                    'ideal_min' => 85.0,
+                    'ideal_max' => 90.0,
+                    'dangerous_min' => 80.0
+                ],
+                'ambient' => [
+                    'ideal_min' => 50.0,
+                    'ideal_max' => 60.0,
+                    'dangerous_min' => 40.0,
+                    'dangerous_max' => 65.0
+                ]
+            ];
+            
+            return [
+                'temperature' => $temperature_ranges[$temperature_type] ?? $temperature_ranges['ambient'],
+                'humidity' => $humidity_ranges[$humidity_type] ?? $humidity_ranges['ambient']
+            ];
+        }
+        
+        return null;
+    }
 }
 ?>

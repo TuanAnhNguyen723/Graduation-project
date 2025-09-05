@@ -5,8 +5,14 @@
 -- Thêm trường temperature_type vào bảng categories nếu chưa có
 ALTER TABLE categories ADD COLUMN IF NOT EXISTS temperature_type ENUM('frozen', 'chilled', 'ambient') DEFAULT 'ambient' COMMENT 'Loại nhiệt độ: frozen(≤-18°C), chilled(0-5°C), ambient(15-33°C)';
 
+-- Thêm trường humidity_type vào bảng categories nếu chưa có
+ALTER TABLE categories ADD COLUMN IF NOT EXISTS humidity_type ENUM('frozen', 'chilled', 'ambient') DEFAULT 'ambient' COMMENT 'Loại độ ẩm: frozen(85-95%, nguy hiểm:<80%), chilled(85-90%, nguy hiểm:<80%), ambient(50-60%, nguy hiểm:<40% hoặc >65%)';
+
 -- Cập nhật dữ liệu mẫu với temperature_type
 UPDATE categories SET temperature_type = 'ambient' WHERE temperature_type IS NULL OR temperature_type = '';
+
+-- Cập nhật dữ liệu mẫu với humidity_type
+UPDATE categories SET humidity_type = 'ambient' WHERE humidity_type IS NULL OR humidity_type = '';
 
 --Cập nhật cột humidity vào temperature_sensor
 ALTER TABLE temperature_sensors
@@ -33,6 +39,7 @@ CREATE TABLE IF NOT EXISTS categories (
     parent_id INT DEFAULT NULL,
     image VARCHAR(255),
     temperature_type ENUM('frozen', 'chilled', 'ambient') DEFAULT 'ambient' COMMENT 'Loại nhiệt độ: frozen(≤-18°C), chilled(0-5°C), ambient(15-33°C)',
+    humidity_type ENUM('frozen', 'chilled', 'ambient') DEFAULT 'ambient' COMMENT 'Loại độ ẩm: frozen(85-95%, nguy hiểm:<80%), chilled(85-90%, nguy hiểm:<80%), ambient(50-60%, nguy hiểm:<40% hoặc >65%)',
     is_active BOOLEAN DEFAULT TRUE,
     sort_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

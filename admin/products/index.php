@@ -795,10 +795,12 @@ if ($categories_result) {
                                             <?php 
                                             $cat_name = 'N/A';
                                             $cat_temp_type = 'ambient';
+                                            $cat_humidity_type = 'ambient';
                                             foreach ($categories as $cat) {
                                                 if ($cat['id'] == $prod['category_id']) {
                                                     $cat_name = $cat['name'];
                                                     $cat_temp_type = isset($cat['temperature_type']) ? $cat['temperature_type'] : 'ambient';
+                                                    $cat_humidity_type = isset($cat['humidity_type']) ? $cat['humidity_type'] : 'ambient';
                                                     break;
                                                 }
                                             }
@@ -806,44 +808,97 @@ if ($categories_result) {
                                                     <span class="badge bg-info-subtle text-info"><?php echo htmlspecialchars($cat_name); ?></span>
                                                 </div>
                                             </div>
-                                            <!-- Nhiệt độ bảo quản (theo loại danh mục) -->
-                                             <div class="d-flex align-items-center justify-content-between gap-3">
-                                                 <div class="mb-3">
-                                                     <div>
-                                                         <small class="text-muted d-block mb-1">Nhiệt độ bảo quản</small>
+                                            <!-- Thông tin nhiệt độ và độ ẩm -->
+                                             <div class="row" style="justify-content: space-between;">
+                                                 <!-- Cột trái: Bảo quản -->
+                                                 <div class="col-5">
+                                                     <div class="mb-3">
+                                                         <div>
+                                                             <small class="text-muted d-block mb-1">Nhiệt độ bảo quản</small>
+                                                         </div>
+         
+                                                         <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                             <?php 
+                                                             $temp_labels = [
+                                                                 'frozen' => ['Đông lạnh (< -18°C)', 'bg-info-subtle text-info'],
+                                                                 'chilled' => ['Lạnh mát (0 - 5°C)', 'bg-primary-subtle text-primary'],
+                                                                 'ambient' => ['Nhiệt độ phòng (15 - 33°C)', 'bg-warning-subtle text-warning']
+                                                             ];
+                                                             $temp_info = $temp_labels[$cat_temp_type] ?? $temp_labels['ambient'];
+                                                             ?>
+                                                             <span class="badge rounded-pill <?php echo $temp_info[1]; ?> d-inline-flex align-items-center">
+                                                                 <?php echo $temp_info[0]; ?>
+                                                             </span>
+                                                         </div>
                                                      </div>
-     
-                                                     <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                     
+                                                     <div class="mb-3">
+                                                         <div>
+                                                             <small class="text-muted d-block mb-1">Độ ẩm bảo quản</small>
+                                                         </div>
+         
+                                                         <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                             <?php 
+                                                             $humidity_labels = [
+                                                                 'frozen' => ['Đông lạnh (85-95%)', 'bg-info-subtle text-info'],
+                                                                 'chilled' => ['Lạnh mát (85-90%)', 'bg-primary-subtle text-primary'],
+                                                                 'ambient' => ['Phòng (50-60%)', 'bg-warning-subtle text-warning']
+                                                             ];
+                                                             $humidity_info = $humidity_labels[$cat_humidity_type] ?? $humidity_labels['ambient'];
+                                                             ?>
+                                                             <span class="badge rounded-pill <?php echo $humidity_info[1]; ?> d-inline-flex align-items-center">
+                                                                 <?php echo $humidity_info[0]; ?>
+                                                             </span>
+                                                         </div>
+                                                     </div>
+                                                 </div>
+                                                 
+                                                 <!-- Đường phân cách -->
+                                                 <div class="col-1 d-flex justify-content-center">
+                                                     <div class="vr opacity-25" style="height: 90px;"></div>
+                                                 </div>
+                                                 
+                                                 <!-- Cột phải: Nguy hiểm -->
+                                                 <div class="col-5" style="width: 30% !important;">
+                                                     <div class="mb-3">
+                                                         <div>
+                                                             <small class="text-muted">Nhiệt độ nguy hiểm</small>
+                                                         </div>
                                                          <?php 
-                                                         $temp_labels = [
-                                                             'frozen' => ['Đông lạnh (< -18°C)', 'bg-info-subtle text-info'],
-                                                             'chilled' => ['Lạnh mát (0 - 5°C)', 'bg-primary-subtle text-primary'],
-                                                             'ambient' => ['Nhiệt độ phòng (15 - 33°C)', 'bg-warning-subtle text-warning']
-                                                         ];
-                                                         $temp_info = $temp_labels[$cat_temp_type] ?? $temp_labels['ambient'];
-     
                                                          // Lấy thông tin nhiệt độ (bao gồm dangerous_min/max) từ model
                                                          $temp_info_detail = $product->getTemperatureInfoFromCategory($prod['category_id']);
                                                          $danger_min = $temp_info_detail && isset($temp_info_detail['dangerous_min']) ? $temp_info_detail['dangerous_min'] : null;
                                                          $danger_max = $temp_info_detail ? $temp_info_detail['dangerous_max'] : 50.0;
                                                          ?>
-                                                         <span class="badge rounded-pill <?php echo $temp_info[1]; ?> d-inline-flex align-items-center">
-                                                             <?php echo $temp_info[0]; ?>
+                                                         <span class="badge badge-red rounded-pill bg-danger-subtle text-danger d-inline-flex align-items-center">
+                                                             <?php if ($danger_min !== null): ?>
+                                                                 < <?php echo $danger_min; ?>°C và > <?php echo $danger_max; ?>°C
+                                                             <?php else: ?>
+                                                                 > <?php echo $danger_max; ?>°C
+                                                             <?php endif; ?>
                                                          </span>
                                                      </div>
-                                                 </div>
-                                                 <div class="vr mx-2 opacity-25" style="height: 40px;"></div>
-                                                 <div class="mb-3">
-                                                     <div>
-                                                         <small class="text-muted">Nhiệt độ nguy hiểm</small>
+                                                     
+                                                     <div class="mb-3">
+                                                         <div>
+                                                             <small class="text-muted">Độ ẩm nguy hiểm</small>
+                                                         </div>
+                                                         <?php 
+                                                         // Lấy thông tin độ ẩm (bao gồm dangerous_min/max) từ model
+                                                         $humidity_info_detail = $product->getHumidityInfoFromCategory($prod['category_id']);
+                                                         $humidity_danger_min = $humidity_info_detail && isset($humidity_info_detail['dangerous_min']) ? $humidity_info_detail['dangerous_min'] : null;
+                                                         $humidity_danger_max = $humidity_info_detail && isset($humidity_info_detail['dangerous_max']) ? $humidity_info_detail['dangerous_max'] : null;
+                                                         ?>
+                                                         <span class="badge badge-red rounded-pill bg-danger-subtle text-danger d-inline-flex align-items-center">
+                                                             <?php if ($humidity_danger_min !== null && $humidity_danger_max !== null): ?>
+                                                                 < <?php echo $humidity_danger_min; ?>% và > <?php echo $humidity_danger_max; ?>%
+                                                             <?php elseif ($humidity_danger_min !== null): ?>
+                                                                 < <?php echo $humidity_danger_min; ?>%
+                                                             <?php else: ?>
+                                                                 N/A
+                                                             <?php endif; ?>
+                                                         </span>
                                                      </div>
-                                                     <span class="badge badge-red rounded-pill bg-danger-subtle text-danger d-inline-flex align-items-center ms-1">
-                                                         <?php if ($danger_min !== null): ?>
-                                                             < <?php echo $danger_min; ?>°C và > <?php echo $danger_max; ?>°C
-                                                         <?php else: ?>
-                                                             > <?php echo $danger_max; ?>°C
-                                                         <?php endif; ?>
-                                                     </span>
                                                  </div>
                                              </div>
 
