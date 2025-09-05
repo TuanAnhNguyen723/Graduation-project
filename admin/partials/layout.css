@@ -1,6 +1,13 @@
 /* Admin Layout CSS - Common for all admin pages */
 
 /* ==============================================================
+   FONT CONSISTENCY - ĐỒNG BỘ FONT CHỮ
+   ============================================================== */
+
+/* Import font consistency CSS */
+@import url('../../assets/css/font-consistency.css');
+
+/* ==============================================================
    MAIN LAYOUT FIXES - SỬA LỖI HEADER CHE CONTENT
    ============================================================== */
 

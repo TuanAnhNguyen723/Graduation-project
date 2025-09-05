@@ -404,20 +404,18 @@ class Product {
                 'frozen' => [
                     'ideal_min' => -50.0,
                     'ideal_max' => -18.0,
-                    'dangerous_min' => -50,
-                    'dangerous_max' => -18
+                    'dangerous_max' => -18.0
                 ],
                 'chilled' => [
                     'ideal_min' => 0.0,
                     'ideal_max' => 5.0,
-                    'dangerous_min' => -1,
-                    'dangerous_max' => 5
+                    'dangerous_max' => 8.0
                 ],
                 'ambient' => [
                     'ideal_min' => 15.0,
                     'ideal_max' => 33.0,
-                    'dangerous_min' => 14,
-                    'dangerous_max' => 33
+                    'dangerous_min' => 0.0,
+                    'dangerous_max' => 37.0
                 ]
             ];
             

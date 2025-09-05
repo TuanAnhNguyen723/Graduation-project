@@ -51,15 +51,6 @@ if ($categories_result) {
     <link href="../partials/layout.css" rel="stylesheet" type="text/css" />
     
     <style>
-        /* Global Font Settings for Vietnamese Text */
-        body, html {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-            text-rendering: optimizeLegibility;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
-        }
-        
         /* Enhanced Product Cards */
         .product-card {
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -142,6 +133,11 @@ if ($categories_result) {
             -moz-osx-font-smoothing: grayscale;
             word-wrap: break-word;
             word-break: break-word;
+        }
+
+        .badge-red {
+            width: 100px;
+            justify-content: center;
         }
         
         .product-card .badge {
@@ -828,7 +824,7 @@ if ($categories_result) {
      
                                                          // Lấy thông tin nhiệt độ (bao gồm dangerous_min/max) từ model
                                                          $temp_info_detail = $product->getTemperatureInfoFromCategory($prod['category_id']);
-                                                         $danger_min = $temp_info_detail ? $temp_info_detail['dangerous_min'] : -50.0;
+                                                         $danger_min = $temp_info_detail && isset($temp_info_detail['dangerous_min']) ? $temp_info_detail['dangerous_min'] : null;
                                                          $danger_max = $temp_info_detail ? $temp_info_detail['dangerous_max'] : 50.0;
                                                          ?>
                                                          <span class="badge rounded-pill <?php echo $temp_info[1]; ?> d-inline-flex align-items-center">
@@ -841,8 +837,12 @@ if ($categories_result) {
                                                      <div>
                                                          <small class="text-muted">Nhiệt độ nguy hiểm</small>
                                                      </div>
-                                                     <span class="badge rounded-pill bg-danger-subtle text-danger d-inline-flex align-items-center ms-1">
-                                                         < <?php echo $danger_min; ?>°C hoặc > <?php echo $danger_max; ?>°C
+                                                     <span class="badge badge-red rounded-pill bg-danger-subtle text-danger d-inline-flex align-items-center ms-1">
+                                                         <?php if ($danger_min !== null): ?>
+                                                             < <?php echo $danger_min; ?>°C và > <?php echo $danger_max; ?>°C
+                                                         <?php else: ?>
+                                                             > <?php echo $danger_max; ?>°C
+                                                         <?php endif; ?>
                                                      </span>
                                                  </div>
                                              </div>

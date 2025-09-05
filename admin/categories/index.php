@@ -409,23 +409,6 @@ if(!empty($search_results)) {
             left: 100%;
         }
         
-        /* Global Font Settings for Vietnamese Text */
-        body, html {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-            text-rendering: optimizeLegibility;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
-        }
-        
-        /* Ensure consistent font rendering for all text elements */
-        p, div, span, small, h1, h2, h3, h4, h5, h6 {
-            font-family: inherit;
-            text-rendering: optimizeLegibility;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        
         /* Loading Animation for Search */
         .loading {
             position: relative;

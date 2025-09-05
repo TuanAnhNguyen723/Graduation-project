@@ -87,6 +87,9 @@ try {
     <link href="../../assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link href="../../assets/css/app.min.css" rel="stylesheet" type="text/css" />
     
+    <!-- Font Consistency CSS -->
+    <link href="../../assets/css/font-consistency.css" rel="stylesheet" type="text/css" />
+    
     <!-- Common Admin Layout CSS -->
     <link href="../partials/layout.css" rel="stylesheet" type="text/css" />
     

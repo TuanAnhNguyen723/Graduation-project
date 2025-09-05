@@ -1,0 +1,248 @@
+/* Font Consistency CSS - Đồng bộ font chữ cho toàn bộ dự án */
+
+/* Global Font Settings for Vietnamese Text */
+body, html {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+}
+
+/* Ensure consistent font rendering for all text elements */
+p, div, span, small, h1, h2, h3, h4, h5, h6, 
+.card-title, .card-text, .btn, .form-control, 
+.table, .badge, .alert, .nav-link, .dropdown-item {
+    font-family: inherit;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Specific font settings for Vietnamese text elements */
+.product-description,
+.category-description,
+.notification-message,
+.sensor-description {
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+/* Form elements font consistency */
+.form-control,
+.form-select,
+.form-check-label,
+.input-group-text {
+    font-family: inherit;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Button font consistency */
+.btn,
+.btn-sm,
+.btn-lg {
+    font-family: inherit;
+    font-weight: 600;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Table font consistency */
+.table th,
+.table td {
+    font-family: inherit;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Badge font consistency */
+.badge {
+    font-family: inherit;
+    font-weight: 600;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Navigation font consistency */
+.nav-link,
+.dropdown-item,
+.menu-label {
+    font-family: inherit;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Card elements font consistency */
+.card-title,
+.card-text,
+.card-header h5,
+.card-header h6 {
+    font-family: inherit;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Alert font consistency */
+.alert,
+.alert h4,
+.alert h5,
+.alert p {
+    font-family: inherit;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Search and filter elements */
+.search-section .form-control,
+.search-section .form-select,
+.search-section .btn {
+    font-family: inherit;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Stat cards font consistency */
+.stat-card .card-title,
+.stat-card h2,
+.stat-card h4,
+.stat-card h6 {
+    font-family: inherit;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Product and category cards font consistency */
+.product-card .card-title,
+.product-card .card-text,
+.category-card .card-title,
+.category-card .card-text {
+    font-family: inherit;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Notification cards font consistency */
+.notification-card h6,
+.notification-card p,
+.notification-card small {
+    font-family: inherit;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* IoT dashboard font consistency */
+.temperature-card,
+.sensor-card,
+.location-card {
+    font-family: inherit;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Chart labels and legends */
+.chart-container,
+.chart-legend {
+    font-family: inherit;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Pagination font consistency */
+.pagination .page-link {
+    font-family: inherit;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Empty state font consistency */
+.empty-state h5,
+.empty-state p,
+.search-empty-state h5,
+.search-empty-state p {
+    font-family: inherit;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Search suggestions font consistency */
+.search-suggestions h6,
+.search-suggestions li {
+    font-family: inherit;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Progress bars font consistency */
+.progress {
+    font-family: inherit;
+}
+
+/* Icon text consistency */
+i[class*="iconoir-"] + span,
+i[class*="iconoir-"] + small,
+i[class*="iconoir-"] + p {
+    font-family: inherit;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Responsive font adjustments */
+@media (max-width: 768px) {
+    body, html {
+        font-size: 14px;
+    }
+    
+    .card-title {
+        font-size: 1rem;
+    }
+    
+    .card-text {
+        font-size: 0.875rem;
+    }
+    
+    .btn {
+        font-size: 0.875rem;
+    }
+}
+
+@media (max-width: 576px) {
+    body, html {
+        font-size: 13px;
+    }
+    
+    .card-title {
+        font-size: 0.95rem;
+    }
+    
+    .card-text {
+        font-size: 0.8rem;
+    }
+    
+    .btn {
+        font-size: 0.8rem;
+    }
+}
