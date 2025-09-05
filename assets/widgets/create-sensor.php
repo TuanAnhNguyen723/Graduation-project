@@ -19,17 +19,6 @@
         
         <!-- Modal Body -->
         <div class="custom-modal-body">
-            <!-- Success Message -->
-            <div id="successMessage" class="success-alert">
-                <div class="alert-icon">
-                    <i class="iconoir-check-circle"></i>
-                </div>
-                <div class="alert-content">
-                    <h5>Thành công!</h5>
-                    <p>Cảm biến đã được tạo thành công</p>
-                </div>
-            </div>
-            
             <!-- Main Form -->
             <form id="createSensorForm" class="sensor-form">
                 <!-- Basic Information Section -->
@@ -231,6 +220,20 @@
                 </button>
             </div>
         </div>
+    </div>
+    
+    <!-- Success Message - Fixed Position -->
+    <div id="successMessageCreateSensor" class="success-alert-fixed">
+        <div class="alert-icon">
+            <i class="iconoir-check-circle"></i>
+        </div>
+        <div class="alert-content">
+            <h5>Thành công!</h5>
+            <p>Cảm biến đã được tạo thành công</p>
+        </div>
+        <button type="button" class="alert-close" onclick="hideCreateSensorSuccessMessage()">
+            <i class="iconoir-xmark"></i>
+        </button>
     </div>
 </div>
 

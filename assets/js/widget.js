@@ -58,8 +58,8 @@
     const input = document.getElementById(fieldId); if (input) input.classList.remove('error');
   }
 
-  function showSuccessMessage() { const el = document.querySelector('#createProductModal #successMessage'); if (el) el.classList.add('show'); }
-  function hideSuccessMessage() { const el = document.querySelector('#createProductModal #successMessage'); if (el) el.classList.remove('show'); }
+  function showSuccessMessage() { showCreateProductSuccessMessage(); }
+  function hideSuccessMessage() { hideCreateProductSuccessMessage(); }
 
   function validateCreateProductForm() {
     let isValid = true; clearAllErrors();
@@ -125,7 +125,7 @@
         setTimeout(() => {
           closeCreateProductModal();
           if (typeof window.refreshProductList === 'function') window.refreshProductList(); else window.location.reload();
-        }, 1500);
+        }, 2000);
       } else {
         alert('Có lỗi xảy ra: ' + (result.message || 'Không thể tạo sản phẩm'));
       }
@@ -288,8 +288,8 @@
     const input = document.getElementById(fieldId); if (input) input.classList.remove('error');
   }
 
-  function showSuccessMessage() { const el = document.querySelector('#createCategoryModal #successMessageCategory'); if (el) el.classList.add('show'); }
-  function hideSuccessMessage() { const el = document.querySelector('#createCategoryModal #successMessageCategory'); if (el) el.classList.remove('show'); }
+  function showSuccessMessage() { showCreateCategorySuccessMessage(); }
+  function hideSuccessMessage() { hideCreateCategorySuccessMessage(); }
 
   function validateCreateCategoryForm() {
     let isValid = true; clearAllErrors();
@@ -325,7 +325,7 @@
         setTimeout(() => {
           closeCreateCategoryModal();
           if (typeof window.refreshCategoryList === 'function') window.refreshCategoryList(); else window.location.reload();
-        }, 1500);
+        }, 2000);
       } else {
         alert('Có lỗi xảy ra: ' + (result.message || 'Không thể tạo danh mục'));
       }
@@ -462,13 +462,24 @@
   }
 
   function showEditCategorySuccessMessage() { 
-    const el = document.querySelector('#editCategoryModal #successMessageEditCategory'); 
-    if (el) el.classList.add('show'); 
+    const el = document.getElementById('successMessageEditCategory'); 
+    if (el) {
+      el.classList.add('show', 'slide-in');
+      // Auto hide after 3 seconds
+      setTimeout(() => {
+        hideEditCategorySuccessMessage();
+      }, 3000);
+    }
   }
   
   function hideEditCategorySuccessMessage() { 
-    const el = document.querySelector('#editCategoryModal #successMessageEditCategory'); 
-    if (el) el.classList.remove('show'); 
+    const el = document.getElementById('successMessageEditCategory'); 
+    if (el) {
+      el.classList.add('slide-out');
+      setTimeout(() => {
+        el.classList.remove('show', 'slide-in', 'slide-out');
+      }, 300);
+    }
   }
 
   function validateEditCategoryForm() {
@@ -537,7 +548,7 @@
           closeEditCategoryModal();
           // Refresh the page to show updated data
           window.location.reload();
-        }, 1500);
+        }, 2000);
       } else {
         throw new Error(result.message || 'Không thể cập nhật danh mục');
       }
@@ -671,7 +682,7 @@
       .then(data => {
         if (data.success) {
           // Hiển thị thông báo thành công
-          showNotification('Xóa sản phẩm thành công!', 'success');
+          showDeleteProductSuccessMessage();
           
           // Xóa card sản phẩm khỏi giao diện
           const productCard = deleteBtn.closest('.col-lg-4');
@@ -832,13 +843,24 @@
   }
 
   function showEditProductSuccessMessage() { 
-    const el = document.querySelector('#editProductModal #successMessageEditProduct'); 
-    if (el) el.classList.add('show'); 
+    const el = document.getElementById('successMessageEditProduct'); 
+    if (el) {
+      el.classList.add('show', 'slide-in');
+      // Auto hide after 3 seconds
+      setTimeout(() => {
+        hideEditProductSuccessMessage();
+      }, 3000);
+    }
   }
   
   function hideEditProductSuccessMessage() { 
-    const el = document.querySelector('#editProductModal #successMessageEditProduct'); 
-    if (el) el.classList.remove('show'); 
+    const el = document.getElementById('successMessageEditProduct'); 
+    if (el) {
+      el.classList.add('slide-out');
+      setTimeout(() => {
+        el.classList.remove('show', 'slide-in', 'slide-out');
+      }, 300);
+    }
   }
 
   function validateEditProductForm() {
@@ -935,7 +957,7 @@
           closeEditProductModal();
           // Refresh the page to show updated data
           window.location.reload();
-        }, 1500);
+        }, 2000);
       } else {
         throw new Error(result.message || 'Không thể cập nhật sản phẩm');
       }
@@ -1121,6 +1143,396 @@
   window.previewEditProductImage = previewEditProductImage;
 })();
 
+// Sensor Edit Modal Functions
+(function() {
+  let isEditSensorModalOpen = false;
+  let currentEditSensorId = null;
+
+  function openEditSensorModal(sensorId, sensorName, sensorCode, sensorType, locationId, manufacturer, model, serialNumber, installationDate, minThreshold, maxThreshold, status, lastCalibration, description, notes) {
+    currentEditSensorId = sensorId;
+    
+    // Debug log
+    console.log('Opening edit sensor modal with locationId:', locationId, 'type:', typeof locationId);
+    
+    // Populate form fields
+    document.getElementById('editSensorId').value = sensorId;
+    document.getElementById('editSensorName').value = sensorName;
+    document.getElementById('editSensorCode').value = sensorCode;
+    document.getElementById('editSensorType').value = sensorType;
+    document.getElementById('editManufacturer').value = manufacturer || '';
+    document.getElementById('editModel').value = model || '';
+    document.getElementById('editSerialNumber').value = serialNumber || '';
+    document.getElementById('editInstallationDate').value = installationDate || '';
+    document.getElementById('editMinThreshold').value = minThreshold || '';
+    document.getElementById('editMaxThreshold').value = maxThreshold || '';
+    document.getElementById('editSensorStatus').value = status;
+    document.getElementById('editLastCalibration').value = lastCalibration || '';
+    document.getElementById('editSensorDescription').value = description || '';
+    document.getElementById('editSensorNotes').value = notes || '';
+    
+    // Load locations for dropdown trước, sau đó set giá trị vị trí
+    loadLocationsForEdit().then(() => {
+      // Đợi một chút để đảm bảo DOM đã được render
+      setTimeout(() => {
+        // Sau khi load xong vị trí, set giá trị vị trí
+        const locationSelect = document.getElementById('editLocationId');
+        console.log('Location select element:', locationSelect);
+        console.log('Setting locationId to:', locationId);
+        
+        if (locationSelect) {
+          if (locationId && locationId !== 'null' && locationId !== null) {
+            locationSelect.value = locationId;
+            console.log('Set location value to:', locationId);
+            // Xóa lỗi validation
+            locationSelect.classList.remove('error');
+            locationSelect.classList.add('success');
+          } else {
+            locationSelect.value = '';
+            console.log('Set location value to empty');
+          }
+        }
+      }, 100);
+    }).catch(error => {
+      console.error('Error loading locations:', error);
+    });
+    
+    // Show modal
+    const modal = document.getElementById('editSensorModal');
+    if (modal) {
+      modal.classList.add('show');
+      setTimeout(() => { modal.querySelector('.custom-modal').classList.add('show'); }, 10);
+      isEditSensorModalOpen = true;
+      document.body.style.overflow = 'hidden';
+      
+      // Focus on first field
+      const first = document.getElementById('editSensorName'); 
+      if (first) first.focus();
+    }
+  }
+
+  function closeEditSensorModal() {
+    const modal = document.getElementById('editSensorModal');
+    if (modal) {
+      modal.querySelector('.custom-modal').classList.remove('show');
+      setTimeout(() => { modal.classList.remove('show'); }, 300);
+      isEditSensorModalOpen = false;
+      document.body.style.overflow = '';
+      currentEditSensorId = null;
+    }
+  }
+
+  function resetEditSensorForm() {
+    const form = document.getElementById('editSensorForm');
+    if (form) form.reset();
+    clearEditSensorErrors();
+    hideEditSensorSuccessMessage();
+  }
+
+  function clearEditSensorErrors() {
+    document.querySelectorAll('#editSensorModal .field-error').forEach(el => { 
+      el.textContent=''; 
+      el.classList.remove('show'); 
+    });
+  }
+
+  function showEditSensorFieldError(fieldId, message) {
+    const errorEl = document.getElementById(fieldId + 'Error');
+    if (errorEl) {
+      errorEl.textContent = message; 
+      errorEl.classList.add('show');
+      const input = document.getElementById(fieldId); 
+      if (input) { 
+        input.classList.add('error'); 
+        input.classList.remove('success'); 
+      }
+    }
+  }
+
+  function clearEditSensorFieldError(fieldId) {
+    const errorEl = document.getElementById(fieldId + 'Error');
+    if (errorEl) { 
+      errorEl.textContent=''; 
+      errorEl.classList.remove('show'); 
+    }
+    const input = document.getElementById(fieldId); 
+    if (input) input.classList.remove('error');
+  }
+
+  function showEditSensorSuccessMessage() { 
+    const el = document.getElementById('successMessageEditSensor'); 
+    if (el) {
+      el.classList.add('show', 'slide-in');
+      // Auto hide after 3 seconds
+      setTimeout(() => {
+        hideEditSensorSuccessMessage();
+      }, 3000);
+    }
+  }
+  
+  function hideEditSensorSuccessMessage() { 
+    const el = document.getElementById('successMessageEditSensor'); 
+    if (el) {
+      el.classList.add('slide-out');
+      setTimeout(() => {
+        el.classList.remove('show', 'slide-in', 'slide-out');
+      }, 300);
+    }
+  }
+
+  function validateEditSensorForm() {
+    let isValid = true; 
+    clearEditSensorErrors();
+    
+    const name = document.getElementById('editSensorName')?.value.trim() || '';
+    if (!name) { 
+      showEditSensorFieldError('editSensorName','Tên cảm biến là bắt buộc'); 
+      isValid = false; 
+    } else if (name.length < 3) { 
+      showEditSensorFieldError('editSensorName','Tên cảm biến phải có ít nhất 3 ký tự'); 
+      isValid = false; 
+    }
+    
+    const code = document.getElementById('editSensorCode')?.value.trim() || '';
+    if (!code) { 
+      showEditSensorFieldError('editSensorCode','Mã cảm biến là bắt buộc'); 
+      isValid = false; 
+    } else if (code.length < 3) {
+      showEditSensorFieldError('editSensorCode','Mã cảm biến phải có ít nhất 3 ký tự');
+      isValid = false;
+    }
+    
+    const type = document.getElementById('editSensorType')?.value || '';
+    if (!type) { 
+      showEditSensorFieldError('editSensorType','Vui lòng chọn loại cảm biến'); 
+      isValid = false; 
+    }
+    
+    const status = document.getElementById('editSensorStatus')?.value || '';
+    if (!status) { 
+      showEditSensorFieldError('editSensorStatus','Vui lòng chọn trạng thái'); 
+      isValid = false; 
+    }
+
+    // Validate thresholds
+    const minThreshold = document.getElementById('editMinThreshold')?.value;
+    const maxThreshold = document.getElementById('editMaxThreshold')?.value;
+    
+    if (minThreshold && maxThreshold) {
+      const min = parseFloat(minThreshold);
+      const max = parseFloat(maxThreshold);
+      if (min >= max) {
+        showEditSensorFieldError('editMaxThreshold','Ngưỡng tối đa phải lớn hơn ngưỡng tối thiểu');
+        isValid = false;
+      }
+    }
+    
+    return isValid;
+  }
+
+  async function submitEditSensorForm() {
+    if (!validateEditSensorForm()) return;
+    
+    const btn = document.getElementById('editSensorSubmitBtn');
+    const original = btn?.innerHTML || '';
+    
+    try {
+      if (btn) { 
+        btn.disabled = true; 
+        btn.classList.add('loading'); 
+        btn.innerHTML = 'Đang cập nhật...'; 
+      }
+      
+      const form = document.getElementById('editSensorForm');
+      const formData = new FormData();
+      
+      if (form) {
+        Array.from(form.elements).forEach(el => {
+          if (!el.name) return;
+          if (el.type !== 'file' && el.value !== undefined) {
+            formData.append(el.name, el.value);
+          }
+        });
+      }
+      
+      // Add sensor ID
+      formData.append('id', currentEditSensorId);
+      
+      const response = await fetch('../api/update-sensor.php', { 
+        method: 'POST', 
+        body: formData 
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+      }
+      
+      const result = await response.json();
+      if (result.success) {
+        showEditSensorSuccessMessage();
+        setTimeout(() => {
+          closeEditSensorModal();
+          // Refresh the page to show updated data
+          window.location.reload();
+        }, 2000);
+      } else {
+        throw new Error(result.message || 'Không thể cập nhật cảm biến');
+      }
+    } catch (err) {
+      console.error('Error updating sensor:', err);
+      alert('Có lỗi xảy ra khi cập nhật cảm biến: ' + err.message);
+    } finally {
+      if (btn) { 
+        btn.disabled = false; 
+        btn.classList.remove('loading'); 
+        btn.innerHTML = original || 'Cập nhật cảm biến'; 
+      }
+    }
+  }
+
+  function loadLocationsForEdit() {
+    return fetch('../api/locations.php')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && data.data) {
+          const locationSelect = document.getElementById('editLocationId');
+          if (locationSelect) {
+            // Keep the first option (Chọn vị trí)
+            const firstOption = locationSelect.firstElementChild;
+            locationSelect.innerHTML = '';
+            locationSelect.appendChild(firstOption);
+            
+            // Add locations
+            data.data.forEach(location => {
+              const option = document.createElement('option');
+              option.value = location.id;
+              option.textContent = `${location.location_name} (${location.location_code})`;
+              locationSelect.appendChild(option);
+            });
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error loading locations:', error);
+      });
+  }
+
+  // Setup edit sensor real-time validation
+  function setupEditSensorRealTimeValidation() {
+    const nameInput = document.getElementById('editSensorName');
+    if (nameInput) {
+      nameInput.addEventListener('input', function(){
+        const v = this.value.trim(); 
+        if (v.length >= 3){
+          this.classList.add('success'); 
+          this.classList.remove('error'); 
+          clearEditSensorFieldError('editSensorName'); 
+        } else if (v.length > 0){
+          this.classList.remove('success'); 
+          this.classList.add('error'); 
+          showEditSensorFieldError('editSensorName','Tên cảm biến phải có ít nhất 3 ký tự'); 
+        } else { 
+          this.classList.remove('success','error'); 
+          clearEditSensorFieldError('editSensorName'); 
+        }
+      });
+    }
+    
+    const codeInput = document.getElementById('editSensorCode');
+    if (codeInput) {
+      codeInput.addEventListener('input', function(){
+        const v = this.value.trim(); 
+        if (v.length >= 3){
+          this.classList.add('success'); 
+          this.classList.remove('error'); 
+          clearEditSensorFieldError('editSensorCode'); 
+        } else if (v.length > 0){
+          this.classList.remove('success'); 
+          this.classList.add('error'); 
+          showEditSensorFieldError('editSensorCode','Mã cảm biến phải có ít nhất 3 ký tự'); 
+        } else { 
+          this.classList.remove('success','error'); 
+          clearEditSensorFieldError('editSensorCode'); 
+        }
+      });
+    }
+    
+    const typeSelect = document.getElementById('editSensorType');
+    if (typeSelect) {
+      typeSelect.addEventListener('change', function(){
+        if (this.value !== ''){
+          this.classList.add('success'); 
+          this.classList.remove('error'); 
+          clearEditSensorFieldError('editSensorType'); 
+        } else { 
+          this.classList.remove('success'); 
+          this.classList.add('error'); 
+          showEditSensorFieldError('editSensorType','Vui lòng chọn loại cảm biến'); 
+        }
+      });
+    }
+    
+    const statusSelect = document.getElementById('editSensorStatus');
+    if (statusSelect) {
+      statusSelect.addEventListener('change', function(){
+        if (this.value !== ''){
+          this.classList.add('success'); 
+          this.classList.remove('error'); 
+          clearEditSensorFieldError('editSensorStatus'); 
+        } else { 
+          this.classList.remove('success'); 
+          this.classList.add('error'); 
+          showEditSensorFieldError('editSensorStatus','Vui lòng chọn trạng thái'); 
+        }
+      });
+    }
+
+    // Validate thresholds
+    const minThreshold = document.getElementById('editMinThreshold');
+    const maxThreshold = document.getElementById('editMaxThreshold');
+    
+    if (minThreshold && maxThreshold) {
+      const validateThresholds = () => {
+        const min = parseFloat(minThreshold.value);
+        const max = parseFloat(maxThreshold.value);
+        
+        if (minThreshold.value && maxThreshold.value && min >= max) {
+          showEditSensorFieldError('editMaxThreshold','Ngưỡng tối đa phải lớn hơn ngưỡng tối thiểu');
+          maxThreshold.classList.add('error');
+          maxThreshold.classList.remove('success');
+        } else {
+          clearEditSensorFieldError('editMaxThreshold');
+          if (maxThreshold.value) {
+            maxThreshold.classList.add('success');
+            maxThreshold.classList.remove('error');
+          }
+        }
+      };
+      
+      minThreshold.addEventListener('input', validateThresholds);
+      maxThreshold.addEventListener('input', validateThresholds);
+    }
+  }
+
+  // Add event listeners for edit sensor modal
+  document.addEventListener('DOMContentLoaded', function(){
+    setupEditSensorRealTimeValidation();
+    document.addEventListener('click', function(e){ 
+      const modal = document.getElementById('editSensorModal'); 
+      if (modal && e.target === modal) closeEditSensorModal(); 
+    });
+    document.addEventListener('keydown', function(e){ 
+      if (e.key === 'Escape' && isEditSensorModalOpen) closeEditSensorModal(); 
+    });
+  });
+
+  // Export functions to window
+  window.openEditSensorModal = openEditSensorModal;
+  window.closeEditSensorModal = closeEditSensorModal;
+  window.submitEditSensorForm = submitEditSensorForm;
+})();
+
 // IoT widget
 (function() {
   let isSensorModalOpen = false;
@@ -1175,8 +1587,8 @@
     const input = document.getElementById(fieldId); if (input) input.classList.remove('error');
   }
 
-  function showSuccessMessage() { const el = document.querySelector('#createSensorModal #successMessage'); if (el) el.classList.add('show'); }
-  function hideSuccessMessage() { const el = document.querySelector('#createSensorModal #successMessage'); if (el) el.classList.remove('show'); }
+  function showSuccessMessage() { showCreateSensorSuccessMessage(); }
+  function hideSuccessMessage() { hideCreateSensorSuccessMessage(); }
 
   function validateCreateSensorForm() {
     let isValid = true; clearAllErrors();
@@ -1206,12 +1618,12 @@
       const response = await fetch('api/create-sensor.php', { method: 'POST', body: formData });
       const result = await response.json();
       if (result.success) {
-        showSuccessMessage();
+        showCreateSensorSuccessMessage();
         resetCreateSensorForm();
         setTimeout(() => {
           closeCreateSensorModal();
           if (typeof window.refreshSensorList === 'function') window.refreshSensorList(); else location.reload();
-        }, 1500);
+        }, 2000);
       } else {
         showToast('error', 'Lỗi: ' + (result.message || 'Không thể tạo cảm biến'));
         if (result.errors) { Object.keys(result.errors).forEach(field => { showFieldError(field, result.errors[field]); }); }
@@ -1260,9 +1672,150 @@
     return true;
   }
 
+  // Create Success Message Functions
+  function showCreateSensorSuccessMessage() { 
+    const el = document.getElementById('successMessageCreateSensor'); 
+    if (el) {
+      el.classList.add('show', 'slide-in');
+      // Auto hide after 3 seconds
+      setTimeout(() => {
+        hideCreateSensorSuccessMessage();
+      }, 3000);
+    }
+  }
+  
+  function hideCreateSensorSuccessMessage() { 
+    const el = document.getElementById('successMessageCreateSensor'); 
+    if (el) {
+      el.classList.add('slide-out');
+      setTimeout(() => {
+        el.classList.remove('show', 'slide-in', 'slide-out');
+      }, 300);
+    }
+  }
+
+  function showCreateProductSuccessMessage() { 
+    const el = document.getElementById('successMessageCreateProduct'); 
+    if (el) {
+      el.classList.add('show', 'slide-in');
+      // Auto hide after 3 seconds
+      setTimeout(() => {
+        hideCreateProductSuccessMessage();
+      }, 3000);
+    }
+  }
+  
+  function hideCreateProductSuccessMessage() { 
+    const el = document.getElementById('successMessageCreateProduct'); 
+    if (el) {
+      el.classList.add('slide-out');
+      setTimeout(() => {
+        el.classList.remove('show', 'slide-in', 'slide-out');
+      }, 300);
+    }
+  }
+
+  function showCreateCategorySuccessMessage() { 
+    const el = document.getElementById('successMessageCreateCategory'); 
+    if (el) {
+      el.classList.add('show', 'slide-in');
+      // Auto hide after 3 seconds
+      setTimeout(() => {
+        hideCreateCategorySuccessMessage();
+      }, 3000);
+    }
+  }
+  
+  function hideCreateCategorySuccessMessage() { 
+    const el = document.getElementById('successMessageCreateCategory'); 
+    if (el) {
+      el.classList.add('slide-out');
+      setTimeout(() => {
+        el.classList.remove('show', 'slide-in', 'slide-out');
+      }, 300);
+    }
+  }
+
   window.openCreateSensorModal = openCreateSensorModal;
   window.closeCreateSensorModal = closeCreateSensorModal;
   window.submitCreateSensorForm = submitCreateSensorForm;
+  window.showCreateSensorSuccessMessage = showCreateSensorSuccessMessage;
+  window.hideCreateSensorSuccessMessage = hideCreateSensorSuccessMessage;
+  window.showCreateProductSuccessMessage = showCreateProductSuccessMessage;
+  window.hideCreateProductSuccessMessage = hideCreateProductSuccessMessage;
+  window.showCreateCategorySuccessMessage = showCreateCategorySuccessMessage;
+  window.hideCreateCategorySuccessMessage = hideCreateCategorySuccessMessage;
+
+  // Delete Success Message Functions
+  function showDeleteSensorSuccessMessage() { 
+    const el = document.getElementById('successMessageDeleteSensor'); 
+    if (el) {
+      el.classList.add('show', 'slide-in');
+      // Auto hide after 3 seconds
+      setTimeout(() => {
+        hideDeleteSensorSuccessMessage();
+      }, 3000);
+    }
+  }
+  
+  function hideDeleteSensorSuccessMessage() { 
+    const el = document.getElementById('successMessageDeleteSensor'); 
+    if (el) {
+      el.classList.add('slide-out');
+      setTimeout(() => {
+        el.classList.remove('show', 'slide-in', 'slide-out');
+      }, 300);
+    }
+  }
+
+  function showDeleteProductSuccessMessage() { 
+    const el = document.getElementById('successMessageDeleteProduct'); 
+    if (el) {
+      el.classList.add('show', 'slide-in');
+      // Auto hide after 3 seconds
+      setTimeout(() => {
+        hideDeleteProductSuccessMessage();
+      }, 3000);
+    }
+  }
+  
+  function hideDeleteProductSuccessMessage() { 
+    const el = document.getElementById('successMessageDeleteProduct'); 
+    if (el) {
+      el.classList.add('slide-out');
+      setTimeout(() => {
+        el.classList.remove('show', 'slide-in', 'slide-out');
+      }, 300);
+    }
+  }
+
+  function showDeleteCategorySuccessMessage() { 
+    const el = document.getElementById('successMessageDeleteCategory'); 
+    if (el) {
+      el.classList.add('show', 'slide-in');
+      // Auto hide after 3 seconds
+      setTimeout(() => {
+        hideDeleteCategorySuccessMessage();
+      }, 3000);
+    }
+  }
+  
+  function hideDeleteCategorySuccessMessage() { 
+    const el = document.getElementById('successMessageDeleteCategory'); 
+    if (el) {
+      el.classList.add('slide-out');
+      setTimeout(() => {
+        el.classList.remove('show', 'slide-in', 'slide-out');
+      }, 300);
+    }
+  }
+
+  window.showDeleteSensorSuccessMessage = showDeleteSensorSuccessMessage;
+  window.hideDeleteSensorSuccessMessage = hideDeleteSensorSuccessMessage;
+  window.showDeleteProductSuccessMessage = showDeleteProductSuccessMessage;
+  window.hideDeleteProductSuccessMessage = hideDeleteProductSuccessMessage;
+  window.showDeleteCategorySuccessMessage = showDeleteCategorySuccessMessage;
+  window.hideDeleteCategorySuccessMessage = hideDeleteCategorySuccessMessage;
 })();
 
 

@@ -857,7 +857,7 @@ if(!empty($search_results)) {
                 .then(data => {
                     if (data.success) {
                         // Hiển thị thông báo thành công
-                        showNotification('Xóa danh mục thành công!', 'success');
+                        showDeleteCategorySuccessMessage();
                         
                         // Xóa card danh mục khỏi giao diện
                         const categoryCard = deleteBtn.closest('.col-lg-4');
@@ -1154,5 +1154,19 @@ if(!empty($search_results)) {
     
     <!-- Include Unified Widgets JavaScript -->
     <script src="../../assets/js/widget.js"></script>
+
+    <!-- Delete Success Message - Fixed Position -->
+    <div id="successMessageDeleteCategory" class="success-alert-fixed delete-success">
+        <div class="alert-icon">
+            <i class="iconoir-check-circle"></i>
+        </div>
+        <div class="alert-content">
+            <h5>Thành công!</h5>
+            <p>Danh mục đã được xóa thành công</p>
+        </div>
+        <button type="button" class="alert-close" onclick="hideDeleteCategorySuccessMessage()">
+            <i class="iconoir-xmark"></i>
+        </button>
+    </div>
 </body>
 </html>

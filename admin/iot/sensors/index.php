@@ -209,7 +209,7 @@ try {
                                         </small>
                                         <div class="mt-1 small text-muted">
                                             <?php if (!empty($sensor['manufacturer']) || !empty($sensor['model'])): ?>
-                                                <div><i class="iconoir-cog"></i>
+                                                <div><i class="iconoir-tools"></i>
                                                     <?php echo htmlspecialchars(trim(($sensor['manufacturer'] ?? '') . ' ' . ($sensor['model'] ?? ''))); ?>
                                                 </div>
                                             <?php endif; ?>
@@ -248,7 +248,7 @@ try {
                                     </div>
                                     
                                     <div class="mt-3">
-                                        <button class="btn btn-sm btn-outline-primary me-2" onclick="editSensor(<?php echo $sensor['id']; ?>)">
+                                        <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditSensorModal(<?php echo $sensor['id']; ?>, '<?php echo htmlspecialchars(addslashes($sensor['sensor_name'])); ?>', '<?php echo htmlspecialchars(addslashes($sensor['sensor_code'])); ?>', '<?php echo htmlspecialchars(addslashes($sensor['sensor_type'])); ?>', <?php echo $sensor['location_id'] ? $sensor['location_id'] : 'null'; ?>, '<?php echo htmlspecialchars(addslashes($sensor['manufacturer'] ?? '')); ?>', '<?php echo htmlspecialchars(addslashes($sensor['model'] ?? '')); ?>', '<?php echo htmlspecialchars(addslashes($sensor['serial_number'] ?? '')); ?>', '<?php echo $sensor['installation_date'] ?? ''; ?>', <?php echo $sensor['min_threshold'] ?? 'null'; ?>, <?php echo $sensor['max_threshold'] ?? 'null'; ?>, '<?php echo htmlspecialchars(addslashes($sensor['status'])); ?>', '<?php echo $sensor['last_calibration'] ?? ''; ?>', '<?php echo htmlspecialchars(addslashes($sensor['description'] ?? '')); ?>', '<?php echo htmlspecialchars(addslashes($sensor['notes'] ?? '')); ?>')">
                                             <i class="iconoir-edit"></i> Sửa
                                         </button>
                                         <button class="btn btn-sm btn-outline-danger" onclick="deleteSensor(<?php echo $sensor['id']; ?>)">
@@ -341,6 +341,15 @@ try {
     
     <!-- Common Admin Layout JavaScript -->
     <script src="../../../admin/partials/layout.js"></script>
+    
+    <!-- Include Unified Widgets CSS -->
+    <link href="../../../assets/css/widget.css" rel="stylesheet" type="text/css" />
+    
+    <!-- Include Sensor Edit Modal Widget -->
+    <?php include '../../../assets/widgets/edit-sensor.php'; ?>
+    
+    <!-- Include Unified Widgets JavaScript -->
+    <script src="../../../assets/js/widget.js"></script>
 
     <script>
         // Khởi tạo Bootstrap dropdown
@@ -383,14 +392,34 @@ try {
             });
         }
 
-        // Chỉnh sửa cảm biến
-        function editSensor(sensorId) {
-            alert('Chức năng chỉnh sửa sẽ được implement sau!');
+        // Function hiển thị thông báo
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = `
+                top: 80px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                border-radius: 8px;
+                border: none;
+                font-weight: 500;
+            `;
+            notification.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+            document.body.appendChild(notification);
+            setTimeout(() => { if (notification.parentNode) { notification.remove(); } }, 3000);
         }
 
         // Xóa cảm biến
         function deleteSensor(sensorId) {
             if (confirm('Bạn có chắc chắn muốn xóa cảm biến này?')) {
+                // Hiển thị loading trên button
+                const deleteBtn = event.target.closest('.btn-outline-danger');
+                const originalText = deleteBtn.innerHTML;
+                deleteBtn.disabled = true;
+                deleteBtn.innerHTML = '<i class="iconoir-loading"></i> Đang xóa...';
+                
                 // Gửi request xóa cảm biến
                 fetch('../api/delete-sensor.php', {
                     method: 'POST',
@@ -402,14 +431,47 @@ try {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Xóa cảm biến thành công!');
-                        location.reload();
+                        // Hiển thị thông báo thành công
+                        showDeleteSensorSuccessMessage();
+                        
+                        // Xóa card cảm biến khỏi giao diện
+                        const sensorCard = deleteBtn.closest('.col-xl-4');
+                        sensorCard.style.opacity = '0.5';
+                        sensorCard.style.transform = 'scale(0.95)';
+                        
+                        setTimeout(() => {
+                            sensorCard.remove();
+                            
+                            // Kiểm tra xem còn cảm biến nào không
+                            const remainingSensors = document.querySelectorAll('.sensor-card');
+                            if (remainingSensors.length === 0) {
+                                // Hiển thị trạng thái trống
+                                const container = document.querySelector('.row');
+                                container.innerHTML = `
+                                    <div class="col-12 text-center py-5">
+                                        <div class="empty-state">
+                                            <i class="iconoir-cpu" style="font-size: 64px; color: #dee2e6; margin-bottom: 20px;"></i>
+                                            <h4 class="text-muted mb-3">Chưa có cảm biến nào</h4>
+                                            <p class="text-muted mb-4">Bắt đầu thêm cảm biến đầu tiên để giám sát</p>
+                                            <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#addSensorModal">
+                                                <i class="iconoir-plus"></i> Thêm cảm biến đầu tiên
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        }, 300);
                     } else {
-                        alert('Lỗi: ' + data.error);
+                        throw new Error(data.error || 'Có lỗi xảy ra khi xóa cảm biến');
                     }
                 })
                 .catch(error => {
-                    alert('Lỗi kết nối: ' + error.message);
+                    console.error('Error:', error);
+                    showNotification('Lỗi: ' + error.message, 'error');
+                    
+                    // Khôi phục button
+                    deleteBtn.disabled = false;
+                    deleteBtn.innerHTML = originalText;
                 });
             }
         }
@@ -487,7 +549,7 @@ try {
                                     </small>
                                     <div class="mt-1 small text-muted">
                                         ${sensor.manufacturer || sensor.model ? `
-                                            <div><i class="iconoir-cog"></i>
+                                            <div><i class="iconoir-tools"></i>
                                                 ${[sensor.manufacturer, sensor.model].filter(Boolean).join(" ")}
                                             </div>` : ""
                                         }
@@ -519,7 +581,7 @@ try {
                                 </div>
 
                                 <div class="mt-3">
-                                    <button class="btn btn-sm btn-outline-primary me-2" onclick="editSensor(${sensor.id})">
+                                    <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditSensorModal(${sensor.id}, '${sensor.sensor_name}', '${sensor.sensor_code}', '${sensor.sensor_type}', ${sensor.location_id ? sensor.location_id : 'null'}, '${sensor.manufacturer || ''}', '${sensor.model || ''}', '${sensor.serial_number || ''}', '${sensor.installation_date || ''}', ${sensor.min_threshold || 'null'}, ${sensor.max_threshold || 'null'}, '${sensor.status}', '${sensor.last_calibration || ''}', '${sensor.description || ''}', '${sensor.notes || ''}')">
                                         <i class="iconoir-edit"></i> Sửa
                                     </button>
                                     <button class="btn btn-sm btn-outline-danger" onclick="deleteSensor(${sensor.id})">
@@ -554,5 +616,19 @@ try {
         console.error("Lỗi SSE:", err);
     };
     </script>
+
+    <!-- Delete Success Message - Fixed Position -->
+    <div id="successMessageDeleteSensor" class="success-alert-fixed delete-success">
+        <div class="alert-icon">
+            <i class="iconoir-check-circle"></i>
+        </div>
+        <div class="alert-content">
+            <h5>Thành công!</h5>
+            <p>Cảm biến đã được xóa thành công</p>
+        </div>
+        <button type="button" class="alert-close" onclick="hideDeleteSensorSuccessMessage()">
+            <i class="iconoir-xmark"></i>
+        </button>
+    </div>
 </body>
 </html>

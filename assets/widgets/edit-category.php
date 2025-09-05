@@ -19,17 +19,6 @@
 
         <!-- Modal Body -->
         <div class="custom-modal-body">
-            <!-- Success Message -->
-            <div id="successMessageEditCategory" class="success-alert">
-                <div class="alert-icon">
-                    <i class="iconoir-check-circle"></i>
-                </div>
-                <div class="alert-content">
-                    <h5>Thành công!</h5>
-                    <p>Danh mục đã được cập nhật thành công</p>
-                </div>
-            </div>
-
             <!-- Main Form -->
             <form id="editCategoryForm" class="product-form">
                 <input type="hidden" id="editCategoryId" name="id">
@@ -112,7 +101,7 @@
                 <!-- Image & Description Section -->
                 <div class="form-section">
                     <div class="section-header">
-                        <i class="iconoir-image-plus" style="background: linear-gradient(135deg, #f02d8f 0%, #d70b71 100%); color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px;"></i>
+                        <i class="iconoir-camera" style="background: linear-gradient(135deg, #f02d8f 0%, #d70b71 100%); color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px;"></i>
                         <h5>Hình ảnh & Mô tả</h5>
                     </div>
 
@@ -165,5 +154,19 @@
                 </button>
             </div>
         </div>
+    </div>
+    
+    <!-- Success Message - Fixed Position -->
+    <div id="successMessageEditCategory" class="success-alert-fixed">
+        <div class="alert-icon">
+            <i class="iconoir-check-circle"></i>
+        </div>
+        <div class="alert-content">
+            <h5>Thành công!</h5>
+            <p>Danh mục đã được cập nhật thành công</p>
+        </div>
+        <button type="button" class="alert-close" onclick="hideEditCategorySuccessMessage()">
+            <i class="iconoir-xmark"></i>
+        </button>
     </div>
 </div>

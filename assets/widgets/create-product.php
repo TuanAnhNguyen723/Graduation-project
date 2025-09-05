@@ -19,17 +19,6 @@
         
         <!-- Modal Body -->
         <div class="custom-modal-body">
-            <!-- Success Message -->
-            <div id="successMessage" class="success-alert">
-                <div class="alert-icon">
-                    <i class="iconoir-check-circle"></i>
-                </div>
-                <div class="alert-content">
-                    <h5>Thành công!</h5>
-                    <p>Sản phẩm đã được tạo thành công</p>
-                </div>
-            </div>
-            
             <!-- Main Form -->
             <form id="createProductForm" class="product-form">
                 <!-- Basic Information Section -->
@@ -141,7 +130,7 @@
                 <!-- Image & Status Section -->
                 <div class="form-section">
                     <div class="section-header">
-                        <i class="iconoir-image-plus"></i>
+                        <i class="iconoir-camera"></i>
                         <h5>Hình ảnh & Trạng thái</h5>
                     </div>
                     
@@ -198,6 +187,20 @@
                 </button>
             </div>
         </div>
+    </div>
+    
+    <!-- Success Message - Fixed Position -->
+    <div id="successMessageCreateProduct" class="success-alert-fixed">
+        <div class="alert-icon">
+            <i class="iconoir-check-circle"></i>
+        </div>
+        <div class="alert-content">
+            <h5>Thành công!</h5>
+            <p>Sản phẩm đã được tạo thành công</p>
+        </div>
+        <button type="button" class="alert-close" onclick="hideCreateProductSuccessMessage()">
+            <i class="iconoir-xmark"></i>
+        </button>
     </div>
 </div>
 

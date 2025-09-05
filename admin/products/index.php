@@ -1171,5 +1171,19 @@ if ($categories_result) {
             }
         });
     </script>
+
+    <!-- Delete Success Message - Fixed Position -->
+    <div id="successMessageDeleteProduct" class="success-alert-fixed delete-success">
+        <div class="alert-icon">
+            <i class="iconoir-check-circle"></i>
+        </div>
+        <div class="alert-content">
+            <h5>Thành công!</h5>
+            <p>Sản phẩm đã được xóa thành công</p>
+        </div>
+        <button type="button" class="alert-close" onclick="hideDeleteProductSuccessMessage()">
+            <i class="iconoir-xmark"></i>
+        </button>
+    </div>
 </body>
 </html>

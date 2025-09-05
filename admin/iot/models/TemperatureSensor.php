@@ -74,7 +74,9 @@ class TemperatureSensor {
     public function updateSensor($id, $data) {
         $query = "UPDATE temperature_sensors 
                   SET sensor_name = ?, sensor_code = ?, location_id = ?, sensor_type = ?, 
-                      status = ?, last_calibration = ?, next_calibration = ?, updated_at = CURRENT_TIMESTAMP 
+                      manufacturer = ?, model = ?, serial_number = ?, installation_date = ?,
+                      min_threshold = ?, max_threshold = ?, status = ?, last_calibration = ?, 
+                      description = ?, notes = ?, updated_at = ? 
                   WHERE id = ?";
         
         $stmt = $this->db->prepare($query);
@@ -83,9 +85,17 @@ class TemperatureSensor {
             $data['sensor_code'],
             $data['location_id'],
             $data['sensor_type'],
+            $data['manufacturer'],
+            $data['model'],
+            $data['serial_number'],
+            $data['installation_date'],
+            $data['min_threshold'],
+            $data['max_threshold'],
             $data['status'],
             $data['last_calibration'],
-            $data['next_calibration'],
+            $data['description'],
+            $data['notes'],
+            $data['updated_at'],
             $id
         ]);
     }
@@ -143,5 +153,12 @@ class TemperatureSensor {
         $stmt->execute($params);
         return $stmt->rowCount() > 0;
     }
+
+    // Kiểm tra mã cảm biến đã tồn tại (alias)
+    public function sensorCodeExists($sensorCode, $excludeId = null) {
+        return $this->isSensorCodeExists($sensorCode, $excludeId);
+    }
+
+
 }
 ?>

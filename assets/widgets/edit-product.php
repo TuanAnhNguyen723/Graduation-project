@@ -19,17 +19,6 @@
 
         <!-- Modal Body -->
         <div class="custom-modal-body">
-            <!-- Success Message -->
-            <div id="successMessageEditProduct" class="success-alert">
-                <div class="alert-icon">
-                    <i class="iconoir-check-circle"></i>
-                </div>
-                <div class="alert-content">
-                    <h5>Thành công!</h5>
-                    <p>Sản phẩm đã được cập nhật thành công</p>
-                </div>
-            </div>
-
             <!-- Main Form -->
             <form id="editProductForm" class="product-form">
                 <input type="hidden" id="editProductId" name="id">
@@ -89,7 +78,7 @@
                 <!-- Pricing Section -->
                 <div class="form-section">
                     <div class="section-header">
-                        <i class="iconoir-tag" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px;"></i>
+                        <i class="iconoir-cash" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px;"></i>
                         <h5>Thông tin giá</h5>
                     </div>
 
@@ -151,7 +140,7 @@
                 <!-- Image Section -->
                 <div class="form-section">
                     <div class="section-header">
-                        <i class="iconoir-image-plus" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px;"></i>
+                        <i class="iconoir-camera" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px;"></i>
                         <h5>Hình ảnh sản phẩm</h5>
                     </div>
 
@@ -212,5 +201,19 @@
                 </button>
             </div>
         </div>
+    </div>
+    
+    <!-- Success Message - Fixed Position -->
+    <div id="successMessageEditProduct" class="success-alert-fixed">
+        <div class="alert-icon">
+            <i class="iconoir-check-circle"></i>
+        </div>
+        <div class="alert-content">
+            <h5>Thành công!</h5>
+            <p>Sản phẩm đã được cập nhật thành công</p>
+        </div>
+        <button type="button" class="alert-close" onclick="hideEditProductSuccessMessage()">
+            <i class="iconoir-xmark"></i>
+        </button>
     </div>
 </div>
