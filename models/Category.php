@@ -14,6 +14,7 @@ class Category {
     public $slug;
     public $description;
     public $parent_id;
+    public $location_id;
     public $image;
     public $temperature_type;
     public $humidity_type;
@@ -84,8 +85,8 @@ class Category {
      */
     public function create() {
         $query = "INSERT INTO " . $this->table_name . " 
-                  (name, slug, description, parent_id, image, temperature_type, humidity_type, is_active, sort_order) 
-                  VALUES (:name, :slug, :description, :parent_id, :image, :temperature_type, :humidity_type, :is_active, :sort_order)";
+                  (name, slug, description, parent_id, location_id, image, temperature_type, humidity_type, is_active, sort_order) 
+                  VALUES (:name, :slug, :description, :parent_id, :location_id, :image, :temperature_type, :humidity_type, :is_active, :sort_order)";
 
         $stmt = $this->conn->prepare($query);
 
@@ -100,6 +101,7 @@ class Category {
         $stmt->bindParam(":slug", $this->slug);
         $stmt->bindParam(":description", $this->description);
         $stmt->bindParam(":parent_id", $this->parent_id);
+        $stmt->bindParam(":location_id", $this->location_id);
         $stmt->bindParam(":image", $this->image);
         $stmt->bindParam(":temperature_type", $this->temperature_type);
         $stmt->bindParam(":humidity_type", $this->humidity_type);
@@ -118,7 +120,7 @@ class Category {
     public function update() {
         $query = "UPDATE " . $this->table_name . " 
                   SET name = :name, slug = :slug, description = :description, 
-                      parent_id = :parent_id, image = :image, temperature_type = :temperature_type, 
+                      parent_id = :parent_id, location_id = :location_id, image = :image, temperature_type = :temperature_type, 
                       humidity_type = :humidity_type, is_active = :is_active, sort_order = :sort_order 
                   WHERE id = :id";
 
@@ -135,6 +137,7 @@ class Category {
         $stmt->bindParam(":slug", $this->slug);
         $stmt->bindParam(":description", $this->description);
         $stmt->bindParam(":parent_id", $this->parent_id);
+        $stmt->bindParam(":location_id", $this->location_id);
         $stmt->bindParam(":image", $this->image);
         $stmt->bindParam(":temperature_type", $this->temperature_type);
         $stmt->bindParam(":humidity_type", $this->humidity_type);

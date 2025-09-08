@@ -210,6 +210,7 @@ try {
                 $category->description = trim($data['description']);
                 $category->parent_id = !empty($data['parent_id']) ? (int)$data['parent_id'] : null;
                 $category->image = $image_path;
+                $category->location_id = !empty($data['location_id']) ? (int)$data['location_id'] : null;
                 $category->temperature_type = isset($data['temperature_type']) ? $data['temperature_type'] : 'ambient';
                 $category->humidity_type = isset($data['humidity_type']) ? $data['humidity_type'] : 'ambient';
                 $category->is_active = isset($data['is_active']) ? (int)$data['is_active'] : 1;
@@ -287,6 +288,7 @@ try {
             $category->slug = isset($data['slug']) ? $data['slug'] : $category->createSlug($data['name']);
             $category->description = isset($data['description']) ? $data['description'] : '';
             $category->parent_id = isset($data['parent_id']) ? $data['parent_id'] : null;
+            $category->location_id = isset($data['location_id']) && !empty($data['location_id']) ? (int)$data['location_id'] : null;
             $category->image = $image_path;
             $category->temperature_type = isset($data['temperature_type']) ? $data['temperature_type'] : 'ambient';
             $category->humidity_type = isset($data['humidity_type']) ? $data['humidity_type'] : 'ambient';

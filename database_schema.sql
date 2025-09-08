@@ -4,6 +4,9 @@
 
 -- Thêm trường temperature_type vào bảng categories nếu chưa có
 ALTER TABLE categories ADD COLUMN IF NOT EXISTS temperature_type ENUM('frozen', 'chilled', 'ambient') DEFAULT 'ambient' COMMENT 'Loại nhiệt độ: frozen(≤-18°C), chilled(0-5°C), ambient(15-33°C)';
+-- Liên kết danh mục với vị trí kho
+ALTER TABLE categories ADD COLUMN IF NOT EXISTS location_id INT NULL AFTER parent_id;
+ALTER TABLE categories ADD CONSTRAINT fk_categories_location_id FOREIGN KEY (location_id) REFERENCES warehouse_locations(id) ON DELETE SET NULL;
 
 -- Thêm trường humidity_type vào bảng categories nếu chưa có
 ALTER TABLE categories ADD COLUMN IF NOT EXISTS humidity_type ENUM('frozen', 'chilled', 'ambient') DEFAULT 'ambient' COMMENT 'Loại độ ẩm: frozen(85-95%, nguy hiểm:<80%), chilled(85-90%, nguy hiểm:<80%), ambient(50-60%, nguy hiểm:<40% hoặc >65%)';
@@ -37,6 +40,7 @@ CREATE TABLE IF NOT EXISTS categories (
     slug VARCHAR(255) UNIQUE NOT NULL,
     description TEXT,
     parent_id INT DEFAULT NULL,
+    location_id INT DEFAULT NULL,
     image VARCHAR(255),
     temperature_type ENUM('frozen', 'chilled', 'ambient') DEFAULT 'ambient' COMMENT 'Loại nhiệt độ: frozen(≤-18°C), chilled(0-5°C), ambient(15-33°C)',
     humidity_type ENUM('frozen', 'chilled', 'ambient') DEFAULT 'ambient' COMMENT 'Loại độ ẩm: frozen(85-95%, nguy hiểm:<80%), chilled(85-90%, nguy hiểm:<80%), ambient(50-60%, nguy hiểm:<40% hoặc >65%)',
@@ -44,7 +48,8 @@ CREATE TABLE IF NOT EXISTS categories (
     sort_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (parent_id) REFERENCES categories(id) ON DELETE SET NULL
+    FOREIGN KEY (parent_id) REFERENCES categories(id) ON DELETE SET NULL,
+    FOREIGN KEY (location_id) REFERENCES warehouse_locations(id) ON DELETE SET NULL
 );
 
 -- BẢNG PRODUCTS (SẢN PHẨM)
@@ -122,6 +127,20 @@ CREATE TABLE IF NOT EXISTS temperature_readings (
     FOREIGN KEY (sensor_id) REFERENCES temperature_sensors(id) ON DELETE CASCADE
 );
 
+-- BẢNG PRODUCT_LOCATIONS (LIÊN KẾT SẢN PHẨM - VỊ TRÍ KHO)
+CREATE TABLE IF NOT EXISTS product_locations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    location_id INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 0,
+    reserved_quantity INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_product_location (product_id, location_id),
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+    FOREIGN KEY (location_id) REFERENCES warehouse_locations(id) ON DELETE CASCADE
+);
+
 -- ==============================================================
 -- INSERT DỮ LIỆU MẪU
 -- ==============================================================
@@ -188,6 +207,7 @@ INSERT INTO temperature_readings (sensor_id, temperature, humidity) VALUES
 CREATE INDEX idx_categories_slug ON categories(slug);
 CREATE INDEX idx_categories_parent_id ON categories(parent_id);
 CREATE INDEX idx_categories_is_active ON categories(is_active);
+CREATE INDEX idx_categories_location_id ON categories(location_id);
 
 -- Indexes cho bảng products
 CREATE INDEX idx_products_slug ON products(slug);
@@ -209,6 +229,10 @@ CREATE INDEX idx_temperature_sensors_status ON temperature_sensors(status);
 -- Indexes cho bảng temperature_readings
 CREATE INDEX idx_temperature_readings_sensor_id ON temperature_readings(sensor_id);
 CREATE INDEX idx_temperature_readings_timestamp ON temperature_readings(reading_timestamp);
+
+-- Indexes cho bảng product_locations
+CREATE INDEX idx_product_locations_product_id ON product_locations(product_id);
+CREATE INDEX idx_product_locations_location_id ON product_locations(location_id);
 
 -- ==============================================================
 -- BẢNG NOTIFICATIONS (THÔNG BÁO)

@@ -66,6 +66,16 @@
                         </div>
 
                         <div class="form-field">
+                            <label for="categoryLocationId" class="field-label">Vị trí kho</label>
+                            <div class="input-wrapper">
+                                <select class="form-select" id="categoryLocationId" name="location_id">
+                                    <option value="">Chưa gán vị trí</option>
+                                </select>
+                                <small class="text-muted">Chọn vị trí kho áp dụng cho danh mục</small>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
                             <label for="temperatureType" class="field-label">Loại nhiệt độ <span class="required">*</span></label>
                             <div class="input-wrapper">
                                 <select class="form-select" id="temperatureType" name="temperature_type" required>

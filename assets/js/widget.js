@@ -223,6 +223,8 @@
       resetCreateCategoryForm();
       const first = document.getElementById('categoryName'); if (first) first.focus();
       document.body.style.overflow = 'hidden';
+        // Load locations for category select
+      loadLocationsForCategoryCreate();
     }
   }
 
@@ -355,11 +357,29 @@
   window.submitCreateCategoryForm = submitCreateCategoryForm;
   window.previewCategoryImage = previewCategoryImage;
   
+  // Load locations for category create
+  async function loadLocationsForCategoryCreate() {
+    try {
+      const response = await fetch('../../admin/iot/api/locations.php');
+      const result = await response.json();
+      const select = document.getElementById('categoryLocationId');
+      if (select && result.success && Array.isArray(result.data)) {
+        select.innerHTML = '<option value="">Chưa gán vị trí</option>';
+        result.data.forEach(loc => {
+          const opt = document.createElement('option');
+          opt.value = loc.id;
+          opt.textContent = `${loc.location_name} (${loc.location_code})`;
+          select.appendChild(opt);
+        });
+      }
+    } catch (e) { console.error('Load locations failed', e); }
+  }
+  
   // Edit Category Modal Functions
   let isEditCategoryModalOpen = false;
   let currentEditCategoryId = null;
 
-  function openEditCategoryModal(categoryId, name, slug, description, parentId, sortOrder, isActive, image, temperatureType, humidityType) {
+  function openEditCategoryModal(categoryId, name, slug, description, parentId, locationId, sortOrder, isActive, image, temperatureType, humidityType) {
     currentEditCategoryId = categoryId;
     
     // Populate form fields
@@ -395,6 +415,29 @@
     
     // Load parent categories for dropdown
     loadParentCategoriesForEdit();
+
+    // Load locations for edit dropdown và set giá trị hiện tại
+    fetch('../../admin/iot/api/locations.php')
+      .then(r => r.json())
+      .then(result => {
+        if (result.success && Array.isArray(result.data)) {
+          const select = document.getElementById('editCategoryLocationId');
+          if (select) {
+            const first = select.firstElementChild;
+            select.innerHTML = '';
+            if (first) select.appendChild(first);
+            result.data.forEach(loc => {
+              const opt = document.createElement('option');
+              opt.value = loc.id;
+              opt.textContent = `${loc.location_name} (${loc.location_code})`;
+              select.appendChild(opt);
+            });
+            // Set selected value
+            if (locationId) select.value = String(locationId);
+          }
+        }
+      })
+      .catch(err => console.error('Load locations failed', err));
     
     // Show modal
     const modal = document.getElementById('editCategoryModal');

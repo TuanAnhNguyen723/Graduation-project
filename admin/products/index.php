@@ -722,15 +722,6 @@ if ($categories_result) {
                                                 Không có sản phẩm nào trong danh mục đã chọn.
                                             <?php endif; ?>
                                         </p>
-                                        <div class="search-suggestions">
-                                            <h6><i class="iconoir-lightbulb"></i> Gợi ý tìm kiếm:</h6>
-                                            <ul>
-                                                <li>Kiểm tra chính tả từ khóa tìm kiếm</li>
-                                                <li>Thử từ khóa ngắn hơn hoặc khác</li>
-                                                <li>Chọn danh mục khác</li>
-                                                <li>Xóa bộ lọc để xem tất cả sản phẩm</li>
-                                            </ul>
-                                        </div>
                                     </div>
                                 <?php else: ?>
                                     <div class="card empty-state">

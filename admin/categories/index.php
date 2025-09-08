@@ -705,14 +705,6 @@ if(!empty($search_results)) {
                                         <i class="iconoir-search"></i>
                                         <h5>Không tìm thấy danh mục nào</h5>
                                         <p>Không có danh mục nào khớp với từ khóa "<strong><?php echo htmlspecialchars($search_keyword); ?></strong>".</p>
-                                        <div class="search-suggestions">
-                                            <h6><i class="iconoir-lightbulb"></i> Gợi ý tìm kiếm:</h6>
-                                            <ul>
-                                                <li>Kiểm tra chính tả từ khóa tìm kiếm</li>
-                                                <li>Thử từ khóa ngắn hơn hoặc khác</li>
-                                                <li>Xóa bộ lọc để xem tất cả danh mục</li>
-                                            </ul>
-                                        </div>
                                     </div>
                                 <?php else: ?>
                                     <div class="card empty-state">
@@ -867,7 +859,7 @@ if(!empty($search_results)) {
                                             <div class="d-flex justify-content-between mt-5">
                                                 <button type="button" 
                                                         class="btn btn-outline-primary" 
-                                                        onclick="openEditCategoryModal(<?php echo $cat['id']; ?>, '<?php echo htmlspecialchars(addslashes($cat['name'])); ?>', '<?php echo htmlspecialchars(addslashes($cat['slug'])); ?>', '<?php echo htmlspecialchars(addslashes($cat['description'])); ?>', <?php echo $cat['parent_id'] ?: 'null'; ?>, <?php echo $cat['sort_order']; ?>, <?php echo $cat['is_active']; ?>, '<?php echo htmlspecialchars(addslashes($cat['image'])); ?>', '<?php echo isset($cat['temperature_type']) ? $cat['temperature_type'] : 'ambient'; ?>', '<?php echo isset($cat['humidity_type']) ? $cat['humidity_type'] : 'ambient'; ?>')">
+                                                        onclick="openEditCategoryModal(<?php echo $cat['id']; ?>, '<?php echo htmlspecialchars(addslashes($cat['name'])); ?>', '<?php echo htmlspecialchars(addslashes($cat['slug'])); ?>', '<?php echo htmlspecialchars(addslashes($cat['description'])); ?>', <?php echo $cat['parent_id'] ?: 'null'; ?>, <?php echo $cat['location_id'] ?: 'null'; ?>, <?php echo $cat['sort_order']; ?>, <?php echo $cat['is_active']; ?>, '<?php echo htmlspecialchars(addslashes($cat['image'])); ?>', '<?php echo isset($cat['temperature_type']) ? $cat['temperature_type'] : 'ambient'; ?>', '<?php echo isset($cat['humidity_type']) ? $cat['humidity_type'] : 'ambient'; ?>')">
                                                     <i class="iconoir-edit"></i> Sửa
                                                 </button>
                                                 <button type="button" 
@@ -882,8 +874,15 @@ if(!empty($search_results)) {
                                         <div class="card-footer bg-transparent border-top">
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <small class="text-muted">
-                                                    <i class="iconoir-calendar"></i> 
+                                                    <i class="iconoir-calendar"></i>
                                                     <?php echo date('d/m/Y H:i', strtotime($cat['created_at'])); ?>
+                                                </small>
+                                                <small class="text-muted">
+                                                    <?php if (!empty($cat['location_id'])): ?>
+                                                        Vị trí kho: <span class="badge bg-info-subtle text-info">ID <?php echo (int)$cat['location_id']; ?></span>
+                                                    <?php else: ?>
+                                                        Vị trí kho: <span class="badge bg-secondary-subtle text-secondary">Chưa gán</span>
+                                                    <?php endif; ?>
                                                 </small>
                                             </div>
                                         </div>

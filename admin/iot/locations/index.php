@@ -17,6 +17,7 @@ try {
     $locations = $locationModel->getAllLocations();
     $capacityStats = $locationModel->getCapacityStats();
     $capacityStatsByZone = $locationModel->getCapacityStatsByZone();
+    $productCounts = $locationModel->getProductCountsPerLocation();
     
 } catch(Exception $e) {
     $error = "Lỗi kết nối database: " . $e->getMessage();
@@ -165,14 +166,22 @@ try {
                                         <span class="badge bg-primary"><?php echo htmlspecialchars($location['area']); ?></span>
                                     </div>
                                     
+                                    <?php 
+                                        $maxCap = (int)$location['max_capacity'];
+                                        $baseUsed = (int)$location['current_capacity'];
+                                        $catProducts = isset($productCounts[$location['id']]) ? (int)$productCounts[$location['id']] : 0;
+                                        $usedTotal = min($maxCap, max(0, $baseUsed + $catProducts));
+                                        $freeTotal = max(0, $maxCap - $usedTotal);
+                                        $percentUsed = $maxCap > 0 ? ($usedTotal * 100.0 / $maxCap) : 0;
+                                    ?>
                                     <div class="mb-3">
-                                        <p class="mb-1"><strong>Sức chứa:</strong> <?php echo $location['max_capacity']; ?> sản phẩm</p>
-                                        <p class="mb-1"><strong>Đã sử dụng:</strong> <?php echo $location['current_capacity']; ?> sản phẩm</p>
-                                        <p class="mb-1"><strong>Còn trống:</strong> <?php echo $location['max_capacity'] - $location['current_capacity']; ?> sản phẩm</p>
+                                        <p class="mb-1"><strong>Sức chứa:</strong> <?php echo $maxCap; ?> sản phẩm</p>
+                                        <p class="mb-1"><strong>Đã sử dụng:</strong> <?php echo $usedTotal; ?> sản phẩm</p>
+                                        <p class="mb-1"><strong>Còn trống:</strong> <?php echo $freeTotal; ?> sản phẩm</p>
                                     </div>
                                     
                                     <div class="capacity-bar mb-3">
-                                        <div class="capacity-fill" style="width: <?php echo ($location['current_capacity'] / $location['max_capacity']) * 100; ?>%"></div>
+                                        <div class="capacity-fill" style="width: <?php echo $percentUsed; ?>%"></div>
                                     </div>
                                     
                                     <div class="mt-3">

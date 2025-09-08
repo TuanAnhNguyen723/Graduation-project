@@ -169,6 +169,25 @@ class WarehouseLocation {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    // Lấy số sản phẩm theo vị trí (tính qua danh mục gắn với vị trí)
+    public function getProductCountsPerLocation() {
+        $query = "SELECT wl.id AS location_id, COUNT(p.id) AS product_count
+                  FROM warehouse_locations wl
+                  LEFT JOIN categories c ON c.location_id = wl.id
+                  LEFT JOIN products p ON p.category_id = c.id
+                  WHERE wl.is_active = 1
+                  GROUP BY wl.id";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $result = [];
+        foreach ($rows as $row) {
+            $result[(int)$row['location_id']] = (int)$row['product_count'];
+        }
+        return $result;
+    }
     
     // Kiểm tra mã vị trí đã tồn tại
     public function isLocationCodeExists($locationCode, $excludeId = null) {
