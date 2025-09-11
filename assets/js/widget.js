@@ -1091,15 +1091,26 @@
     loadCategoriesForEdit().then(() => {
       // Sau khi load xong danh mục, set giá trị danh mục
       const categorySelect = document.getElementById('editProductCategory');
-      if (categorySelect && categoryId) {
-        categorySelect.value = categoryId;
-        // Xóa lỗi validation
-        categorySelect.classList.remove('error');
-        categorySelect.classList.add('success');
-        const errorEl = document.getElementById('editProductCategoryError');
-        if (errorEl) {
-          errorEl.textContent = '';
-          errorEl.classList.remove('show');
+      if (categorySelect) {
+        if (categoryId) {
+          categorySelect.value = categoryId;
+          // Xóa lỗi validation
+          categorySelect.classList.remove('error');
+          categorySelect.classList.add('success');
+          const errorEl = document.getElementById('editProductCategoryError');
+          if (errorEl) {
+            errorEl.textContent = '';
+            errorEl.classList.remove('show');
+          }
+          // Cập nhật ngay thông tin nhiệt độ & độ ẩm theo danh mục hiện có
+          if (typeof updateEditTemperatureHumidityInfo === 'function') {
+            updateEditTemperatureHumidityInfo(categoryId);
+          }
+        } else {
+          // Không có danh mục -> reset khu vực thông tin môi trường
+          if (typeof resetEditTemperatureHumidityInfo === 'function') {
+            resetEditTemperatureHumidityInfo();
+          }
         }
       }
     });
