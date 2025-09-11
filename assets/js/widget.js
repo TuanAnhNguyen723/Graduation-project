@@ -482,6 +482,13 @@
   window.updateHumidityDangerDisplay = updateHumidityDangerDisplay;
   window.getZoneFromTemperatureData = getZoneFromTemperatureData;
   window.getZoneFromHumidityData = getZoneFromHumidityData;
+  // Also expose edit-product helpers from this IIFE where they are defined
+  window.updateEditTemperatureHumidityInfo = updateEditTemperatureHumidityInfo;
+  window.resetEditTemperatureHumidityInfo = resetEditTemperatureHumidityInfo;
+  window.updateEditTemperatureDisplay = updateEditTemperatureDisplay;
+  window.updateEditHumidityDisplay = updateEditHumidityDisplay;
+  window.updateEditTemperatureDangerDisplay = updateEditTemperatureDangerDisplay;
+  window.updateEditHumidityDangerDisplay = updateEditHumidityDangerDisplay;
 })();
 
 // Categories widget
@@ -657,12 +664,18 @@
     currentEditCategoryId = categoryId;
     
     // Populate form fields
-    document.getElementById('editCategoryId').value = categoryId;
-    document.getElementById('editCategoryName').value = name;
-    document.getElementById('editCategorySlug').value = slug;
-    document.getElementById('editCategoryDescription').value = description;
-    document.getElementById('editSortOrder').value = sortOrder;
-    document.getElementById('editCategoryStatus').value = isActive;
+    const idEl = document.getElementById('editCategoryId');
+    if (idEl) idEl.value = categoryId;
+    const nameEl = document.getElementById('editCategoryName');
+    if (nameEl) nameEl.value = name || '';
+    const slugEl = document.getElementById('editCategorySlug');
+    if (slugEl) slugEl.value = slug || '';
+    const descEl = document.getElementById('editCategoryDescription');
+    if (descEl) descEl.value = description || '';
+    const sortEl = document.getElementById('editSortOrder');
+    if (sortEl) sortEl.value = (typeof sortOrder !== 'undefined' && sortOrder !== null) ? sortOrder : 0;
+    const statusEl = document.getElementById('editCategoryStatus');
+    if (statusEl) statusEl.value = (typeof isActive !== 'undefined' && isActive !== null) ? String(isActive) : '1';
     // Nhiệt độ/độ ẩm được ấn định theo vị trí; không còn trường riêng trong danh mục
     
     // Set parent category
@@ -675,16 +688,20 @@
     const currentImageContainer = document.getElementById('currentImageContainer');
     const currentImage = document.getElementById('currentCategoryImage');
     
-    if (image && image.trim() !== '') {
-      currentImage.src = '../../' + image;
-      currentImageContainer.style.display = 'block';
-    } else {
-      currentImageContainer.style.display = 'none';
+    if (currentImage && currentImageContainer) {
+      if (image && String(image).trim() !== '') {
+        currentImage.src = '../../' + image;
+        currentImageContainer.style.display = 'block';
+      } else {
+        currentImageContainer.style.display = 'none';
+      }
     }
     
     // Reset image preview
-    document.getElementById('editImagePreviewContainer').style.display = 'none';
-    document.getElementById('editCategoryImage').value = '';
+    const previewContainer = document.getElementById('editImagePreviewContainer');
+    if (previewContainer) previewContainer.style.display = 'none';
+    const fileInput = document.getElementById('editCategoryImage');
+    if (fileInput) fileInput.value = '';
     
     // Load parent categories for dropdown
     loadParentCategoriesForEdit();
@@ -717,12 +734,6 @@
     if (modal) {
       modal.classList.add('show');
       setTimeout(() => { modal.querySelector('.custom-modal').classList.add('show'); }, 10);
-      isEditCategoryModalOpen = true;
-      document.body.style.overflow = 'hidden';
-      
-      // Focus on first field
-      const first = document.getElementById('editCategoryName'); 
-      if (first) first.focus();
     }
   }
 
@@ -1462,12 +1473,26 @@
   window.closeEditProductModal = closeEditProductModal;
   window.submitEditProductForm = submitEditProductForm;
   window.previewEditProductImage = previewEditProductImage;
-  window.updateEditTemperatureHumidityInfo = updateEditTemperatureHumidityInfo;
-  window.resetEditTemperatureHumidityInfo = resetEditTemperatureHumidityInfo;
-  window.updateEditTemperatureDisplay = updateEditTemperatureDisplay;
-  window.updateEditHumidityDisplay = updateEditHumidityDisplay;
-  window.updateEditTemperatureDangerDisplay = updateEditTemperatureDangerDisplay;
-  window.updateEditHumidityDangerDisplay = updateEditHumidityDangerDisplay;
+  // These helpers are defined in the Products widget IIFE above.
+  // Guard to avoid ReferenceError if order changes or when this block is executed on pages without those definitions.
+  if (typeof updateEditTemperatureHumidityInfo === 'function') {
+    window.updateEditTemperatureHumidityInfo = updateEditTemperatureHumidityInfo;
+  }
+  if (typeof resetEditTemperatureHumidityInfo === 'function') {
+    window.resetEditTemperatureHumidityInfo = resetEditTemperatureHumidityInfo;
+  }
+  if (typeof updateEditTemperatureDisplay === 'function') {
+    window.updateEditTemperatureDisplay = updateEditTemperatureDisplay;
+  }
+  if (typeof updateEditHumidityDisplay === 'function') {
+    window.updateEditHumidityDisplay = updateEditHumidityDisplay;
+  }
+  if (typeof updateEditTemperatureDangerDisplay === 'function') {
+    window.updateEditTemperatureDangerDisplay = updateEditTemperatureDangerDisplay;
+  }
+  if (typeof updateEditHumidityDangerDisplay === 'function') {
+    window.updateEditHumidityDangerDisplay = updateEditHumidityDangerDisplay;
+  }
 })();
 
 // Sensor Edit Modal Functions
