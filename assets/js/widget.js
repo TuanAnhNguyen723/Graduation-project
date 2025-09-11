@@ -474,6 +474,14 @@
   window.closeCreateProductModal = closeCreateProductModal;
   window.submitCreateProductForm = submitCreateProductForm;
   window.loadCategoriesForCreate = loadCategoriesForCreate;
+  window.updateTemperatureHumidityInfo = updateTemperatureHumidityInfo;
+  window.resetTemperatureHumidityInfo = resetTemperatureHumidityInfo;
+  window.updateTemperatureDisplay = updateTemperatureDisplay;
+  window.updateHumidityDisplay = updateHumidityDisplay;
+  window.updateTemperatureDangerDisplay = updateTemperatureDangerDisplay;
+  window.updateHumidityDangerDisplay = updateHumidityDangerDisplay;
+  window.getZoneFromTemperatureData = getZoneFromTemperatureData;
+  window.getZoneFromHumidityData = getZoneFromHumidityData;
 })();
 
 // Categories widget
@@ -1454,6 +1462,12 @@
   window.closeEditProductModal = closeEditProductModal;
   window.submitEditProductForm = submitEditProductForm;
   window.previewEditProductImage = previewEditProductImage;
+  window.updateEditTemperatureHumidityInfo = updateEditTemperatureHumidityInfo;
+  window.resetEditTemperatureHumidityInfo = resetEditTemperatureHumidityInfo;
+  window.updateEditTemperatureDisplay = updateEditTemperatureDisplay;
+  window.updateEditHumidityDisplay = updateEditHumidityDisplay;
+  window.updateEditTemperatureDangerDisplay = updateEditTemperatureDangerDisplay;
+  window.updateEditHumidityDangerDisplay = updateEditHumidityDangerDisplay;
 })();
 
 // Sensor Edit Modal Functions
