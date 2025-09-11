@@ -34,7 +34,7 @@ class TemperatureSensor {
 
     // Lấy cảm biến theo code
     public function getSensorByCode($sensorCode) {
-        $query = "SELECT ts.*, wl.location_code, wl.location_name 
+        $query = "SELECT ts.*, wl.location_code, wl.location_name, wl.temperature_zone 
                   FROM temperature_sensors ts 
                   LEFT JOIN warehouse_locations wl ON ts.location_id = wl.id 
                   WHERE ts.sensor_code = ? AND ts.is_active = 1";

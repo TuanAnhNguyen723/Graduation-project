@@ -61,32 +61,98 @@ try {
                 throw new Exception('Độ ẩm không hợp lệ (0% đến 100%)');
             }
             
-            // Thêm dữ liệu vào database
+            // Lưu reading
             $success = $readingModel->addReadingFromIoT($sensorCode, $temperature, $humidity);
-            
-            if ($success) {
-                //Update bang sensor
-                $sensorModel->updateCurrentValues($sensorCode, $temperature, $humidity);
-
-                // Lấy thông tin cảm biến để trả về
-                $sensor = $sensorModel->getSensorByCode($sensorCode);
-                
-                $response = [
-                    'success' => true,
-                    'message' => 'Dữ liệu đã được lưu thành công',
-                    'data' => [
-                        'sensor_code' => $sensorCode,
-                        'temperature' => $temperature,
-                        'humidity' => $humidity,
-                        'timestamp' => date('Y-m-d H:i:s'),
-                        'sensor_info' => $sensor
-                    ]
-                ];
-                
-                http_response_code(201);
-            } else {
+            if (!$success) {
                 throw new Exception('Không thể lưu dữ liệu');
             }
+
+            // Cập nhật giá trị hiện tại cảm biến
+            $sensorModel->updateCurrentValues($sensorCode, $temperature, $humidity);
+
+            // Lấy thông tin cảm biến (kèm zone vị trí)
+            $sensor = $sensorModel->getSensorByCode($sensorCode);
+
+            // Xác định ngưỡng nguy hiểm theo zone vị trí
+            $zone = $sensor['temperature_zone'] ?? 'ambient';
+            $tempDangerMin = null; $tempDangerMax = null; $humidityDangerMin = null; $humidityDangerMax = null;
+            if ($zone === 'frozen') {
+                $tempDangerMax = -18.0; // > -18°C là nguy hiểm
+                $humidityDangerMin = 85.0; $humidityDangerMax = 95.0;
+            } elseif ($zone === 'chilled') {
+                $tempDangerMax = 8.0; // > 8°C là nguy hiểm
+                $humidityDangerMin = 85.0; $humidityDangerMax = 90.0;
+            } else { // ambient
+                $tempDangerMin = 0.0; $tempDangerMax = 37.0; // <0°C hoặc >37°C
+                $humidityDangerMin = 50.0; $humidityDangerMax = 60.0; // ngoài khoảng 50-60%
+            }
+
+            // Kiểm tra vi phạm để bắn thông báo
+            $alerts = [];
+            $violatedTemp = ($tempDangerMin !== null && $temperature < $tempDangerMin) || ($tempDangerMax !== null && $temperature > $tempDangerMax);
+            $violatedHumidity = ($humidity !== null) && (($humidityDangerMin !== null && $humidity < $humidityDangerMin) || ($humidityDangerMax !== null && $humidity > $humidityDangerMax));
+
+            if ($violatedTemp) {
+                $alerts[] = [
+                    'title' => 'Cảnh báo nhiệt độ vượt ngưỡng',
+                    'message' => sprintf('Cảm biến %s tại %s: Nhiệt độ %.2f°C vượt ngưỡng an toàn (%s%s%s).',
+                        $sensor['sensor_name'] ?? $sensorCode,
+                        $sensor['location_name'] ?? 'Không rõ vị trí',
+                        $temperature,
+                        $tempDangerMin !== null ? $tempDangerMin . '°C - ' : '',
+                        $tempDangerMax !== null ? $tempDangerMax . '°C' : '',
+                        ($tempDangerMin === null && $tempDangerMax !== null) ? ' (giới hạn trên)' : ''
+                    ),
+                    'icon' => 'iconoir-temperature-high',
+                    'icon_color' => 'danger'
+                ];
+            }
+
+            if ($violatedHumidity) {
+                $alerts[] = [
+                    'title' => 'Cảnh báo độ ẩm vượt ngưỡng',
+                    'message' => sprintf('Cảm biến %s tại %s: Độ ẩm %.2f%% vượt ngưỡng an toàn (%s - %s%%).',
+                        $sensor['sensor_name'] ?? $sensorCode,
+                        $sensor['location_name'] ?? 'Không rõ vị trí',
+                        $humidity,
+                        number_format($humidityDangerMin, 0),
+                        number_format($humidityDangerMax, 0)
+                    ),
+                    'icon' => 'iconoir-drop',
+                    'icon_color' => 'warning'
+                ];
+            }
+
+            // Nếu có vi phạm -> tạo notification
+            if (!empty($alerts)) {
+                require_once '../../../config/database.php';
+                $db2 = new Database();
+                $conn2 = $db2->getConnection();
+                $stmt = $conn2->prepare("INSERT INTO notifications (title, message, type, icon, icon_color, related_id, related_type) VALUES (?, ?, 'sensor', ?, ?, ?, 'sensor')");
+                foreach ($alerts as $a) {
+                    $stmt->execute([
+                        $a['title'],
+                        $a['message'],
+                        $a['icon'],
+                        $a['icon_color'],
+                        $sensor['id'] ?? null
+                    ]);
+                }
+            }
+
+            $response = [
+                'success' => true,
+                'message' => 'Dữ liệu đã được lưu thành công',
+                'data' => [
+                    'sensor_code' => $sensorCode,
+                    'temperature' => $temperature,
+                    'humidity' => $humidity,
+                    'timestamp' => date('Y-m-d H:i:s'),
+                    'sensor_info' => $sensor,
+                    'alerts_created' => count($alerts)
+                ]
+            ];
+            http_response_code(201);
             break;
             
         case 'GET':
