@@ -756,13 +756,16 @@ if(!empty($search_results)) {
                                                     <small class="text-muted d-block mb-1">Nhiệt độ</small>
                                                     <div>
                                                         <?php 
-                                                        $temp_type = isset($cat['temperature_type']) ? $cat['temperature_type'] : 'ambient';
+                                                        // Lấy temperature_zone từ vị trí kho thay vì temperature_type từ category
+                                                        $product = new Product();
+                                                        $zone = $product->getTemperatureZoneFromCategory($cat['id']);
+                                                        
                                                         $temp_labels = [
                                                             'frozen' => ['Đông lạnh', 'bg-info-subtle text-info'],
                                                             'chilled' => ['Lạnh mát', 'bg-primary-subtle text-primary'],
                                                             'ambient' => ['Nhiệt độ phòng', 'bg-warning-subtle text-warning']
                                                         ];
-                                                        $temp_info = $temp_labels[$temp_type] ?? $temp_labels['ambient'];
+                                                        $temp_info = $temp_labels[$zone] ?? $temp_labels['ambient'];
                                                         ?>
                                                         <span class="badge <?php echo $temp_info[1]; ?>">
                                                             <?php echo $temp_info[0]; ?>
@@ -773,13 +776,15 @@ if(!empty($search_results)) {
                                                     <small class="text-muted d-block mb-1">Độ ẩm</small>
                                                     <div>
                                                         <?php 
-                                                        $humidity_type = isset($cat['humidity_type']) ? $cat['humidity_type'] : 'ambient';
+                                                        // Lấy temperature_zone từ vị trí kho (cùng zone cho cả nhiệt độ và độ ẩm)
+                                                        $zone = $product->getTemperatureZoneFromCategory($cat['id']);
+                                                        
                                                         $humidity_labels = [
                                                             'frozen' => ['Đông lạnh (85-95%)', 'bg-info-subtle text-info'],
                                                             'chilled' => ['Lạnh mát (85-90%)', 'bg-primary-subtle text-primary'],
                                                             'ambient' => ['Phòng (50-60%)', 'bg-warning-subtle text-warning']
                                                         ];
-                                                        $humidity_info = $humidity_labels[$humidity_type] ?? $humidity_labels['ambient'];
+                                                        $humidity_info = $humidity_labels[$zone] ?? $humidity_labels['ambient'];
                                                         ?>
                                                         <span class="badge <?php echo $humidity_info[1]; ?>">
                                                             <?php echo $humidity_info[0]; ?>
@@ -820,7 +825,7 @@ if(!empty($search_results)) {
                                                                 echo '</span>';
                                                             }
                                                         } else {
-                                                            echo '<span class="badge bg-secondary-subtle text-secondary">N/A</span>';
+                                                            echo '<span class="badge bg-secondary-subtle text-secondary">Chưa gán vị trí</span>';
                                                         }
                                                         ?>
                                                     </div>
@@ -845,10 +850,10 @@ if(!empty($search_results)) {
                                                                 echo '< ' . $humidity_danger_min . '%';
                                                                 echo '</span>';
                                                             } else {
-                                                                echo '<span class="badge bg-secondary-subtle text-secondary">N/A</span>';
+                                                                echo '<span class="badge bg-secondary-subtle text-secondary">Chưa gán vị trí</span>';
                                                             }
                                                         } else {
-                                                            echo '<span class="badge bg-secondary-subtle text-secondary">N/A</span>';
+                                                            echo '<span class="badge bg-secondary-subtle text-secondary">Chưa gán vị trí</span>';
                                                         }
                                                         ?>
                                                     </div>

@@ -2,20 +2,21 @@
 -- CẬP NHẬT DATABASE HIỆN TẠI
 -- ==============================================================
 
--- Thêm trường temperature_type vào bảng categories nếu chưa có
-ALTER TABLE categories ADD COLUMN IF NOT EXISTS temperature_type ENUM('frozen', 'chilled', 'ambient') DEFAULT 'ambient' COMMENT 'Loại nhiệt độ: frozen(≤-18°C), chilled(0-5°C), ambient(15-33°C)';
+
 -- Liên kết danh mục với vị trí kho
 ALTER TABLE categories ADD COLUMN IF NOT EXISTS location_id INT NULL AFTER parent_id;
 ALTER TABLE categories ADD CONSTRAINT fk_categories_location_id FOREIGN KEY (location_id) REFERENCES warehouse_locations(id) ON DELETE SET NULL;
 
--- Thêm trường humidity_type vào bảng categories nếu chưa có
-ALTER TABLE categories ADD COLUMN IF NOT EXISTS humidity_type ENUM('frozen', 'chilled', 'ambient') DEFAULT 'ambient' COMMENT 'Loại độ ẩm: frozen(85-95%, nguy hiểm:<80%), chilled(85-90%, nguy hiểm:<80%), ambient(50-60%, nguy hiểm:<40% hoặc >65%)';
+-- Chuẩn hóa: bỏ cấu hình mức nhiệt/ẩm ở danh mục; dùng theo vị trí kho
+ALTER TABLE categories DROP COLUMN IF EXISTS temperature_type;
+-- Bỏ trường humidity_type ở danh mục (đã dùng theo vị trí)
+ALTER TABLE categories DROP COLUMN IF EXISTS humidity_type;
 
--- Cập nhật dữ liệu mẫu với temperature_type
-UPDATE categories SET temperature_type = 'ambient' WHERE temperature_type IS NULL OR temperature_type = '';
 
--- Cập nhật dữ liệu mẫu với humidity_type
-UPDATE categories SET humidity_type = 'ambient' WHERE humidity_type IS NULL OR humidity_type = '';
+ALTER TABLE warehouse_locations
+MODIFY COLUMN temperature_zone ENUM('frozen','chilled','ambient')
+    NOT NULL DEFAULT 'ambient'
+    COMMENT 'Mức môi trường áp dụng đồng thời cho nhiệt độ/độ ẩm';
 
 --Cập nhật cột humidity vào temperature_sensor
 ALTER TABLE temperature_sensors
@@ -42,8 +43,6 @@ CREATE TABLE IF NOT EXISTS categories (
     parent_id INT DEFAULT NULL,
     location_id INT DEFAULT NULL,
     image VARCHAR(255),
-    temperature_type ENUM('frozen', 'chilled', 'ambient') DEFAULT 'ambient' COMMENT 'Loại nhiệt độ: frozen(≤-18°C), chilled(0-5°C), ambient(15-33°C)',
-    humidity_type ENUM('frozen', 'chilled', 'ambient') DEFAULT 'ambient' COMMENT 'Loại độ ẩm: frozen(85-95%, nguy hiểm:<80%), chilled(85-90%, nguy hiểm:<80%), ambient(50-60%, nguy hiểm:<40% hoặc >65%)',
     is_active BOOLEAN DEFAULT TRUE,
     sort_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -81,10 +80,7 @@ CREATE TABLE IF NOT EXISTS warehouse_locations (
     location_code VARCHAR(50) UNIQUE NOT NULL,
     location_name VARCHAR(255) NOT NULL,
     area VARCHAR(100) NOT NULL,
-    row_number INT,
-    column_number INT,
-    shelf_number INT,
-    temperature_zone VARCHAR(50),
+    temperature_zone ENUM('frozen','chilled','ambient') DEFAULT 'ambient' COMMENT 'Mức môi trường áp dụng đồng thời cho nhiệt độ/độ ẩm',
     max_capacity INT NOT NULL DEFAULT 0,
     current_capacity INT NOT NULL DEFAULT 0,
     is_active BOOLEAN DEFAULT TRUE,
@@ -162,12 +158,12 @@ INSERT INTO products (name, slug, description, sku, price, sale_price, stock_qua
 
 -- INSERT DỮ LIỆU MẪU CHO BẢNG WAREHOUSE_LOCATIONS
 INSERT INTO warehouse_locations (location_code, location_name, area, row_number, column_number, shelf_number, temperature_zone, max_capacity) VALUES
-('A-01-01', 'Khu A - Hàng 1 - Cột 1', 'A', 1, 1, 1, 'cool', 1000),
-('A-01-02', 'Khu A - Hàng 1 - Cột 2', 'A', 1, 2, 1, 'cool', 1000),
-('B-01-01', 'Khu B - Hàng 1 - Cột 1', 'B', 1, 1, 1, 'normal', 800),
-('B-01-02', 'Khu B - Hàng 1 - Cột 2', 'B', 1, 2, 1, 'normal', 800),
-('C-01-01', 'Khu C - Hàng 1 - Cột 1', 'C', 1, 1, 1, 'warm', 600),
-('C-01-02', 'Khu C - Hàng 1 - Cột 2', 'C', 1, 2, 1, 'warm', 600);
+('A-01-01', 'Khu A - Hàng 1 - Cột 1', 'A', 1, 1, 1, 'ambient', 1000),
+('A-01-02', 'Khu A - Hàng 1 - Cột 2', 'A', 1, 2, 1, 'ambient', 1000),
+('B-01-01', 'Khu B - Hàng 1 - Cột 1', 'B', 1, 1, 1, 'chilled', 800),
+('B-01-02', 'Khu B - Hàng 1 - Cột 2', 'B', 1, 2, 1, 'chilled', 800),
+('C-01-01', 'Khu C - Hàng 1 - Cột 1', 'C', 1, 1, 1, 'frozen', 600),
+('C-01-02', 'Khu C - Hàng 1 - Cột 2', 'C', 1, 2, 1, 'frozen', 600);
 
 -- INSERT DỮ LIỆU MẪU CHO BẢNG TEMPERATURE_SENSORS
 INSERT INTO temperature_sensors (sensor_name, sensor_code, location_id, sensor_type) VALUES

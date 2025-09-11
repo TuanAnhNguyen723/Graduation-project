@@ -70,31 +70,7 @@
                             </div>
                         </div>
 
-                        <div class="form-field">
-                            <label for="editTemperatureType" class="field-label">Loại nhiệt độ <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <select class="form-select" id="editTemperatureType" name="temperature_type" required>
-                                    <option value="ambient">Nhiệt độ phòng (15-33°C)</option>
-                                    <option value="frozen">Đông lạnh (≤-18°C)</option>
-                                    <option value="chilled">Lạnh mát (0-5°C)</option>
-                                </select>
-                                <small class="text-muted">Chọn loại nhiệt độ phù hợp cho danh mục</small>
-                            </div>
-                            <div class="field-error" id="editTemperatureTypeError"></div>
-                        </div>
-
-                        <div class="form-field">
-                            <label for="editHumidityType" class="field-label">Loại độ ẩm <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <select class="form-select" id="editHumidityType" name="humidity_type" required>
-                                    <option value="ambient">Độ ẩm phòng (50-60%)</option>
-                                    <option value="frozen">Độ ẩm đông lạnh (85-95%)</option>
-                                    <option value="chilled">Độ ẩm lạnh (85-90%)</option>
-                                </select>
-                                <small class="text-muted">Chọn loại độ ẩm phù hợp cho danh mục</small>
-                            </div>
-                            <div class="field-error" id="editHumidityTypeError"></div>
-                        </div>
+                        
 
                         <div class="form-field">
                             <label for="editSortOrder" class="field-label">Thứ tự</label>

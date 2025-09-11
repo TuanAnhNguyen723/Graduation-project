@@ -158,13 +158,279 @@
     const stockQuantityInput = document.getElementById('stockQuantity');
     if (stockQuantityInput) stockQuantityInput.addEventListener('input', function(){ if (this.value.length>0){ const val=parseInt(this.value); if (val>=0){ this.classList.add('success'); this.classList.remove('error'); clearFieldError('stockQuantity'); } else { this.classList.remove('success'); this.classList.add('error'); showFieldError('stockQuantity','Số lượng tồn kho không được âm'); } } else { this.classList.remove('success','error'); clearFieldError('stockQuantity'); }});
     const productCategorySelect = document.getElementById('productCategory');
-    if (productCategorySelect) productCategorySelect.addEventListener('change', function(){ if (this.value){ this.classList.add('success'); this.classList.remove('error'); clearFieldError('productCategory'); } else { this.classList.remove('success'); this.classList.add('error'); showFieldError('productCategory','Vui lòng chọn danh mục'); }});
+    if (productCategorySelect) productCategorySelect.addEventListener('change', function(){ 
+      if (this.value){ 
+        this.classList.add('success'); 
+        this.classList.remove('error'); 
+        clearFieldError('productCategory'); 
+        // Cập nhật thông tin nhiệt độ và độ ẩm
+        updateTemperatureHumidityInfo(this.value);
+      } else { 
+        this.classList.remove('success'); 
+        this.classList.add('error'); 
+        showFieldError('productCategory','Vui lòng chọn danh mục'); 
+        // Reset thông tin nhiệt độ và độ ẩm
+        resetTemperatureHumidityInfo();
+      } 
+    });
     const productStatusSelect = document.getElementById('productStatus');
     if (productStatusSelect) productStatusSelect.addEventListener('change', function(){ if (this.value){ this.classList.add('success'); this.classList.remove('error'); clearFieldError('productStatus'); } else { this.classList.remove('success'); this.classList.add('error'); showFieldError('productStatus','Vui lòng chọn trạng thái'); }});
   }
 
   function setupSKUGeneration() {
     const nameInput = document.getElementById('productName'); if (nameInput) nameInput.addEventListener('blur', generateSKU);
+  }
+
+  // Cập nhật thông tin nhiệt độ và độ ẩm khi category thay đổi
+  async function updateTemperatureHumidityInfo(categoryId) {
+    try {
+      const response = await fetch(`../../api/products.php?temperature_info=1&category_id=${categoryId}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        const tempData = result.data.temperature;
+        const humidityData = result.data.humidity;
+        
+        // Cập nhật hiển thị nhiệt độ
+        updateTemperatureDisplay(tempData);
+        
+        // Cập nhật hiển thị độ ẩm
+        updateHumidityDisplay(humidityData);
+        
+        // Cập nhật hiển thị nhiệt độ nguy hiểm
+        updateTemperatureDangerDisplay(tempData);
+        
+        // Cập nhật hiển thị độ ẩm nguy hiểm
+        updateHumidityDangerDisplay(humidityData);
+      }
+    } catch (error) {
+      console.error('Error loading temperature/humidity info:', error);
+      resetTemperatureHumidityInfo();
+    }
+  }
+
+  // Reset thông tin nhiệt độ và độ ẩm
+  function resetTemperatureHumidityInfo() {
+    const elements = [
+      'temperatureInfo', 'humidityInfo', 
+      'temperatureDangerInfo', 'humidityDangerInfo'
+    ];
+    
+    elements.forEach(id => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.innerHTML = '<span class="info-text">Chọn danh mục để xem thông tin</span>';
+      }
+    });
+  }
+
+  // Cập nhật hiển thị nhiệt độ
+  function updateTemperatureDisplay(tempData) {
+    const element = document.getElementById('temperatureInfo');
+    if (!element || !tempData) return;
+    
+    const zone = getZoneFromTemperatureData(tempData);
+    const labels = {
+      'frozen': ['Đông lạnh', 'bg-info-subtle text-info'],
+      'chilled': ['Lạnh mát', 'bg-primary-subtle text-primary'],
+      'ambient': ['Nhiệt độ phòng', 'bg-warning-subtle text-warning']
+    };
+    
+    const info = labels[zone] || labels['ambient'];
+    element.innerHTML = `<span class="badge ${info[1]}">${info[0]}</span>`;
+  }
+
+  // Cập nhật hiển thị độ ẩm
+  function updateHumidityDisplay(humidityData) {
+    const element = document.getElementById('humidityInfo');
+    if (!element || !humidityData) return;
+    
+    const zone = getZoneFromHumidityData(humidityData);
+    const labels = {
+      'frozen': ['Đông lạnh (85-95%)', 'bg-info-subtle text-info'],
+      'chilled': ['Lạnh mát (85-90%)', 'bg-primary-subtle text-primary'],
+      'ambient': ['Phòng (50-60%)', 'bg-warning-subtle text-warning']
+    };
+    
+    const info = labels[zone] || labels['ambient'];
+    element.innerHTML = `<span class="badge ${info[1]}">${info[0]}</span>`;
+  }
+
+  // Cập nhật hiển thị nhiệt độ nguy hiểm
+  function updateTemperatureDangerDisplay(tempData) {
+    const element = document.getElementById('temperatureDangerInfo');
+    if (!element || !tempData) return;
+    
+    const dangerMin = tempData.dangerous_min;
+    const dangerMax = tempData.dangerous_max;
+    
+    let text = '';
+    if (dangerMin !== null && dangerMin !== undefined) {
+      text = `< ${dangerMin}°C và > ${dangerMax}°C`;
+    } else {
+      text = `> ${dangerMax}°C`;
+    }
+    
+    element.innerHTML = `<span class="badge bg-danger-subtle text-danger">${text}</span>`;
+  }
+
+  // Cập nhật hiển thị độ ẩm nguy hiểm
+  function updateHumidityDangerDisplay(humidityData) {
+    const element = document.getElementById('humidityDangerInfo');
+    if (!element || !humidityData) return;
+    
+    const dangerMin = humidityData.dangerous_min;
+    const dangerMax = humidityData.dangerous_max;
+    
+    let text = '';
+    if (dangerMin !== null && dangerMin !== undefined && dangerMax !== null && dangerMax !== undefined) {
+      text = `< ${dangerMin}% và > ${dangerMax}%`;
+    } else if (dangerMin !== null && dangerMin !== undefined) {
+      text = `< ${dangerMin}%`;
+    } else {
+      text = 'N/A';
+    }
+    
+    element.innerHTML = `<span class="badge bg-danger-subtle text-danger">${text}</span>`;
+  }
+
+  // Xác định zone từ dữ liệu nhiệt độ
+  function getZoneFromTemperatureData(tempData) {
+    if (!tempData) return 'ambient';
+    
+    const idealMin = tempData.ideal_min;
+    if (idealMin <= -18) return 'frozen';
+    if (idealMin <= 5) return 'chilled';
+    return 'ambient';
+  }
+
+  // Xác định zone từ dữ liệu độ ẩm
+  function getZoneFromHumidityData(humidityData) {
+    if (!humidityData) return 'ambient';
+    
+    const idealMin = humidityData.ideal_min;
+    const idealMax = humidityData.ideal_max;
+    
+    if (idealMin >= 85) {
+      if (idealMax >= 95) return 'frozen';
+      return 'chilled';
+    }
+    return 'ambient';
+  }
+
+  // Cập nhật thông tin nhiệt độ và độ ẩm cho edit product
+  async function updateEditTemperatureHumidityInfo(categoryId) {
+    try {
+      const response = await fetch(`../../api/products.php?temperature_info=1&category_id=${categoryId}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        const tempData = result.data.temperature;
+        const humidityData = result.data.humidity;
+        
+        // Cập nhật hiển thị nhiệt độ
+        updateEditTemperatureDisplay(tempData);
+        
+        // Cập nhật hiển thị độ ẩm
+        updateEditHumidityDisplay(humidityData);
+        
+        // Cập nhật hiển thị nhiệt độ nguy hiểm
+        updateEditTemperatureDangerDisplay(tempData);
+        
+        // Cập nhật hiển thị độ ẩm nguy hiểm
+        updateEditHumidityDangerDisplay(humidityData);
+      }
+    } catch (error) {
+      console.error('Error loading temperature/humidity info for edit:', error);
+      resetEditTemperatureHumidityInfo();
+    }
+  }
+
+  // Reset thông tin nhiệt độ và độ ẩm cho edit product
+  function resetEditTemperatureHumidityInfo() {
+    const elements = [
+      'editTemperatureInfo', 'editHumidityInfo', 
+      'editTemperatureDangerInfo', 'editHumidityDangerInfo'
+    ];
+    
+    elements.forEach(id => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.innerHTML = '<span class="info-text">Chọn danh mục để xem thông tin</span>';
+      }
+    });
+  }
+
+  // Cập nhật hiển thị nhiệt độ cho edit
+  function updateEditTemperatureDisplay(tempData) {
+    const element = document.getElementById('editTemperatureInfo');
+    if (!element || !tempData) return;
+    
+    const zone = getZoneFromTemperatureData(tempData);
+    const labels = {
+      'frozen': ['Đông lạnh', 'bg-info-subtle text-info'],
+      'chilled': ['Lạnh mát', 'bg-primary-subtle text-primary'],
+      'ambient': ['Nhiệt độ phòng', 'bg-warning-subtle text-warning']
+    };
+    
+    const info = labels[zone] || labels['ambient'];
+    element.innerHTML = `<span class="badge ${info[1]}">${info[0]}</span>`;
+  }
+
+  // Cập nhật hiển thị độ ẩm cho edit
+  function updateEditHumidityDisplay(humidityData) {
+    const element = document.getElementById('editHumidityInfo');
+    if (!element || !humidityData) return;
+    
+    const zone = getZoneFromHumidityData(humidityData);
+    const labels = {
+      'frozen': ['Đông lạnh (85-95%)', 'bg-info-subtle text-info'],
+      'chilled': ['Lạnh mát (85-90%)', 'bg-primary-subtle text-primary'],
+      'ambient': ['Phòng (50-60%)', 'bg-warning-subtle text-warning']
+    };
+    
+    const info = labels[zone] || labels['ambient'];
+    element.innerHTML = `<span class="badge ${info[1]}">${info[0]}</span>`;
+  }
+
+  // Cập nhật hiển thị nhiệt độ nguy hiểm cho edit
+  function updateEditTemperatureDangerDisplay(tempData) {
+    const element = document.getElementById('editTemperatureDangerInfo');
+    if (!element || !tempData) return;
+    
+    const dangerMin = tempData.dangerous_min;
+    const dangerMax = tempData.dangerous_max;
+    
+    let text = '';
+    if (dangerMin !== null && dangerMin !== undefined) {
+      text = `< ${dangerMin}°C và > ${dangerMax}°C`;
+    } else {
+      text = `> ${dangerMax}°C`;
+    }
+    
+    element.innerHTML = `<span class="badge bg-danger-subtle text-danger">${text}</span>`;
+  }
+
+  // Cập nhật hiển thị độ ẩm nguy hiểm cho edit
+  function updateEditHumidityDangerDisplay(humidityData) {
+    const element = document.getElementById('editHumidityDangerInfo');
+    if (!element || !humidityData) return;
+    
+    const dangerMin = humidityData.dangerous_min;
+    const dangerMax = humidityData.dangerous_max;
+    
+    let text = '';
+    if (dangerMin !== null && dangerMin !== undefined && dangerMax !== null && dangerMax !== undefined) {
+      text = `< ${dangerMin}% và > ${dangerMax}%`;
+    } else if (dangerMin !== null && dangerMin !== undefined) {
+      text = `< ${dangerMin}%`;
+    } else {
+      text = 'N/A';
+    }
+    
+    element.innerHTML = `<span class="badge bg-danger-subtle text-danger">${text}</span>`;
   }
 
   document.addEventListener('DOMContentLoaded', function(){
@@ -389,8 +655,7 @@
     document.getElementById('editCategoryDescription').value = description;
     document.getElementById('editSortOrder').value = sortOrder;
     document.getElementById('editCategoryStatus').value = isActive;
-    document.getElementById('editTemperatureType').value = temperatureType || 'ambient';
-    document.getElementById('editHumidityType').value = humidityType || 'ambient';
+    // Nhiệt độ/độ ẩm được ấn định theo vị trí; không còn trường riêng trong danh mục
     
     // Set parent category
     const parentSelect = document.getElementById('editParentId');
@@ -1143,10 +1408,14 @@
           this.classList.add('success'); 
           this.classList.remove('error'); 
           clearEditProductFieldError('editProductCategory'); 
+          // Cập nhật thông tin nhiệt độ và độ ẩm
+          updateEditTemperatureHumidityInfo(this.value);
         } else { 
           this.classList.remove('success'); 
           this.classList.add('error'); 
           showEditProductFieldError('editProductCategory','Vui lòng chọn danh mục'); 
+          // Reset thông tin nhiệt độ và độ ẩm
+          resetEditTemperatureHumidityInfo();
         }
       });
     }

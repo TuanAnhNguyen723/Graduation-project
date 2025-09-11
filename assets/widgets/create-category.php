@@ -75,31 +75,7 @@
                             </div>
                         </div>
 
-                        <div class="form-field">
-                            <label for="temperatureType" class="field-label">Loại nhiệt độ <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <select class="form-select" id="temperatureType" name="temperature_type" required>
-                                    <option value="ambient">Nhiệt độ phòng (15-33°C)</option>
-                                    <option value="chilled">Lạnh mát (0-5°C)</option>
-                                    <option value="frozen">Đông lạnh (≤-18°C)</option>
-                                </select>
-                                <small class="text-muted">Chọn loại nhiệt độ phù hợp cho danh mục</small>
-                            </div>
-                            <div class="field-error" id="temperatureTypeError"></div>
-                        </div>
-
-                        <div class="form-field">
-                            <label for="humidityType" class="field-label">Loại độ ẩm <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <select class="form-select" id="humidityType" name="humidity_type" required>
-                                    <option value="ambient">Độ ẩm phòng (50-60%)</option>
-                                    <option value="chilled">Độ ẩm lạnh (85-90%)</option>
-                                    <option value="frozen">Độ ẩm đông lạnh (85-95%)</option>
-                                </select>
-                                <small class="text-muted">Chọn loại độ ẩm phù hợp cho danh mục</small>
-                            </div>
-                            <div class="field-error" id="humidityTypeError"></div>
-                        </div>
+                        
 
                         <div class="form-field">
                             <label for="sortOrder" class="field-label">Thứ tự</label>

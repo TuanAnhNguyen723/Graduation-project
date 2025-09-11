@@ -5,7 +5,7 @@
 
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET");
+header("Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 require_once '../../../config/database.php';
@@ -14,14 +14,7 @@ require_once '../models/WarehouseLocation.php';
 $method = $_SERVER['REQUEST_METHOD'];
 
 try {
-    if ($method !== 'GET') {
-        http_response_code(405);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Method không được hỗ trợ'
-        ]);
-        exit;
-    }
+    if ($method === 'OPTIONS') { http_response_code(200); echo json_encode(['success'=>true]); exit; }
 
     // Kết nối database
     $database = new Database();
@@ -33,14 +26,54 @@ try {
 
     $locationModel = new WarehouseLocation($pdo);
 
-    // Lấy tất cả vị trí
-    $locations = $locationModel->getAllLocations();
+    if ($method === 'GET') {
+        if (isset($_GET['id'])) {
+            $loc = $locationModel->getLocationById((int)$_GET['id']);
+            if ($loc) {
+                echo json_encode(['success'=>true,'data'=>$loc]);
+            } else {
+                http_response_code(404);
+                echo json_encode(['success'=>false,'message'=>'Không tìm thấy vị trí']);
+            }
+            exit;
+        }
+        $locations = $locationModel->getAllLocations();
+        echo json_encode(['success'=>true,'data'=>$locations,'total'=>count($locations)]);
+        exit;
+    }
 
-    echo json_encode([
-        'success' => true,
-        'data' => $locations,
-        'total' => count($locations)
-    ]);
+    if ($method === 'POST') {
+        // Hỗ trợ cả create và update: nếu có id => update
+        $id = $_POST['id'] ?? null;
+        $payload = [
+            'location_code' => trim($_POST['location_code'] ?? ''),
+            'location_name' => trim($_POST['location_name'] ?? ''),
+            'area' => trim($_POST['area'] ?? ''),
+            'temperature_zone' => trim($_POST['temperature_zone'] ?? 'ambient'),
+            'max_capacity' => (int)($_POST['max_capacity'] ?? 0)
+        ];
+        if (empty($payload['location_code']) || empty($payload['location_name']) || empty($payload['area'])) {
+            http_response_code(400);
+            echo json_encode(['success'=>false,'message'=>'Thiếu trường bắt buộc']);
+            exit;
+        }
+        if ($id) {
+            $ok = $locationModel->updateLocation((int)$id, $payload);
+            echo json_encode(['success'=>$ok,'message'=>$ok?'Cập nhật vị trí thành công':'Không thể cập nhật vị trí']);
+        } else {
+            $ok = $locationModel->createLocation($payload);
+            echo json_encode(['success'=>$ok,'message'=>$ok?'Tạo vị trí thành công':'Không thể tạo vị trí']);
+        }
+        exit;
+    }
+
+    if ($method === 'DELETE') {
+        $id = $_GET['id'] ?? null;
+        if (!$id) { http_response_code(400); echo json_encode(['success'=>false,'message'=>'Thiếu id']); exit; }
+        $ok = $locationModel->deleteLocation((int)$id);
+        echo json_encode(['success'=>$ok,'message'=>$ok?'Đã xóa vị trí':'Không thể xóa vị trí']);
+        exit;
+    }
 
 } catch (Exception $e) {
     http_response_code(500);

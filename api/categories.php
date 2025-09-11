@@ -17,13 +17,13 @@ $method = $_SERVER['REQUEST_METHOD'];
 /**
  * Tạo thông báo khi thêm danh mục mới
  */
-function createCategoryNotification($category_id, $category_name, $temperature_type, $humidity_type) {
+function createCategoryNotification($category_id, $category_name) {
     try {
         $db = new Database();
         $conn = $db->getConnection();
         
         $title = "Danh mục mới được thêm";
-        $message = "Đã thêm danh mục mới \"{$category_name}\" (Nhiệt độ: {$temperature_type}, Độ ẩm: {$humidity_type}) vào hệ thống.";
+        $message = "Đã thêm danh mục mới \"{$category_name}\" vào hệ thống.";
         
         $stmt = $conn->prepare("
             INSERT INTO notifications (title, message, type, icon, icon_color, related_id, related_type) 
@@ -211,8 +211,7 @@ try {
                 $category->parent_id = !empty($data['parent_id']) ? (int)$data['parent_id'] : null;
                 $category->image = $image_path;
                 $category->location_id = !empty($data['location_id']) ? (int)$data['location_id'] : null;
-                $category->temperature_type = isset($data['temperature_type']) ? $data['temperature_type'] : 'ambient';
-                $category->humidity_type = isset($data['humidity_type']) ? $data['humidity_type'] : 'ambient';
+                // nhiệt độ/độ ẩm lấy theo vị trí (warehouse_locations.temperature_zone)
                 $category->is_active = isset($data['is_active']) ? (int)$data['is_active'] : 1;
                 $category->sort_order = isset($data['sort_order']) ? (int)$data['sort_order'] : 0;
 
@@ -290,15 +289,14 @@ try {
             $category->parent_id = isset($data['parent_id']) ? $data['parent_id'] : null;
             $category->location_id = isset($data['location_id']) && !empty($data['location_id']) ? (int)$data['location_id'] : null;
             $category->image = $image_path;
-            $category->temperature_type = isset($data['temperature_type']) ? $data['temperature_type'] : 'ambient';
-            $category->humidity_type = isset($data['humidity_type']) ? $data['humidity_type'] : 'ambient';
+            // nhiệt độ/độ ẩm lấy theo vị trí (warehouse_locations.temperature_zone)
             $category->is_active = isset($data['is_active']) ? $data['is_active'] : 1;
             $category->sort_order = isset($data['sort_order']) ? $data['sort_order'] : 0;
 
             $id = $category->create();
             if($id) {
                 // Tạo thông báo khi thêm danh mục mới
-                createCategoryNotification($id, $data['name'], $data['temperature_type'], $data['humidity_type']);
+                createCategoryNotification($id, $data['name']);
                 
                 echo json_encode([
                     'success' => true,
@@ -333,8 +331,6 @@ try {
             $category->description = isset($data['description']) ? $data['description'] : '';
             $category->parent_id = isset($data['parent_id']) ? $data['parent_id'] : null;
             $category->image = isset($data['image']) ? $data['image'] : '';
-            $category->temperature_type = isset($data['temperature_type']) ? $data['temperature_type'] : 'ambient';
-            $category->humidity_type = isset($data['humidity_type']) ? $data['humidity_type'] : 'ambient';
             $category->is_active = isset($data['is_active']) ? $data['is_active'] : 1;
             $category->sort_order = isset($data['sort_order']) ? $data['sort_order'] : 0;
 

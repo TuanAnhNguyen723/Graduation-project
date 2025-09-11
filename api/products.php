@@ -138,21 +138,25 @@ try {
                     ]);
                 }
             } elseif(isset($_GET['temperature_info'])) {
-                // Lấy thông tin nhiệt độ từ category
+                // Lấy thông tin nhiệt độ và độ ẩm từ category
                 if(isset($_GET['category_id'])) {
                     $category_id = (int)$_GET['category_id'];
                     $temp_info = $product->getTemperatureInfoFromCategory($category_id);
+                    $humidity_info = $product->getHumidityInfoFromCategory($category_id);
                     
-                    if($temp_info) {
+                    if($temp_info || $humidity_info) {
                         echo json_encode([
                             'success' => true,
-                            'data' => $temp_info
+                            'data' => [
+                                'temperature' => $temp_info,
+                                'humidity' => $humidity_info
+                            ]
                         ]);
                     } else {
                         http_response_code(404);
                         echo json_encode([
                             'success' => false,
-                            'message' => 'Không tìm thấy thông tin nhiệt độ cho category này'
+                            'message' => 'Không tìm thấy thông tin nhiệt độ và độ ẩm cho category này'
                         ]);
                     }
                 } else {

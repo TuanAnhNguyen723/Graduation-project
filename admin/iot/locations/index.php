@@ -38,6 +38,7 @@ try {
     <link href="../../../assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <link href="../../../assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link href="../../../assets/css/app.min.css" rel="stylesheet" type="text/css" />
+    <link href="../../../assets/css/widget.css" rel="stylesheet" type="text/css" />
     
     <!-- Common Admin Layout CSS -->
     <link href="../../partials/layout.css" rel="stylesheet" type="text/css" />
@@ -82,7 +83,7 @@ try {
                 <!-- Add Location Button -->
                 <div class="row mb-3">
                     <div class="col-12">
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLocationModal">
+                        <button type="button" class="btn btn-primary" onclick="openCreateLocationModal()">
                             <i class="iconoir-plus"></i> Thêm vị trí mới
                         </button>
                     </div>
@@ -162,6 +163,20 @@ try {
                                         <div>
                                             <h5 class="card-title"><?php echo htmlspecialchars($location['location_name']); ?></h5>
                                             <p class="text-muted mb-0">Khu vực: <?php echo htmlspecialchars($location['area']); ?></p>
+                                            <?php 
+                                                $zone = $location['temperature_zone'] ?? 'ambient';
+                                                $zoneMap = [
+                                                  'ambient' => ['Ambient','15-33°C, 50-60%','bg-warning-subtle text-warning','iconoir-sun-light'],
+                                                  'chilled' => ['Chilled','0-5°C, 85-90%','bg-primary-subtle text-primary','iconoir-snow'],
+                                                  'frozen'  => ['Frozen','≤-18°C, 85-95%','bg-info-subtle text-info','iconoir-ice-cream']
+                                                ];
+                                                $z = $zoneMap[$zone] ?? $zoneMap['ambient'];
+                                            ?>
+                                            <div class="mt-1">
+                                                <span style="display: flex; align-items: center; gap: 10px;" class="badge <?php echo $z[2]; ?>" title="<?php echo $z[1]; ?>">
+                                                    <i class="<?php echo $z[3]; ?>"></i> Mức môi trường: <?php echo $z[0]; ?> (<?php echo $z[1]; ?>)
+                                                </span>
+                                            </div>
                                         </div>
                                         <span class="badge bg-primary"><?php echo htmlspecialchars($location['area']); ?></span>
                                     </div>
@@ -185,10 +200,10 @@ try {
                                     </div>
                                     
                                     <div class="mt-3">
-                                        <button class="btn btn-sm btn-outline-primary me-2" onclick="editLocation(<?php echo $location['id']; ?>)">
+                                        <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditLocationModalWidget(<?php echo $location['id']; ?>)">
                                             <i class="iconoir-edit"></i> Sửa
                                         </button>
-                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteLocation(<?php echo $location['id']; ?>)">
+                                        <button class="btn btn-sm btn-outline-danger" onclick="confirmDeleteLocation(<?php echo $location['id']; ?>)">
                                             <i class="iconoir-trash"></i> Xóa
                                         </button>
                                     </div>
@@ -221,18 +236,75 @@ try {
     <!-- Common Admin Layout JavaScript -->
     <script src="../../../admin/partials/layout.js"></script>
 
+    <?php include '../../../assets/widgets/create-location.php'; ?>
+    <?php include '../../../assets/widgets/edit-location.php'; ?>
+
     <script>
-        function editLocation(id) {
-            // TODO: Implement edit functionality
-            console.log('Edit location:', id);
-        }
-        
-        function deleteLocation(id) {
-            if (confirm('Bạn có chắc chắn muốn xóa vị trí này?')) {
-                // TODO: Implement delete functionality
-                console.log('Delete location:', id);
-            }
-        }
+      // Widget-style open/close/submit
+      function openCreateLocationModal(){
+        const modal = document.getElementById('createLocationModal');
+        if (modal) { modal.classList.add('show'); setTimeout(()=>{ const inner=modal.querySelector('.custom-modal'); if(inner){ inner.classList.add('show'); } },10); document.body.style.overflow='hidden'; }
+      }
+      function closeCreateLocationModal(){
+        const modal = document.getElementById('createLocationModal');
+        if (modal) { modal.querySelector('.custom-modal').classList.remove('show'); setTimeout(()=>{ modal.classList.remove('show'); },300); document.body.style.overflow=''; }
+      }
+      async function submitCreateLocationForm(){
+        const btn = document.getElementById('createLocationSubmitBtn'); const original = btn?.innerHTML || '';
+        try{
+          if (btn){ btn.disabled=true; btn.classList.add('loading'); btn.innerHTML='Đang tạo...'; }
+          const form = document.getElementById('createLocationForm');
+          const fd = new FormData(form);
+          const res = await fetch('../api/locations.php', { method: 'POST', body: fd });
+          const data = await res.json();
+          if (data.success){
+            const msg = document.getElementById('successMessageCreateLocation'); if (msg){ msg.classList.add('show','slide-in'); setTimeout(()=>{ msg.classList.remove('show','slide-in'); }, 1500); }
+            setTimeout(()=>{ location.reload(); }, 1600);
+          } else { alert(data.message || 'Không thể tạo vị trí'); }
+        } finally { if (btn){ btn.disabled=false; btn.classList.remove('loading'); btn.innerHTML = original || 'Tạo vị trí'; } }
+      }
+
+      async function openEditLocationModalWidget(id){
+        const res = await fetch('../api/locations.php?id='+id);
+        const result = await res.json();
+        if (!result.success || !result.data){ alert('Không tìm thấy vị trí'); return; }
+        const form = document.getElementById('editLocationFormWidget');
+        form.elements['id'].value = result.data.id;
+        document.getElementById('editLocCode').value = result.data.location_code;
+        document.getElementById('editLocName').value = result.data.location_name;
+        document.getElementById('editLocArea').value = result.data.area;
+        document.getElementById('editTempZone').value = result.data.temperature_zone;
+        document.getElementById('editMaxCapacity').value = result.data.max_capacity;
+        const modal = document.getElementById('editLocationModalWidget');
+        if (modal){ modal.classList.add('show'); setTimeout(()=>{ const inner=modal.querySelector('.custom-modal'); if(inner){ inner.classList.add('show'); } },10); document.body.style.overflow='hidden'; }
+      }
+
+      function closeEditLocationModal(){
+        const modal = document.getElementById('editLocationModalWidget');
+        if (modal){ modal.querySelector('.custom-modal').classList.remove('show'); setTimeout(()=>{ modal.classList.remove('show'); },300); document.body.style.overflow=''; }
+      }
+
+      async function submitEditLocationForm(){
+        const btn = document.getElementById('editLocationSubmitBtn'); const original = btn?.innerHTML || '';
+        try{
+          if (btn){ btn.disabled=true; btn.classList.add('loading'); btn.innerHTML='Đang cập nhật...'; }
+          const form = document.getElementById('editLocationFormWidget');
+          const fd = new FormData(form);
+          const res = await fetch('../api/locations.php', { method: 'POST', body: fd });
+          const data = await res.json();
+          if (data.success){
+            const msg = document.getElementById('successMessageEditLocation'); if (msg){ msg.classList.add('show','slide-in'); setTimeout(()=>{ msg.classList.remove('show','slide-in'); }, 1500); }
+            setTimeout(()=>{ location.reload(); }, 1600);
+          } else { alert(data.message || 'Không thể cập nhật vị trí'); }
+        } finally { if (btn){ btn.disabled=false; btn.classList.remove('loading'); btn.innerHTML = original || 'Cập nhật vị trí'; } }
+      }
+
+      async function confirmDeleteLocation(id){
+        if (!confirm('Bạn có chắc chắn muốn xóa vị trí này?')) return;
+        const res = await fetch('../api/locations.php?id='+id, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success){ location.reload(); } else { alert(data.message || 'Không thể xóa vị trí'); }
+      }
     </script>
 </body>
 </html>

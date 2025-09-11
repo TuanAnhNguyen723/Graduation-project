@@ -390,38 +390,25 @@ class Product {
      * Lấy thông tin nhiệt độ từ category
      */
     public function getTemperatureInfoFromCategory($category_id) {
-        $query = "SELECT temperature_type FROM categories WHERE id = :category_id";
+        // Lấy temperature_zone từ vị trí của danh mục
+        $query = "SELECT wl.temperature_zone
+                  FROM categories c
+                  LEFT JOIN warehouse_locations wl ON wl.id = c.location_id
+                  WHERE c.id = :category_id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":category_id", $category_id);
         $stmt->execute();
         $result = $stmt->fetch();
-        
+
         if ($result) {
-            $temperature_type = $result['temperature_type'];
-            
-            // Định nghĩa nhiệt độ theo loại
+            $zone = $result['temperature_zone'] ?: 'ambient';
             $temperature_ranges = [
-                'frozen' => [
-                    'ideal_min' => -50.0,
-                    'ideal_max' => -18.0,
-                    'dangerous_max' => -18.0
-                ],
-                'chilled' => [
-                    'ideal_min' => 0.0,
-                    'ideal_max' => 5.0,
-                    'dangerous_max' => 8.0
-                ],
-                'ambient' => [
-                    'ideal_min' => 15.0,
-                    'ideal_max' => 33.0,
-                    'dangerous_min' => 0.0,
-                    'dangerous_max' => 37.0
-                ]
+                'frozen' => [ 'ideal_min' => -50.0, 'ideal_max' => -18.0, 'dangerous_max' => -18.0 ],
+                'chilled' => [ 'ideal_min' => 0.0,   'ideal_max' => 5.0,    'dangerous_max' => 8.0 ],
+                'ambient' => [ 'ideal_min' => 15.0,  'ideal_max' => 33.0,   'dangerous_min' => 0.0, 'dangerous_max' => 37.0 ]
             ];
-            
-            return $temperature_ranges[$temperature_type] ?? $temperature_ranges['ambient'];
+            return $temperature_ranges[$zone] ?? $temperature_ranges['ambient'];
         }
-        
         return null;
     }
 
@@ -429,38 +416,24 @@ class Product {
      * Lấy thông tin độ ẩm từ category
      */
     public function getHumidityInfoFromCategory($category_id) {
-        $query = "SELECT humidity_type FROM categories WHERE id = :category_id";
+        $query = "SELECT wl.temperature_zone
+                  FROM categories c
+                  LEFT JOIN warehouse_locations wl ON wl.id = c.location_id
+                  WHERE c.id = :category_id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":category_id", $category_id);
         $stmt->execute();
         $result = $stmt->fetch();
-        
+
         if ($result) {
-            $humidity_type = $result['humidity_type'];
-            
-            // Định nghĩa độ ẩm theo loại
+            $zone = $result['temperature_zone'] ?: 'ambient';
             $humidity_ranges = [
-                'frozen' => [
-                    'ideal_min' => 85.0,
-                    'ideal_max' => 95.0,
-                    'dangerous_min' => 80.0
-                ],
-                'chilled' => [
-                    'ideal_min' => 85.0,
-                    'ideal_max' => 90.0,
-                    'dangerous_min' => 80.0
-                ],
-                'ambient' => [
-                    'ideal_min' => 50.0,
-                    'ideal_max' => 60.0,
-                    'dangerous_min' => 40.0,
-                    'dangerous_max' => 65.0
-                ]
+                'frozen' => [ 'ideal_min' => 85.0, 'ideal_max' => 95.0, 'dangerous_min' => 80.0 ],
+                'chilled' => [ 'ideal_min' => 85.0, 'ideal_max' => 90.0, 'dangerous_min' => 80.0 ],
+                'ambient' => [ 'ideal_min' => 50.0, 'ideal_max' => 60.0, 'dangerous_min' => 40.0, 'dangerous_max' => 65.0 ]
             ];
-            
-            return $humidity_ranges[$humidity_type] ?? $humidity_ranges['ambient'];
+            return $humidity_ranges[$zone] ?? $humidity_ranges['ambient'];
         }
-        
         return null;
     }
 
@@ -468,63 +441,49 @@ class Product {
      * Lấy thông tin nhiệt độ và độ ẩm từ category
      */
     public function getTemperatureAndHumidityInfoFromCategory($category_id) {
-        $query = "SELECT temperature_type, humidity_type FROM categories WHERE id = :category_id";
+        $query = "SELECT wl.temperature_zone
+                  FROM categories c
+                  LEFT JOIN warehouse_locations wl ON wl.id = c.location_id
+                  WHERE c.id = :category_id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":category_id", $category_id);
         $stmt->execute();
         $result = $stmt->fetch();
-        
+
         if ($result) {
-            $temperature_type = $result['temperature_type'];
-            $humidity_type = $result['humidity_type'];
-            
-            // Định nghĩa nhiệt độ theo loại
+            $zone = $result['temperature_zone'] ?: 'ambient';
             $temperature_ranges = [
-                'frozen' => [
-                    'ideal_min' => -50.0,
-                    'ideal_max' => -18.0,
-                    'dangerous_max' => -18.0
-                ],
-                'chilled' => [
-                    'ideal_min' => 0.0,
-                    'ideal_max' => 5.0,
-                    'dangerous_max' => 8.0
-                ],
-                'ambient' => [
-                    'ideal_min' => 15.0,
-                    'ideal_max' => 33.0,
-                    'dangerous_min' => 0.0,
-                    'dangerous_max' => 37.0
-                ]
+                'frozen' => [ 'ideal_min' => -50.0, 'ideal_max' => -18.0, 'dangerous_max' => -18.0 ],
+                'chilled' => [ 'ideal_min' => 0.0,   'ideal_max' => 5.0,    'dangerous_max' => 8.0 ],
+                'ambient' => [ 'ideal_min' => 15.0,  'ideal_max' => 33.0,   'dangerous_min' => 0.0, 'dangerous_max' => 37.0 ]
             ];
-            
-            // Định nghĩa độ ẩm theo loại
             $humidity_ranges = [
-                'frozen' => [
-                    'ideal_min' => 85.0,
-                    'ideal_max' => 95.0,
-                    'dangerous_min' => 80.0
-                ],
-                'chilled' => [
-                    'ideal_min' => 85.0,
-                    'ideal_max' => 90.0,
-                    'dangerous_min' => 80.0
-                ],
-                'ambient' => [
-                    'ideal_min' => 50.0,
-                    'ideal_max' => 60.0,
-                    'dangerous_min' => 40.0,
-                    'dangerous_max' => 65.0
-                ]
+                'frozen' => [ 'ideal_min' => 85.0, 'ideal_max' => 95.0, 'dangerous_min' => 80.0 ],
+                'chilled' => [ 'ideal_min' => 85.0, 'ideal_max' => 90.0, 'dangerous_min' => 80.0 ],
+                'ambient' => [ 'ideal_min' => 50.0, 'ideal_max' => 60.0, 'dangerous_min' => 40.0, 'dangerous_max' => 65.0 ]
             ];
-            
             return [
-                'temperature' => $temperature_ranges[$temperature_type] ?? $temperature_ranges['ambient'],
-                'humidity' => $humidity_ranges[$humidity_type] ?? $humidity_ranges['ambient']
+                'temperature' => $temperature_ranges[$zone] ?? $temperature_ranges['ambient'],
+                'humidity'    => $humidity_ranges[$zone]    ?? $humidity_ranges['ambient']
             ];
         }
-        
         return null;
+    }
+
+    /**
+     * Lấy temperature_zone từ vị trí kho của category
+     */
+    public function getTemperatureZoneFromCategory($category_id) {
+        $query = "SELECT wl.temperature_zone
+                  FROM categories c
+                  LEFT JOIN warehouse_locations wl ON wl.id = c.location_id
+                  WHERE c.id = :category_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":category_id", $category_id);
+        $stmt->execute();
+        $result = $stmt->fetch();
+
+        return $result ? ($result['temperature_zone'] ?: 'ambient') : 'ambient';
     }
 }
 ?>

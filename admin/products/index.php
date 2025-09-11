@@ -785,13 +785,12 @@ if ($categories_result) {
                                                 <div>
                                             <?php 
                                             $cat_name = 'N/A';
-                                            $cat_temp_type = 'ambient';
-                                            $cat_humidity_type = 'ambient';
+                                            $cat_temp_zone = 'ambient';
                                             foreach ($categories as $cat) {
                                                 if ($cat['id'] == $prod['category_id']) {
                                                     $cat_name = $cat['name'];
-                                                    $cat_temp_type = isset($cat['temperature_type']) ? $cat['temperature_type'] : 'ambient';
-                                                    $cat_humidity_type = isset($cat['humidity_type']) ? $cat['humidity_type'] : 'ambient';
+                                                    // Lấy temperature_zone từ vị trí kho thay vì temperature_type từ category
+                                                    $cat_temp_zone = $product->getTemperatureZoneFromCategory($prod['category_id']);
                                                     break;
                                                 }
                                             }
@@ -815,7 +814,7 @@ if ($categories_result) {
                                                                  'chilled' => ['Lạnh mát (0 - 5°C)', 'bg-primary-subtle text-primary'],
                                                                  'ambient' => ['Nhiệt độ phòng (15 - 33°C)', 'bg-warning-subtle text-warning']
                                                              ];
-                                                             $temp_info = $temp_labels[$cat_temp_type] ?? $temp_labels['ambient'];
+                                                             $temp_info = $temp_labels[$cat_temp_zone] ?? $temp_labels['ambient'];
                                                              ?>
                                                              <span class="badge rounded-pill <?php echo $temp_info[1]; ?> d-inline-flex align-items-center">
                                                                  <?php echo $temp_info[0]; ?>
@@ -835,7 +834,7 @@ if ($categories_result) {
                                                                  'chilled' => ['Lạnh mát (85-90%)', 'bg-primary-subtle text-primary'],
                                                                  'ambient' => ['Phòng (50-60%)', 'bg-warning-subtle text-warning']
                                                              ];
-                                                             $humidity_info = $humidity_labels[$cat_humidity_type] ?? $humidity_labels['ambient'];
+                                                             $humidity_info = $humidity_labels[$cat_temp_zone] ?? $humidity_labels['ambient'];
                                                              ?>
                                                              <span class="badge rounded-pill <?php echo $humidity_info[1]; ?> d-inline-flex align-items-center">
                                                                  <?php echo $humidity_info[0]; ?>

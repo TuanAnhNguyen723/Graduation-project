@@ -100,6 +100,54 @@
                     </div>
                 </div>
                 
+                <!-- Temperature & Humidity Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="iconoir-thermometer"></i>
+                        <h5>Thông tin môi trường</h5>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label class="field-label">Nhiệt độ</label>
+                            <div class="input-wrapper">
+                                <div class="info-display" id="temperatureInfo">
+                                    <span class="info-text">Chọn danh mục để xem thông tin</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-field">
+                            <label class="field-label">Độ ẩm</label>
+                            <div class="input-wrapper">
+                                <div class="info-display" id="humidityInfo">
+                                    <span class="info-text">Chọn danh mục để xem thông tin</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label class="field-label">Nhiệt độ nguy hiểm</label>
+                            <div class="input-wrapper">
+                                <div class="info-display" id="temperatureDangerInfo">
+                                    <span class="info-text">Chọn danh mục để xem thông tin</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-field">
+                            <label class="field-label">Độ ẩm nguy hiểm</label>
+                            <div class="input-wrapper">
+                                <div class="info-display" id="humidityDangerInfo">
+                                    <span class="info-text">Chọn danh mục để xem thông tin</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Inventory Section -->
                 <div class="form-section">
                     <div class="section-header">
@@ -203,4 +251,48 @@
         </button>
     </div>
 </div>
+
+<style>
+.info-display {
+    padding: 12px 16px;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+}
+
+.info-display .info-text {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.info-display .badge {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.info-display .badge.bg-info-subtle {
+    background-color: #d1ecf1 !important;
+    color: #0c5460 !important;
+}
+
+.info-display .badge.bg-primary-subtle {
+    background-color: #cce7ff !important;
+    color: #004085 !important;
+}
+
+.info-display .badge.bg-warning-subtle {
+    background-color: #fff3cd !important;
+    color: #856404 !important;
+}
+
+.info-display .badge.bg-danger-subtle {
+    background-color: #f8d7da !important;
+    color: #721c24 !important;
+}
+</style>
 
