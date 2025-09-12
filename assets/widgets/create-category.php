@@ -50,22 +50,6 @@
 
                     <div class="form-grid three-columns">
                         <div class="form-field">
-                            <label for="parentId" class="field-label">Danh mục cha</label>
-                            <div class="input-wrapper">
-                                <select class="form-select" id="parentId" name="parent_id">
-                                    <option value="">Không có danh mục cha</option>
-                                    <?php
-                                    if (isset($parent_categories) && $parent_categories) {
-                                        while ($row = $parent_categories->fetch()) {
-                                            echo '<option value="' . $row['id'] . '">' . htmlspecialchars($row['name']) . '</option>';
-                                        }
-                                    }
-                                    ?>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-field">
                             <label for="categoryLocationId" class="field-label">Vị trí kho</label>
                             <div class="input-wrapper">
                                 <select class="form-select" id="categoryLocationId" name="location_id">

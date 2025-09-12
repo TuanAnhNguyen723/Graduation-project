@@ -208,7 +208,7 @@ try {
                 $category->name = trim($data['name']);
                 $category->slug = !empty($data['slug']) ? trim($data['slug']) : $category->createSlug($data['name']);
                 $category->description = trim($data['description']);
-                $category->parent_id = !empty($data['parent_id']) ? (int)$data['parent_id'] : null;
+                $category->parent_id = null;
                 $category->image = $image_path;
                 $category->location_id = !empty($data['location_id']) ? (int)$data['location_id'] : null;
                 // nhiệt độ/độ ẩm lấy theo vị trí (warehouse_locations.temperature_zone)
@@ -286,7 +286,7 @@ try {
             $category->name = $data['name'];
             $category->slug = isset($data['slug']) ? $data['slug'] : $category->createSlug($data['name']);
             $category->description = isset($data['description']) ? $data['description'] : '';
-            $category->parent_id = isset($data['parent_id']) ? $data['parent_id'] : null;
+            $category->parent_id = null;
             $category->location_id = isset($data['location_id']) && !empty($data['location_id']) ? (int)$data['location_id'] : null;
             $category->image = $image_path;
             // nhiệt độ/độ ẩm lấy theo vị trí (warehouse_locations.temperature_zone)
@@ -329,7 +329,7 @@ try {
             $category->name = $data['name'];
             $category->slug = isset($data['slug']) ? $data['slug'] : $category->createSlug($data['name']);
             $category->description = isset($data['description']) ? $data['description'] : '';
-            $category->parent_id = isset($data['parent_id']) ? $data['parent_id'] : null;
+            $category->parent_id = null;
             $category->image = isset($data['image']) ? $data['image'] : '';
             $category->is_active = isset($data['is_active']) ? $data['is_active'] : 1;
             $category->sort_order = isset($data['sort_order']) ? $data['sort_order'] : 0;

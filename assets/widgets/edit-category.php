@@ -52,16 +52,6 @@
 
                     <div class="form-grid three-columns">
                         <div class="form-field">
-                            <label for="editParentId" class="field-label">Danh mục cha</label>
-                            <div class="input-wrapper">
-                                <select class="form-select" id="editParentId" name="parent_id">
-                                    <option value="">Không có danh mục cha</option>
-                                    <!-- Options sẽ được populate bằng JavaScript -->
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-field">
                             <label for="editCategoryLocationId" class="field-label">Vị trí kho</label>
                             <div class="input-wrapper">
                                 <select class="form-select" id="editCategoryLocationId" name="location_id">

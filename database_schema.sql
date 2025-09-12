@@ -15,6 +15,33 @@ ALTER TABLE `temperature_sensors` DROP COLUMN IF EXISTS `min_threshold`;
 -- Xóa cột max_threshold  
 ALTER TABLE `temperature_sensors` DROP COLUMN IF EXISTS `max_threshold`;
 
+
+-- Migration: Remove parent_id from categories safely (FK + column)
+-- Lưu ý: Đặt sau khi bảng categories đã tồn tại
+-- Xóa khóa ngoại tham chiếu đến parent_id (nếu có)
+SET @fk_parent := (
+  SELECT rc.CONSTRAINT_NAME
+  FROM information_schema.REFERENTIAL_CONSTRAINTS rc
+  JOIN information_schema.KEY_COLUMN_USAGE kcu
+    ON rc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME
+   AND rc.CONSTRAINT_SCHEMA = kcu.CONSTRAINT_SCHEMA
+   AND rc.TABLE_NAME = kcu.TABLE_NAME
+  WHERE rc.CONSTRAINT_SCHEMA = DATABASE()
+    AND rc.TABLE_NAME = 'categories'
+    AND kcu.COLUMN_NAME = 'parent_id'
+  LIMIT 1
+);
+SET @sql_drop_fk = IF(@fk_parent IS NOT NULL,
+  CONCAT('ALTER TABLE `categories` DROP FOREIGN KEY `', @fk_parent, '`'),
+  NULL
+);
+PREPARE stmt FROM IFNULL(@sql_drop_fk, 'SELECT 1');
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Xóa cột parent_id nếu tồn tại (MySQL 8.0.29+ hỗ trợ IF EXISTS)
+ALTER TABLE `categories` DROP COLUMN IF EXISTS `parent_id`;
+
 -- BẢNG WAREHOUSE_LOCATIONS (VỊ TRÍ TRONG KHO)
 CREATE TABLE IF NOT EXISTS warehouse_locations (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -43,14 +70,14 @@ CREATE TABLE IF NOT EXISTS categories (
     name VARCHAR(255) NOT NULL,
     slug VARCHAR(255) UNIQUE NOT NULL,
     description TEXT,
-    parent_id INT DEFAULT NULL,
+    -- parent_id INT DEFAULT NULL, -- Đã bỏ sử dụng danh mục cha
     location_id INT DEFAULT NULL,
     image VARCHAR(255),
     is_active BOOLEAN DEFAULT TRUE,
     sort_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (parent_id) REFERENCES categories(id) ON DELETE SET NULL,
+    -- FOREIGN KEY (parent_id) REFERENCES categories(id) ON DELETE SET NULL,
     FOREIGN KEY (location_id) REFERENCES warehouse_locations(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 

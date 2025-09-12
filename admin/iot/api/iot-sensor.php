@@ -118,7 +118,7 @@ try {
                         number_format($humidityDangerMin, 0),
                         number_format($humidityDangerMax, 0)
                     ),
-                    'icon' => 'iconoir-drop',
+                    'icon' => 'iconoir-droplet',
                     'icon_color' => 'warning'
                 ];
             }

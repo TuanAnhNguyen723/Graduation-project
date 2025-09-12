@@ -215,7 +215,7 @@ try {
                                             <?php endif; ?>
 
                         						<?php if (!empty($sensor['serial_number'])): ?>
-                                                <div><i class="iconoir-hash"></i> Serial: <?php echo htmlspecialchars($sensor['serial_number']); ?></div>
+                                                <div><i class="iconoir-ticket"></i> Serial: <?php echo htmlspecialchars($sensor['serial_number']); ?></div>
                                             <?php endif; ?>
 
                                             <?php if (!empty($sensor['installation_date'])): ?>

@@ -660,7 +660,7 @@
   let isEditCategoryModalOpen = false;
   let currentEditCategoryId = null;
 
-  function openEditCategoryModal(categoryId, name, slug, description, parentId, locationId, sortOrder, isActive, image, temperatureType, humidityType) {
+  function openEditCategoryModal(categoryId, name, slug, description, locationId, sortOrder, isActive, image, temperatureType, humidityType) {
     currentEditCategoryId = categoryId;
     
     // Populate form fields
@@ -678,11 +678,7 @@
     if (statusEl) statusEl.value = (typeof isActive !== 'undefined' && isActive !== null) ? String(isActive) : '1';
     // Nhiệt độ/độ ẩm được ấn định theo vị trí; không còn trường riêng trong danh mục
     
-    // Set parent category
-    const parentSelect = document.getElementById('editParentId');
-    if (parentSelect) {
-      parentSelect.value = parentId || '';
-    }
+    // Đã bỏ danh mục cha
     
     // Handle image display
     const currentImageContainer = document.getElementById('currentImageContainer');
@@ -703,8 +699,7 @@
     const fileInput = document.getElementById('editCategoryImage');
     if (fileInput) fileInput.value = '';
     
-    // Load parent categories for dropdown
-    loadParentCategoriesForEdit();
+    // Không còn load danh mục cha
 
     // Load locations for edit dropdown và set giá trị hiện tại
     fetch('../../admin/iot/api/locations.php')
@@ -892,34 +887,7 @@
     }
   }
 
-  function loadParentCategoriesForEdit() {
-    fetch('../../api/categories.php?parent')
-      .then(response => response.json())
-      .then(data => {
-        if (data.success && data.data) {
-          const parentSelect = document.getElementById('editParentId');
-          if (parentSelect) {
-            // Keep the first option (Không có danh mục cha)
-            const firstOption = parentSelect.firstElementChild;
-            parentSelect.innerHTML = '';
-            parentSelect.appendChild(firstOption);
-            
-            // Add parent categories, excluding current category
-            data.data.forEach(category => {
-              if (category.id != currentEditCategoryId) {
-                const option = document.createElement('option');
-                option.value = category.id;
-                option.textContent = category.name;
-                parentSelect.appendChild(option);
-              }
-            });
-          }
-        }
-      })
-      .catch(error => {
-        console.error('Error loading parent categories:', error);
-      });
-  }
+  // Đã loại bỏ chức năng load danh mục cha
 
   function previewEditCategoryImage(input) {
     const previewContainer = document.getElementById('editImagePreviewContainer');

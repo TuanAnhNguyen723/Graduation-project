@@ -13,7 +13,7 @@ class Category {
     public $name;
     public $slug;
     public $description;
-    public $parent_id;
+    // public $parent_id; // Bỏ sử dụng danh mục cha
     public $location_id;
     public $image;
     public $is_active;
@@ -60,12 +60,7 @@ class Category {
     /**
      * Lấy danh mục cha
      */
-    public function getParentCategories() {
-        $query = "SELECT * FROM " . $this->table_name . " WHERE parent_id IS NULL AND is_active = 1 ORDER BY sort_order ASC, name ASC";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-        return $stmt;
-    }
+    // Bỏ các hàm liên quan danh mục cha
 
     /**
      * Lấy danh mục con
@@ -83,8 +78,8 @@ class Category {
      */
     public function create() {
         $query = "INSERT INTO " . $this->table_name . " 
-                  (name, slug, description, parent_id, location_id, image, is_active, sort_order) 
-                  VALUES (:name, :slug, :description, :parent_id, :location_id, :image, :is_active, :sort_order)";
+                  (name, slug, description, location_id, image, is_active, sort_order) 
+                  VALUES (:name, :slug, :description, :location_id, :image, :is_active, :sort_order)";
 
         $stmt = $this->conn->prepare($query);
 
@@ -98,7 +93,6 @@ class Category {
         $stmt->bindParam(":name", $this->name);
         $stmt->bindParam(":slug", $this->slug);
         $stmt->bindParam(":description", $this->description);
-        $stmt->bindParam(":parent_id", $this->parent_id);
         $stmt->bindParam(":location_id", $this->location_id);
         $stmt->bindParam(":image", $this->image);
         $stmt->bindParam(":is_active", $this->is_active);
@@ -116,7 +110,7 @@ class Category {
     public function update() {
         $query = "UPDATE " . $this->table_name . " 
                   SET name = :name, slug = :slug, description = :description, 
-                      parent_id = :parent_id, location_id = :location_id, image = :image, 
+                      location_id = :location_id, image = :image, 
                       is_active = :is_active, sort_order = :sort_order 
                   WHERE id = :id";
 
@@ -132,7 +126,6 @@ class Category {
         $stmt->bindParam(":name", $this->name);
         $stmt->bindParam(":slug", $this->slug);
         $stmt->bindParam(":description", $this->description);
-        $stmt->bindParam(":parent_id", $this->parent_id);
         $stmt->bindParam(":location_id", $this->location_id);
         $stmt->bindParam(":image", $this->image);
         $stmt->bindParam(":is_active", $this->is_active);

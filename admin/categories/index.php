@@ -15,8 +15,6 @@ while($row = $categories_result->fetch()) {
 
 // Lấy thống kê
 $total_categories = $category->count();
-$parent_categories = $category->getParentCategories();
-$parent_count = $parent_categories->rowCount();
 
 // Xử lý tìm kiếm
 $search_results = [];
@@ -582,48 +580,6 @@ if(!empty($search_results)) {
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-3 mb-2">
-                            <div class="card stat-card bg-success text-white">
-                                <div class="card-body p-4">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="flex-grow-1">
-                                            <h6 class="card-title text-white-50 mb-2 fw-semibold text-uppercase letter-spacing-1">Danh mục cha</h6>
-                                            <h2 class="mb-0 fw-bold"><?php echo $parent_count; ?></h2>
-                                            <div class="progress mt-3">
-                                                <?php 
-                                                $parent_percentage = $total_categories > 0 ? ($parent_count / $total_categories) * 100 : 0;
-                                                ?>
-                                                <div class="progress-bar bg-white" style="width: <?php echo $parent_percentage; ?>%"></div>
-                                            </div>
-                                        </div>
-                                        <div class="icon-wrapper ms-3">
-                                            <i class="iconoir-folder-plus" style="font-size: 28px;"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-lg-3 mb-2">
-                            <div class="card stat-card bg-warning text-white">
-                                <div class="card-body p-4">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="flex-grow-1">
-                                            <h6 class="card-title text-white-50 mb-2 fw-semibold text-uppercase letter-spacing-1">Danh mục con</h6>
-                                            <h2 class="mb-0 fw-bold"><?php echo $total_categories - $parent_count; ?></h2>
-                                            <div class="progress mt-3">
-                                                <?php 
-                                                $child_percentage = $total_categories > 0 ? (($total_categories - $parent_count) / $total_categories) * 100 : 0;
-                                                ?>
-                                                <div class="progress-bar bg-white" style="width: <?php echo $child_percentage; ?>%"></div>
-                                            </div>
-                                        </div>
-                                        <div class="icon-wrapper ms-3">
-                                            <i class="iconoir-folder-minus" style="font-size: 28px;"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-lg-3 mb-2">
                             <div class="card stat-card bg-info text-white">
                                 <div class="card-body p-4">
                                     <div class="d-flex justify-content-between align-items-center">
@@ -864,7 +820,7 @@ if(!empty($search_results)) {
                                             <div class="d-flex justify-content-between mt-5">
                                                 <button type="button" 
                                                         class="btn btn-outline-primary" 
-                                                        onclick="openEditCategoryModal(<?php echo $cat['id']; ?>, '<?php echo htmlspecialchars(addslashes($cat['name'])); ?>', '<?php echo htmlspecialchars(addslashes($cat['slug'])); ?>', '<?php echo htmlspecialchars(addslashes($cat['description'])); ?>', <?php echo $cat['parent_id'] ?: 'null'; ?>, <?php echo $cat['location_id'] ?: 'null'; ?>, <?php echo $cat['sort_order']; ?>, <?php echo $cat['is_active']; ?>, '<?php echo htmlspecialchars(addslashes($cat['image'])); ?>', '<?php echo isset($cat['temperature_type']) ? $cat['temperature_type'] : 'ambient'; ?>', '<?php echo isset($cat['humidity_type']) ? $cat['humidity_type'] : 'ambient'; ?>')">
+                                                        onclick="openEditCategoryModal(<?php echo $cat['id']; ?>, '<?php echo htmlspecialchars(addslashes($cat['name'])); ?>', '<?php echo htmlspecialchars(addslashes($cat['slug'])); ?>', '<?php echo htmlspecialchars(addslashes($cat['description'])); ?>', <?php echo $cat['location_id'] ?: 'null'; ?>, <?php echo $cat['sort_order']; ?>, <?php echo $cat['is_active']; ?>, '<?php echo htmlspecialchars(addslashes($cat['image'])); ?>', '<?php echo isset($cat['temperature_type']) ? $cat['temperature_type'] : 'ambient'; ?>', '<?php echo isset($cat['humidity_type']) ? $cat['humidity_type'] : 'ambient'; ?>')">
                                                     <i class="iconoir-edit"></i> Sửa
                                                 </button>
                                                 <button type="button" 
