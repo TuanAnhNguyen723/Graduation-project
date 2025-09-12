@@ -1511,7 +1511,7 @@
   let isEditSensorModalOpen = false;
   let currentEditSensorId = null;
 
-  function openEditSensorModal(sensorId, sensorName, sensorCode, sensorType, locationId, manufacturer, model, serialNumber, installationDate, minThreshold, maxThreshold, status, lastCalibration, description, notes) {
+  function openEditSensorModal(sensorId, sensorName, sensorCode, sensorType, locationId, manufacturer, model, serialNumber, installationDate, status, lastCalibration, description, notes) {
     currentEditSensorId = sensorId;
     
     // Debug log
@@ -1526,8 +1526,6 @@
     document.getElementById('editModel').value = model || '';
     document.getElementById('editSerialNumber').value = serialNumber || '';
     document.getElementById('editInstallationDate').value = installationDate || '';
-    document.getElementById('editMinThreshold').value = minThreshold || '';
-    document.getElementById('editMaxThreshold').value = maxThreshold || '';
     document.getElementById('editSensorStatus').value = status;
     document.getElementById('editLastCalibration').value = lastCalibration || '';
     document.getElementById('editSensorDescription').value = description || '';
@@ -1676,33 +1674,6 @@
       isValid = false; 
     }
 
-    // Validate thresholds - bắt buộc nhập cả 2
-    const minThreshold = document.getElementById('editMinThreshold')?.value;
-    const maxThreshold = document.getElementById('editMaxThreshold')?.value;
-    
-    if (!minThreshold || minThreshold.trim() === '') {
-      showEditSensorFieldError('editMinThreshold','Ngưỡng tối thiểu là bắt buộc');
-      isValid = false;
-    }
-    
-    if (!maxThreshold || maxThreshold.trim() === '') {
-      showEditSensorFieldError('editMaxThreshold','Ngưỡng tối đa là bắt buộc');
-      isValid = false;
-    }
-    
-    // Kiểm tra ngưỡng tối đa > ngưỡng tối thiểu
-    if (minThreshold && maxThreshold && minThreshold.trim() !== '' && maxThreshold.trim() !== '') {
-      const min = parseFloat(minThreshold);
-      const max = parseFloat(maxThreshold);
-      if (isNaN(min) || isNaN(max)) {
-        if (isNaN(min)) showEditSensorFieldError('editMinThreshold','Ngưỡng tối thiểu phải là số hợp lệ');
-        if (isNaN(max)) showEditSensorFieldError('editMaxThreshold','Ngưỡng tối đa phải là số hợp lệ');
-        isValid = false;
-      } else if (min >= max) {
-        showEditSensorFieldError('editMaxThreshold','Ngưỡng tối đa phải lớn hơn ngưỡng tối thiểu');
-        isValid = false;
-      }
-    }
     
     return isValid;
   }
@@ -1866,31 +1837,6 @@
       });
     }
 
-    // Validate thresholds
-    const minThreshold = document.getElementById('editMinThreshold');
-    const maxThreshold = document.getElementById('editMaxThreshold');
-    
-    if (minThreshold && maxThreshold) {
-      const validateThresholds = () => {
-        const min = parseFloat(minThreshold.value);
-        const max = parseFloat(maxThreshold.value);
-        
-        if (minThreshold.value && maxThreshold.value && min >= max) {
-          showEditSensorFieldError('editMaxThreshold','Ngưỡng tối đa phải lớn hơn ngưỡng tối thiểu');
-          maxThreshold.classList.add('error');
-          maxThreshold.classList.remove('success');
-        } else {
-          clearEditSensorFieldError('editMaxThreshold');
-          if (maxThreshold.value) {
-            maxThreshold.classList.add('success');
-            maxThreshold.classList.remove('error');
-          }
-        }
-      };
-      
-      minThreshold.addEventListener('input', validateThresholds);
-      maxThreshold.addEventListener('input', validateThresholds);
-    }
   }
 
   // Add event listeners for edit sensor modal
@@ -1979,33 +1925,6 @@
     ];
     required.forEach(f => { const el = document.getElementById(f.id); if (!el || !el.value.trim()) { showFieldError(f.id, `${f.name} là bắt buộc`); isValid = false; } else { clearFieldError(f.id); el.classList.add('success'); }});
     const sensorCode = document.getElementById('sensorCode'); if (sensorCode && sensorCode.value.trim()) { const re=/^[a-zA-Z0-9_]{3,20}$/; if (!re.test(sensorCode.value.trim())) { showFieldError('sensorCode','Mã cảm biến chỉ được chứa chữ cái, số và dấu gạch dưới, độ dài 3-20 ký tự'); isValid=false; } }
-    // Validate thresholds - bắt buộc nhập cả 2
-    const minT = document.getElementById('minThreshold');
-    const maxT = document.getElementById('maxThreshold');
-    
-    if (!minT || !minT.value || minT.value.trim() === '') {
-      showFieldError('minThreshold','Ngưỡng tối thiểu là bắt buộc');
-      isValid = false;
-    }
-    
-    if (!maxT || !maxT.value || maxT.value.trim() === '') {
-      showFieldError('maxThreshold','Ngưỡng tối đa là bắt buộc');
-      isValid = false;
-    }
-    
-    // Kiểm tra ngưỡng tối đa > ngưỡng tối thiểu
-    if (minT && maxT && minT.value && maxT.value && minT.value.trim() !== '' && maxT.value.trim() !== '') {
-      const min = parseFloat(minT.value);
-      const max = parseFloat(maxT.value);
-      if (isNaN(min) || isNaN(max)) {
-        if (isNaN(min)) showFieldError('minThreshold','Ngưỡng tối thiểu phải là số hợp lệ');
-        if (isNaN(max)) showFieldError('maxThreshold','Ngưỡng tối đa phải là số hợp lệ');
-        isValid = false;
-      } else if (min >= max) {
-        showFieldError('maxThreshold','Ngưỡng tối đa phải lớn hơn ngưỡng tối thiểu');
-        isValid = false;
-      }
-    }
     return isValid;
   }
 

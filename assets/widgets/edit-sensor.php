@@ -120,31 +120,6 @@
                     </div>
                 </div>
 
-                <!-- Threshold Settings Section -->
-                <div class="form-section">
-                    <div class="section-header">
-                        <i class="iconoir-warning-triangle" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px;"></i>
-                        <h5>Cài đặt ngưỡng</h5>
-                    </div>
-
-                    <div class="form-grid">
-                        <div class="form-field">
-                            <label for="editMinThreshold" class="field-label">Ngưỡng tối thiểu (°C) <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <input type="number" class="form-input" id="editMinThreshold" name="min_threshold" placeholder="0" step="0.1" required>
-                            </div>
-                            <div class="field-error" id="editMinThresholdError"></div>
-                        </div>
-
-                        <div class="form-field">
-                            <label for="editMaxThreshold" class="field-label">Ngưỡng tối đa (°C) <span class="required">*</span></label>
-                            <div class="input-wrapper">
-                                <input type="number" class="form-input" id="editMaxThreshold" name="max_threshold" placeholder="50" step="0.1" required>
-                            </div>
-                            <div class="field-error" id="editMaxThresholdError"></div>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Status and Maintenance Section -->
                 <div class="form-section">

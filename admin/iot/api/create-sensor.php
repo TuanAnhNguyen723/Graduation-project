@@ -55,8 +55,6 @@ try {
     $installationDate = trim($_POST['installation_date'] ?? '');
     $lastCalibration = trim($_POST['last_calibration'] ?? '');
     $description = trim($_POST['description'] ?? '');
-    $minThreshold = trim($_POST['min_threshold'] ?? '');
-    $maxThreshold = trim($_POST['max_threshold'] ?? '');
     $notes = trim($_POST['notes'] ?? '');
     
     // Validate dữ liệu bắt buộc
@@ -84,27 +82,6 @@ try {
         $errors['status'] = 'Trạng thái là bắt buộc';
     }
     
-    // Validate ngưỡng - bắt buộc nhập cả 2
-    if (empty($minThreshold)) {
-        $errors['minThreshold'] = 'Ngưỡng tối thiểu là bắt buộc';
-    } elseif (!is_numeric($minThreshold)) {
-        $errors['minThreshold'] = 'Ngưỡng tối thiểu phải là số hợp lệ';
-    }
-    
-    if (empty($maxThreshold)) {
-        $errors['maxThreshold'] = 'Ngưỡng tối đa là bắt buộc';
-    } elseif (!is_numeric($maxThreshold)) {
-        $errors['maxThreshold'] = 'Ngưỡng tối đa phải là số hợp lệ';
-    }
-    
-    // Kiểm tra ngưỡng tối đa > ngưỡng tối thiểu
-    if (!empty($minThreshold) && !empty($maxThreshold) && is_numeric($minThreshold) && is_numeric($maxThreshold)) {
-        $min = floatval($minThreshold);
-        $max = floatval($maxThreshold);
-        if ($min >= $max) {
-            $errors['maxThreshold'] = 'Ngưỡng tối đa phải lớn hơn ngưỡng tối thiểu';
-        }
-    }
     
     // Chuẩn hóa loại cảm biến theo schema DB
     $allowedSensorTypes = ['temperature', 'humidity', 'both'];
@@ -143,8 +120,6 @@ try {
         'installation_date' => $installationDate ?: null,
         'last_calibration' => $lastCalibration ?: null,
         'description' => $description ?: null,
-        'min_threshold' => floatval($minThreshold),
-        'max_threshold' => floatval($maxThreshold),
         'notes' => $notes ?: null,
         // next_calibration: để null hoặc tính toán nếu cần trong tương lai
         'next_calibration' => null,

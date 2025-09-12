@@ -226,13 +226,6 @@ try {
                                                 <div><i class="iconoir-calendar"></i> Hiệu chuẩn cuối: <?php echo date('d/m/Y', strtotime($sensor['last_calibration'])); ?></div>
                                             <?php endif; ?>
 
-                                            <?php if (isset($sensor['min_threshold']) || isset($sensor['max_threshold'])): ?>
-                                                <div><i class="iconoir-warning-triangle"></i> Ngưỡng: 
-                                                    <?php echo ($sensor['min_threshold'] !== null && $sensor['min_threshold'] !== '' ? htmlspecialchars($sensor['min_threshold']) : '—'); ?> - 
-                                                    <?php echo ($sensor['max_threshold'] !== null && $sensor['max_threshold'] !== '' ? htmlspecialchars($sensor['max_threshold']) : '—'); ?>
-                                                </div>
-                                            <?php endif; ?>
-
                                             <?php if (!empty($sensor['description'])): ?>
                                                 <div class="mt-1"><i class="iconoir-notes"></i>
                                                     <?php $desc = (string)$sensor['description']; echo htmlspecialchars(mb_substr($desc, 0, 80)) . (mb_strlen($desc) > 80 ? '…' : ''); ?>
@@ -248,7 +241,7 @@ try {
                                     </div>
                                     
                                     <div class="mt-3">
-                                        <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditSensorModal(<?php echo $sensor['id']; ?>, '<?php echo htmlspecialchars(addslashes($sensor['sensor_name'])); ?>', '<?php echo htmlspecialchars(addslashes($sensor['sensor_code'])); ?>', '<?php echo htmlspecialchars(addslashes($sensor['sensor_type'])); ?>', <?php echo $sensor['location_id'] ? $sensor['location_id'] : 'null'; ?>, '<?php echo htmlspecialchars(addslashes($sensor['manufacturer'] ?? '')); ?>', '<?php echo htmlspecialchars(addslashes($sensor['model'] ?? '')); ?>', '<?php echo htmlspecialchars(addslashes($sensor['serial_number'] ?? '')); ?>', '<?php echo $sensor['installation_date'] ?? ''; ?>', <?php echo $sensor['min_threshold'] ?? 'null'; ?>, <?php echo $sensor['max_threshold'] ?? 'null'; ?>, '<?php echo htmlspecialchars(addslashes($sensor['status'])); ?>', '<?php echo $sensor['last_calibration'] ?? ''; ?>', '<?php echo htmlspecialchars(addslashes($sensor['description'] ?? '')); ?>', '<?php echo htmlspecialchars(addslashes($sensor['notes'] ?? '')); ?>')">
+                                        <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditSensorModal(<?php echo $sensor['id']; ?>, '<?php echo htmlspecialchars(addslashes($sensor['sensor_name'])); ?>', '<?php echo htmlspecialchars(addslashes($sensor['sensor_code'])); ?>', '<?php echo htmlspecialchars(addslashes($sensor['sensor_type'])); ?>', <?php echo $sensor['location_id'] ? $sensor['location_id'] : 'null'; ?>, '<?php echo htmlspecialchars(addslashes($sensor['manufacturer'] ?? '')); ?>', '<?php echo htmlspecialchars(addslashes($sensor['model'] ?? '')); ?>', '<?php echo htmlspecialchars(addslashes($sensor['serial_number'] ?? '')); ?>', '<?php echo $sensor['installation_date'] ?? ''; ?>', '<?php echo htmlspecialchars(addslashes($sensor['status'])); ?>', '<?php echo $sensor['last_calibration'] ?? ''; ?>', '<?php echo htmlspecialchars(addslashes($sensor['description'] ?? '')); ?>', '<?php echo htmlspecialchars(addslashes($sensor['notes'] ?? '')); ?>')">
                                             <i class="iconoir-edit"></i> Sửa
                                         </button>
                                         <button class="btn btn-sm btn-outline-danger" onclick="deleteSensor(<?php echo $sensor['id']; ?>)">
@@ -503,9 +496,6 @@ try {
                     ? new Date(sensor.last_calibration).toLocaleDateString("vi-VN")
                     : null;
 
-                // Format ngưỡng min - max
-                let threshold = (sensor.min_threshold ?? "—") + " - " + (sensor.max_threshold ?? "—");
-
                 // Format description, notes
                 let description = sensor.description 
                     ? (sensor.description.length > 80 ? sensor.description.substring(0,80) + "…" : sensor.description)
@@ -566,10 +556,6 @@ try {
                                             <div><i class="iconoir-calendar"></i> Hiệu chuẩn cuối: ${lastCalibration}</div>` : ""
                                         }
 
-                                        ${(sensor.min_threshold !== null || sensor.max_threshold !== null) ? `
-                                            <div><i class="iconoir-warning-triangle"></i> Ngưỡng: ${threshold}</div>` : ""
-                                        }
-
                                         ${description ? `
                                             <div class="mt-1"><i class="iconoir-notes"></i> ${description}</div>` : ""
                                         }
@@ -581,7 +567,7 @@ try {
                                 </div>
 
                                 <div class="mt-3">
-                                    <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditSensorModal(${sensor.id}, '${sensor.sensor_name}', '${sensor.sensor_code}', '${sensor.sensor_type}', ${sensor.location_id ? sensor.location_id : 'null'}, '${sensor.manufacturer || ''}', '${sensor.model || ''}', '${sensor.serial_number || ''}', '${sensor.installation_date || ''}', ${sensor.min_threshold || 'null'}, ${sensor.max_threshold || 'null'}, '${sensor.status}', '${sensor.last_calibration || ''}', '${sensor.description || ''}', '${sensor.notes || ''}')">
+                                    <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditSensorModal(${sensor.id}, '${sensor.sensor_name}', '${sensor.sensor_code}', '${sensor.sensor_type}', ${sensor.location_id ? sensor.location_id : 'null'}, '${sensor.manufacturer || ''}', '${sensor.model || ''}', '${sensor.serial_number || ''}', '${sensor.installation_date || ''}', '${sensor.status}', '${sensor.last_calibration || ''}', '${sensor.description || ''}', '${sensor.notes || ''}')">
                                         <i class="iconoir-edit"></i> Sửa
                                     </button>
                                     <button class="btn btn-sm btn-outline-danger" onclick="deleteSensor(${sensor.id})">

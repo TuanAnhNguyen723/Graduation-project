@@ -8,6 +8,13 @@ USE graduation_project;
 -- BẢNG IOT WAREHOUSE MANAGEMENT (TẠO TRƯỚC VÌ LÀ CHA)
 -- ==============================================================
 
+-- Update 9/12/2025
+-- Xóa cột min_threshold
+ALTER TABLE `temperature_sensors` DROP COLUMN IF EXISTS `min_threshold`;
+
+-- Xóa cột max_threshold  
+ALTER TABLE `temperature_sensors` DROP COLUMN IF EXISTS `max_threshold`;
+
 -- BẢNG WAREHOUSE_LOCATIONS (VỊ TRÍ TRONG KHO)
 CREATE TABLE IF NOT EXISTS warehouse_locations (
     id INT AUTO_INCREMENT PRIMARY KEY,

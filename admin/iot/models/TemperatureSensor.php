@@ -75,7 +75,7 @@ class TemperatureSensor {
         $query = "UPDATE temperature_sensors 
                   SET sensor_name = ?, sensor_code = ?, location_id = ?, sensor_type = ?, 
                       manufacturer = ?, model = ?, serial_number = ?, installation_date = ?,
-                      min_threshold = ?, max_threshold = ?, status = ?, last_calibration = ?, 
+                      status = ?, last_calibration = ?, 
                       description = ?, notes = ?, updated_at = ? 
                   WHERE id = ?";
         
@@ -89,8 +89,6 @@ class TemperatureSensor {
             $data['model'],
             $data['serial_number'],
             $data['installation_date'],
-            $data['min_threshold'],
-            $data['max_threshold'],
             $data['status'],
             $data['last_calibration'],
             $data['description'],
