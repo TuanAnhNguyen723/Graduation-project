@@ -103,7 +103,7 @@
                 <!-- Temperature & Humidity Section -->
                 <div class="form-section">
                     <div class="section-header">
-                        <i class="iconoir-thermometer"></i>
+                        <i class="iconoir-temperature-high"></i>
                         <h5>Thông tin môi trường</h5>
                     </div>
                     

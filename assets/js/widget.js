@@ -4,6 +4,7 @@
 // Products widget
 (function() {
   let isProductModalOpen = false;
+  let isViewProductModalOpen = false;
 
   function openCreateProductModal() {
     const modal = document.getElementById('createProductModal');
@@ -489,6 +490,196 @@
   window.updateEditHumidityDisplay = updateEditHumidityDisplay;
   window.updateEditTemperatureDangerDisplay = updateEditTemperatureDangerDisplay;
   window.updateEditHumidityDangerDisplay = updateEditHumidityDangerDisplay;
+
+  // -------- View Product (Read-only) --------
+  async function loadCategoriesForView() {
+    try {
+      const response = await fetch('../../api/categories.php');
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const result = await response.json();
+      if (result.success && result.data) {
+        const categorySelect = document.getElementById('viewProductCategory');
+        if (categorySelect) {
+          const firstOption = categorySelect.firstElementChild;
+          categorySelect.innerHTML = '';
+          if (firstOption) categorySelect.appendChild(firstOption);
+          result.data.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            categorySelect.appendChild(option);
+          });
+        }
+      }
+    } catch (e) { console.error('Error loading categories for view:', e); }
+  }
+
+  function openViewProductModal(product) {
+    // product: {id,name,sku,description,category_id,brand,price,sale_price,stock_quantity,is_active,images}
+    const {
+      id, name, sku, description, category_id, brand, price,
+      sale_price, stock_quantity, is_active, images
+    } = product || {};
+
+    const idEl = document.getElementById('viewProductId'); if (idEl) idEl.value = id || '';
+    const nameEl = document.getElementById('viewProductName'); if (nameEl) nameEl.value = name || '';
+    const skuEl = document.getElementById('viewProductSku'); if (skuEl) skuEl.value = sku || '';
+    const brandEl = document.getElementById('viewProductBrand'); if (brandEl) brandEl.value = brand || '';
+    const priceEl = document.getElementById('viewProductPrice'); if (priceEl) priceEl.value = price ?? '';
+    const salePriceEl = document.getElementById('viewProductSalePrice'); if (salePriceEl) salePriceEl.value = sale_price ?? '';
+    const stockEl = document.getElementById('viewStockQuantity'); if (stockEl) stockEl.value = stock_quantity ?? '';
+    const statusEl = document.getElementById('viewProductStatus'); if (statusEl) statusEl.value = (is_active !== undefined && is_active !== null) ? String(is_active) : '';
+    const descEl = document.getElementById('viewProductDescription'); if (descEl) descEl.value = description || '';
+
+    // Image
+    const imgContainer = document.getElementById('currentViewProductImageContainer');
+    const imgEl = document.getElementById('currentViewProductImage');
+    if (imgEl && imgContainer) {
+      if (images && String(images).trim() !== '') {
+        imgEl.src = '../../' + images;
+        imgContainer.style.display = 'block';
+      } else {
+        imgContainer.style.display = 'none';
+      }
+    }
+
+    // Load categories then set value
+    loadCategoriesForView().then(() => {
+      const catSelect = document.getElementById('viewProductCategory');
+      if (catSelect && category_id) catSelect.value = String(category_id);
+    });
+
+    // Environment info based on category
+    if (category_id) {
+      updateViewTemperatureHumidityInfo(category_id);
+    } else {
+      resetViewTemperatureHumidityInfo();
+    }
+
+    const modal = document.getElementById('viewProductModal');
+    if (modal) {
+      modal.classList.add('show');
+      setTimeout(() => { modal.querySelector('.custom-modal').classList.add('show'); }, 10);
+      isViewProductModalOpen = true;
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeViewProductModal() {
+    const modal = document.getElementById('viewProductModal');
+    if (modal) {
+      modal.querySelector('.custom-modal').classList.remove('show');
+      setTimeout(() => { modal.classList.remove('show'); }, 300);
+      isViewProductModalOpen = false;
+      document.body.style.overflow = '';
+    }
+  }
+
+  async function updateViewTemperatureHumidityInfo(categoryId) {
+    try {
+      const response = await fetch(`../../api/products.php?temperature_info=1&category_id=${categoryId}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const result = await response.json();
+      if (result.success && result.data) {
+        const tempData = result.data.temperature;
+        const humidityData = result.data.humidity;
+        updateViewTemperatureDisplay(tempData);
+        updateViewHumidityDisplay(humidityData);
+        updateViewTemperatureDangerDisplay(tempData);
+        updateViewHumidityDangerDisplay(humidityData);
+      }
+    } catch (e) {
+      console.error('Error loading temperature/humidity info for view:', e);
+      resetViewTemperatureHumidityInfo();
+    }
+  }
+
+  function resetViewTemperatureHumidityInfo() {
+    ['viewTemperatureInfo','viewHumidityInfo','viewTemperatureDangerInfo','viewHumidityDangerInfo']
+      .forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = '<span class="info-text">Chọn danh mục để xem thông tin</span>'; });
+  }
+
+  function updateViewTemperatureDisplay(tempData) {
+    const element = document.getElementById('viewTemperatureInfo');
+    if (!element || !tempData) return;
+    const zone = getZoneFromTemperatureData(tempData);
+    const labels = { 'frozen': ['Đông lạnh', 'bg-info-subtle text-info'], 'chilled': ['Lạnh mát', 'bg-primary-subtle text-primary'], 'ambient': ['Nhiệt độ phòng', 'bg-warning-subtle text-warning'] };
+    const info = labels[zone] || labels['ambient'];
+    element.innerHTML = `<span class="badge ${info[1]}">${info[0]}</span>`;
+  }
+
+  function updateViewHumidityDisplay(humidityData) {
+    const element = document.getElementById('viewHumidityInfo');
+    if (!element || !humidityData) return;
+    const zone = getZoneFromHumidityData(humidityData);
+    const labels = { 'frozen': ['Đông lạnh (85-95%)', 'bg-info-subtle text-info'], 'chilled': ['Lạnh mát (85-90%)', 'bg-primary-subtle text-primary'], 'ambient': ['Phòng (50-60%)', 'bg-warning-subtle text-warning'] };
+    const info = labels[zone] || labels['ambient'];
+    element.innerHTML = `<span class="badge ${info[1]}">${info[0]}</span>`;
+  }
+
+  function updateViewTemperatureDangerDisplay(tempData) {
+    const element = document.getElementById('viewTemperatureDangerInfo');
+    if (!element || !tempData) return;
+    const dangerMin = tempData.dangerous_min; const dangerMax = tempData.dangerous_max;
+    const text = (dangerMin !== null && dangerMin !== undefined) ? `< ${dangerMin}°C và > ${dangerMax}°C` : `> ${dangerMax}°C`;
+    element.innerHTML = `<span class="badge bg-danger-subtle text-danger">${text}</span>`;
+  }
+
+  function updateViewHumidityDangerDisplay(humidityData) {
+    const element = document.getElementById('viewHumidityDangerInfo');
+    if (!element || !humidityData) return;
+    const dangerMin = humidityData.dangerous_min; const dangerMax = humidityData.dangerous_max;
+    let text = '';
+    if (dangerMin !== null && dangerMin !== undefined && dangerMax !== null && dangerMax !== undefined) text = `< ${dangerMin}% và > ${dangerMax}%`;
+    else if (dangerMin !== null && dangerMin !== undefined) text = `< ${dangerMin}%`;
+    else text = 'N/A';
+    element.innerHTML = `<span class="badge bg-danger-subtle text-danger">${text}</span>`;
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    document.addEventListener('click', function(e){ const modal = document.getElementById('viewProductModal'); if (modal && e.target === modal) closeViewProductModal(); });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && isViewProductModalOpen) closeViewProductModal(); });
+  });
+
+  window.openViewProductModal = openViewProductModal;
+  window.closeViewProductModal = closeViewProductModal;
+
+  // Button dataset helpers
+  window.openViewProductFromButton = function(btn){
+    if (!btn || !btn.dataset) return;
+    const d = btn.dataset;
+    openViewProductModal({
+      id: d.id ? parseInt(d.id) : null,
+      name: d.name || '',
+      sku: d.sku || '',
+      description: d.description || '',
+      category_id: d.categoryId ? parseInt(d.categoryId) : null,
+      brand: d.brand || '',
+      price: d.price ? parseFloat(d.price) : null,
+      sale_price: d.salePrice ? parseFloat(d.salePrice) : 0,
+      stock_quantity: d.stockQuantity ? parseInt(d.stockQuantity) : 0,
+      is_active: d.isActive ? parseInt(d.isActive) : 0,
+      images: d.images || ''
+    });
+  };
+
+  window.openEditProductFromButton = function(btn){
+    if (!btn || !btn.dataset) return;
+    const d = btn.dataset;
+    openEditProductModal(
+      d.id ? parseInt(d.id) : null,
+      d.name || '',
+      d.sku || '',
+      d.description || '',
+      d.categoryId ? parseInt(d.categoryId) : null,
+      d.brand || '',
+      d.price ? parseFloat(d.price) : 0,
+      d.salePrice ? parseFloat(d.salePrice) : 0,
+      d.stockQuantity ? parseInt(d.stockQuantity) : 0,
+      d.isActive ? parseInt(d.isActive) : 0,
+      d.images || ''
+    );
+  };
 })();
 
 // Categories widget

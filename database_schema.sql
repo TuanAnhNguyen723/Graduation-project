@@ -235,7 +235,7 @@ INSERT INTO temperature_readings (sensor_id, temperature, humidity) VALUES
 INSERT INTO notifications (title, message, type, icon, icon_color, related_id, related_type, is_read, created_at) VALUES
 ('Sản phẩm mới được thêm', 'Đã thêm sản phẩm mới "iPhone 15 Pro" vào hệ thống.', 'product', 'iconoir-shopping-bag', 'primary', 1, 'product', 0, NOW() - INTERVAL 2 MINUTE),
 ('Danh mục đã được cập nhật', 'Danh mục "Điện tử" đã được cập nhật thành công.', 'product', 'iconoir-folder', 'success', 1, 'category', 0, NOW() - INTERVAL 10 MINUTE),
-('Cảm biến nhiệt độ báo động', 'Nhiệt độ tại vị trí A-01-01 vượt quá ngưỡng cho phép (25°C).', 'alert', 'iconoir-thermometer', 'warning', 1, 'sensor', 0, NOW() - INTERVAL 15 MINUTE),
+('Cảm biến nhiệt độ báo động', 'Nhiệt độ tại vị trí A-01-01 vượt quá ngưỡng cho phép (25°C).', 'alert', 'iconoir-temperature-high', 'warning', 1, 'sensor', 0, NOW() - INTERVAL 15 MINUTE),
 ('Cảm biến hoạt động bình thường', 'Cảm biến SENSOR_B1 đã hoạt động trở lại bình thường.', 'sensor', 'iconoir-check-circle', 'success', 3, 'sensor', 1, NOW() - INTERVAL 1 HOUR),
 ('Hệ thống cập nhật', 'Hệ thống đã được cập nhật lên phiên bản mới nhất.', 'system', 'iconoir-settings', 'info', NULL, NULL, 1, NOW() - INTERVAL 2 HOUR),
 ('Cảnh báo độ ẩm cao', 'Độ ẩm tại vị trí C-01-01 đang ở mức cao (85%).', 'alert', 'iconoir-water-drop', 'danger', 5, 'sensor', 0, NOW() - INTERVAL 30 MINUTE),

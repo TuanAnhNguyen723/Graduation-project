@@ -895,9 +895,37 @@ if ($categories_result) {
                                             
                                             <!-- Nút hành động -->
                                             <div class="d-flex justify-content-between">
+                                                <button type="button"
+                                                        style="border: 1px solid black; color: black;"
+                                                        class="btn btn-outline-secondary"
+                                                        data-id="<?php echo $prod['id']; ?>"
+                                                        data-name="<?php echo htmlspecialchars($prod['name']); ?>"
+                                                        data-sku="<?php echo htmlspecialchars($prod['sku']); ?>"
+                                                        data-description="<?php echo htmlspecialchars($prod['description']); ?>"
+                                                        data-category-id="<?php echo (int)$prod['category_id']; ?>"
+                                                        data-brand="<?php echo htmlspecialchars($prod['brand']); ?>"
+                                                        data-price="<?php echo (float)$prod['price']; ?>"
+                                                        data-sale-price="<?php echo $prod['sale_price'] !== null ? (float)$prod['sale_price'] : 0; ?>"
+                                                        data-stock-quantity="<?php echo (int)$prod['stock_quantity']; ?>"
+                                                        data-is-active="<?php echo (int)$prod['is_active']; ?>"
+                                                        data-images="<?php echo htmlspecialchars($prod['images']); ?>"
+                                                        onclick="openViewProductFromButton(this)">
+                                                    <i class="iconoir-eye"></i> Xem
+                                                </button>
                                                 <button type="button" 
-                                                        class="btn btn-outline-primary" 
-                                                        onclick="openEditProductModal(<?php echo $prod['id']; ?>, '<?php echo htmlspecialchars(addslashes($prod['name'])); ?>', '<?php echo htmlspecialchars(addslashes($prod['sku'])); ?>', '<?php echo htmlspecialchars(addslashes($prod['description'])); ?>', <?php echo $prod['category_id']; ?>, '<?php echo htmlspecialchars(addslashes($prod['brand'])); ?>', <?php echo $prod['price']; ?>, <?php echo $prod['sale_price'] ?: 0; ?>, <?php echo $prod['stock_quantity']; ?>, <?php echo $prod['is_active']; ?>, '<?php echo htmlspecialchars(addslashes($prod['images'])); ?>')">
+                                                        class="btn btn-outline-primary"
+                                                        data-id="<?php echo $prod['id']; ?>"
+                                                        data-name="<?php echo htmlspecialchars($prod['name']); ?>"
+                                                        data-sku="<?php echo htmlspecialchars($prod['sku']); ?>"
+                                                        data-description="<?php echo htmlspecialchars($prod['description']); ?>"
+                                                        data-category-id="<?php echo (int)$prod['category_id']; ?>"
+                                                        data-brand="<?php echo htmlspecialchars($prod['brand']); ?>"
+                                                        data-price="<?php echo (float)$prod['price']; ?>"
+                                                        data-sale-price="<?php echo $prod['sale_price'] !== null ? (float)$prod['sale_price'] : 0; ?>"
+                                                        data-stock-quantity="<?php echo (int)$prod['stock_quantity']; ?>"
+                                                        data-is-active="<?php echo (int)$prod['is_active']; ?>"
+                                                        data-images="<?php echo htmlspecialchars($prod['images']); ?>"
+                                                        onclick="openEditProductFromButton(this)">
                                                     <i class="iconoir-edit"></i> Sửa
                                                 </button>
                                                 <button type="button" 
@@ -954,6 +982,9 @@ if ($categories_result) {
     
     <!-- Include Product Edit Modal Widget -->
     <?php include '../../assets/widgets/edit-product.php'; ?>
+    
+    <!-- Include Product View Modal Widget -->
+    <?php include '../../assets/widgets/view-product.php'; ?>
     
     <!-- Include Unified Widgets JavaScript -->
     <script src="../../assets/js/widget.js"></script>
