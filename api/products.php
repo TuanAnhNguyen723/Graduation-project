@@ -237,6 +237,16 @@ try {
                     }
                 }
                 
+                // Kiểm tra TÊN sản phẩm trùng (trừ chính nó)
+                if(isset($data['name']) && $product->nameExists($data['name'], $product_id)) {
+                    http_response_code(400);
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Sản phẩm đã tồn tại'
+                    ]);
+                    break;
+                }
+                
                 // Xử lý upload hình ảnh mới (nếu có)
                 $image_path = $current_product['images']; // Giữ ảnh cũ
                 if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
@@ -309,6 +319,16 @@ try {
                 echo json_encode([
                     'success' => false,
                     'message' => 'SKU đã tồn tại'
+                ]);
+                break;
+            }
+            
+            // Kiểm tra TÊN sản phẩm đã tồn tại chưa
+            if($product->nameExists($data['name'])) {
+                http_response_code(400);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Sản phẩm đã tồn tại'
                 ]);
                 break;
             }

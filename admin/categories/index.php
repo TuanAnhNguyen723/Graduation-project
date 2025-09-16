@@ -897,12 +897,12 @@ if(!empty($search_results)) {
     <script>
         // Function xóa danh mục
         function deleteCategory(categoryId, categoryName) {
-            if (confirm(`Bạn có chắc chắn muốn xóa danh mục "${categoryName}"?`)) {
+            const triggerBtn = (typeof event !== 'undefined' && event && event.target) ? event.target.closest('.btn-outline-danger') : null;
+            const proceed = () => {
                 // Hiển thị loading trên button
-                const deleteBtn = event.target.closest('.btn-outline-danger');
-                const originalText = deleteBtn.innerHTML;
-                deleteBtn.disabled = true;
-                deleteBtn.innerHTML = '<i class="iconoir-loading"></i> Đang xóa...';
+                const deleteBtn = triggerBtn;
+                const originalText = deleteBtn ? deleteBtn.innerHTML : '';
+                if (deleteBtn) { deleteBtn.disabled = true; deleteBtn.innerHTML = '<i class="iconoir-loading"></i> Đang xóa...'; }
                 
                 // Gọi API xóa danh mục
                 fetch(`../../api/categories.php?id=${categoryId}`, {
@@ -915,12 +915,14 @@ if(!empty($search_results)) {
                         showDeleteCategorySuccessMessage();
                         
                         // Xóa card danh mục khỏi giao diện
-                        const categoryCard = deleteBtn.closest('.col-lg-4');
-                        categoryCard.style.opacity = '0.5';
-                        categoryCard.style.transform = 'scale(0.95)';
+                        const categoryCard = deleteBtn ? deleteBtn.closest('.col-lg-4') : null;
+                        if (categoryCard) {
+                            categoryCard.style.opacity = '0.5';
+                            categoryCard.style.transform = 'scale(0.95)';
+                        }
                         
                         setTimeout(() => {
-                            categoryCard.remove();
+                            if (categoryCard) categoryCard.remove();
                             
                             // Kiểm tra xem còn danh mục nào không
                             const remainingCategories = document.querySelectorAll('.category-card');
@@ -950,9 +952,13 @@ if(!empty($search_results)) {
                     showNotification('Lỗi: ' + error.message, 'error');
                     
                     // Khôi phục button
-                    deleteBtn.disabled = false;
-                    deleteBtn.innerHTML = originalText;
+                    if (deleteBtn) { deleteBtn.disabled = false; deleteBtn.innerHTML = originalText; }
                 });
+            };
+            if (window.showConfirmToast) {
+                window.showConfirmToast('warning', 'Bạn có chắc chắn muốn xóa danh mục?', `"${categoryName}" sẽ bị xóa vĩnh viễn.`, proceed);
+            } else {
+                if (confirm(`Bạn có chắc chắn muốn xóa danh mục "${categoryName}"?`)) proceed();
             }
         }
         

@@ -361,6 +361,24 @@ class Product {
     }
 
     /**
+     * Kiểm tra tên sản phẩm đã tồn tại chưa (không phân biệt hoa thường)
+     */
+    public function nameExists($name, $exclude_id = null) {
+        $query = "SELECT COUNT(*) as count FROM " . $this->table_name . " WHERE LOWER(TRIM(name)) = LOWER(TRIM(:name))";
+        if ($exclude_id) {
+            $query .= " AND id != :exclude_id";
+        }
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":name", $name);
+        if ($exclude_id) {
+            $stmt->bindParam(":exclude_id", $exclude_id);
+        }
+        $stmt->execute();
+        $result = $stmt->fetch();
+        return $result && $result['count'] > 0;
+    }
+
+    /**
      * Lấy sản phẩm theo giá
      */
     public function getByPriceRange($min_price, $max_price, $limit = null) {

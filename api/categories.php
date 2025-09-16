@@ -72,27 +72,12 @@ try {
                         'message' => 'Không tìm thấy danh mục'
                     ]);
                 }
-            } elseif(isset($_GET['parent'])) {
-                // Lấy danh mục cha
-                $result = $category->getParentCategories();
-                $categories = [];
-                while($row = $result->fetch()) {
-                    $categories[] = $row;
-                }
+            } elseif(isset($_GET['parent']) || isset($_GET['sub'])) {
+                // Đã bỏ cấu trúc danh mục cha-con
+                http_response_code(410);
                 echo json_encode([
-                    'success' => true,
-                    'data' => $categories
-                ]);
-            } elseif(isset($_GET['sub'])) {
-                // Lấy danh mục con
-                $result = $category->getSubCategories($_GET['sub']);
-                $categories = [];
-                while($row = $result->fetch()) {
-                    $categories[] = $row;
-                }
-                echo json_encode([
-                    'success' => true,
-                    'data' => $categories
+                    'success' => false,
+                    'message' => 'Tính năng danh mục cha/con đã bị loại bỏ'
                 ]);
             } elseif(isset($_GET['with_products'])) {
                 // Lấy danh mục có số lượng sản phẩm
@@ -203,12 +188,21 @@ try {
                     }
                 }
 
+                // Kiểm tra TÊN danh mục trùng (trừ chính nó)
+                if(isset($data['name']) && $category->nameExists($data['name'], $category_id)) {
+                    http_response_code(400);
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Danh mục đã tồn tại'
+                    ]);
+                    break;
+                }
+
                 // Cập nhật danh mục
                 $category->id = $category_id;
                 $category->name = trim($data['name']);
                 $category->slug = !empty($data['slug']) ? trim($data['slug']) : $category->createSlug($data['name']);
                 $category->description = trim($data['description']);
-                $category->parent_id = null;
                 $category->image = $image_path;
                 $category->location_id = !empty($data['location_id']) ? (int)$data['location_id'] : null;
                 // nhiệt độ/độ ẩm lấy theo vị trí (warehouse_locations.temperature_zone)
@@ -232,6 +226,16 @@ try {
             }
             
             // Tạo danh mục mới
+
+            // Kiểm tra TÊN danh mục đã tồn tại chưa
+            if($category->nameExists($data['name'])) {
+                http_response_code(400);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Danh mục đã tồn tại'
+                ]);
+                break;
+            }
 
             // Xử lý upload ảnh
             $image_path = '';
@@ -286,7 +290,6 @@ try {
             $category->name = $data['name'];
             $category->slug = isset($data['slug']) ? $data['slug'] : $category->createSlug($data['name']);
             $category->description = isset($data['description']) ? $data['description'] : '';
-            $category->parent_id = null;
             $category->location_id = isset($data['location_id']) && !empty($data['location_id']) ? (int)$data['location_id'] : null;
             $category->image = $image_path;
             // nhiệt độ/độ ẩm lấy theo vị trí (warehouse_locations.temperature_zone)
@@ -329,7 +332,7 @@ try {
             $category->name = $data['name'];
             $category->slug = isset($data['slug']) ? $data['slug'] : $category->createSlug($data['name']);
             $category->description = isset($data['description']) ? $data['description'] : '';
-            $category->parent_id = null;
+            // Bỏ parent_id
             $category->image = isset($data['image']) ? $data['image'] : '';
             $category->is_active = isset($data['is_active']) ? $data['is_active'] : 1;
             $category->sort_order = isset($data['sort_order']) ? $data['sort_order'] : 0;
@@ -349,28 +352,8 @@ try {
             break;
 
         case 'DELETE':
-            // Xóa danh mục
+            // Xóa danh mục (đã bỏ quan hệ cha/con)
             if(isset($_GET['id'])) {
-                // Kiểm tra xem danh mục có danh mục con không
-                $children_result = $category->getSubCategories($_GET['id']);
-                $has_children = false;
-                if($children_result) {
-                    $children = [];
-                    while($row = $children_result->fetch()) {
-                        $children[] = $row;
-                    }
-                    $has_children = count($children) > 0;
-                }
-
-                if($has_children) {
-                    http_response_code(400);
-                    echo json_encode([
-                        'success' => false,
-                        'message' => 'Không thể xóa danh mục này vì còn có danh mục con. Vui lòng xóa các danh mục con trước.'
-                    ]);
-                    break;
-                }
-
                 if($category->delete($_GET['id'])) {
                     echo json_encode([
                         'success' => true,

@@ -85,6 +85,19 @@
     const original = btn?.innerHTML || '';
     try {
       if (btn) { btn.disabled = true; btn.classList.add('loading'); btn.innerHTML = 'Đang tạo...'; }
+      // Kiểm tra trùng tên nhanh phía client
+      const rawName = document.getElementById('productName')?.value.trim() || '';
+      if (rawName) {
+        const checkRes = await fetch(`../../api/products.php?search=${encodeURIComponent(rawName)}`);
+        if (checkRes.ok) {
+          const checkData = await checkRes.json();
+          const exists = Array.isArray(checkData.data) && checkData.data.some(p => (p.name || '').trim().toLowerCase() === rawName.toLowerCase());
+          if (exists) {
+            if (window.showAppToast) window.showAppToast('error', 'Không thể tạo', 'Sản phẩm đã tồn tại'); else alert('Sản phẩm đã tồn tại');
+            return;
+          }
+        }
+      }
       const form = document.getElementById('createProductForm');
       const formData = new FormData();
       if (form) {
@@ -128,11 +141,12 @@
           if (typeof window.refreshProductList === 'function') window.refreshProductList(); else window.location.reload();
         }, 2000);
       } else {
-        alert('Có lỗi xảy ra: ' + (result.message || 'Không thể tạo sản phẩm'));
+        const msg = result.message || 'Không thể tạo sản phẩm';
+        if (window.showAppToast) window.showAppToast('error', 'Lỗi', msg); else alert('Có lỗi xảy ra: ' + msg);
       }
     } catch (err) {
       console.error('Error creating product:', err);
-      alert('Có lỗi xảy ra khi tạo sản phẩm: ' + err.message);
+      if (window.showAppToast) window.showAppToast('error', 'Lỗi', err.message || 'Có lỗi xảy ra khi tạo sản phẩm'); else alert('Có lỗi xảy ra khi tạo sản phẩm: ' + err.message);
     } finally {
       if (btn) { btn.disabled = false; btn.classList.remove('loading'); btn.innerHTML = original || 'Tạo sản phẩm'; }
     }
@@ -781,6 +795,19 @@
     const original = btn?.innerHTML || '';
     try {
       if (btn) { btn.disabled = true; btn.classList.add('loading'); btn.innerHTML = 'Đang tạo...'; }
+      // Kiểm tra trùng tên nhanh phía client
+      const rawName = document.getElementById('categoryName')?.value.trim() || '';
+      if (rawName) {
+        const checkRes = await fetch('../../api/categories.php');
+        if (checkRes.ok) {
+          const checkData = await checkRes.json();
+          const exists = Array.isArray(checkData.data) && checkData.data.some(c => (c.name || '').trim().toLowerCase() === rawName.toLowerCase());
+          if (exists) {
+            if (window.showAppToast) window.showAppToast('error', 'Không thể tạo', 'Danh mục đã tồn tại'); else alert('Danh mục đã tồn tại');
+            return;
+          }
+        }
+      }
       const form = document.getElementById('createCategoryForm');
       const formData = new FormData();
       if (form) {
@@ -1099,6 +1126,26 @@
         btn.innerHTML = 'Đang cập nhật...'; 
       }
       
+      // Kiểm tra trùng tên nhanh phía client (ngoại trừ chính danh mục đang sửa)
+      const rawName = (document.getElementById('editCategoryName')?.value || '').trim();
+      if (rawName) {
+        try {
+          const checkRes = await fetch('../../api/categories.php');
+          if (checkRes.ok) {
+            const data = await checkRes.json();
+            const exists = Array.isArray(data.data) && data.data.some(c => {
+              const sameName = (c.name || '').trim().toLowerCase() === rawName.toLowerCase();
+              const differentId = String(c.id) !== String(currentEditCategoryId);
+              return sameName && differentId;
+            });
+            if (exists) {
+              if (window.showAppToast) window.showAppToast('error', 'Không thể cập nhật', 'Danh mục đã tồn tại'); else alert('Danh mục đã tồn tại');
+              return;
+            }
+          }
+        } catch(_) { /* nếu lỗi mạng, bỏ qua để server kiểm tra */ }
+      }
+      
       const form = document.getElementById('editCategoryForm');
       const formData = new FormData();
       
@@ -1121,7 +1168,12 @@
         body: formData 
       });
       
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        let serverMsg = '';
+        try { const t = await response.text(); serverMsg = t; const j = JSON.parse(t); if (j && j.message) serverMsg = j.message; } catch(_) {}
+        if (window.showAppToast) window.showAppToast('error', 'Không thể cập nhật', serverMsg || 'Có lỗi xảy ra'); else alert(serverMsg || 'Có lỗi xảy ra');
+        return;
+      }
       
       const result = await response.json();
       if (result.success) {
@@ -1132,11 +1184,13 @@
           window.location.reload();
         }, 2000);
       } else {
-        throw new Error(result.message || 'Không thể cập nhật danh mục');
+        const msg = result.message || 'Không thể cập nhật danh mục';
+        if (window.showAppToast) window.showAppToast('error', 'Không thể cập nhật', msg); else alert(msg);
+        return;
       }
     } catch (err) {
       console.error('Error updating category:', err);
-      alert('Có lỗi xảy ra khi cập nhật danh mục: ' + err.message);
+      if (window.showAppToast) window.showAppToast('error', 'Lỗi', err.message || 'Có lỗi xảy ra khi cập nhật danh mục'); else alert('Có lỗi xảy ra khi cập nhật danh mục: ' + err.message);
     } finally {
       if (btn) { 
         btn.disabled = false; 
@@ -1255,12 +1309,12 @@
   
   // Product Management Functions
   function deleteProduct(productId, productName) {
-    if (confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${productName}"?`)) {
+    const triggerBtn = (typeof event !== 'undefined' && event && event.target) ? event.target.closest('.btn-outline-danger') : null;
+    const proceed = () => {
       // Hiển thị loading trên button
-      const deleteBtn = event.target.closest('.btn-outline-danger');
-      const originalText = deleteBtn.innerHTML;
-      deleteBtn.disabled = true;
-      deleteBtn.innerHTML = '<i class="iconoir-loading"></i> Đang xóa...';
+      const deleteBtn = triggerBtn;
+      const originalText = deleteBtn ? deleteBtn.innerHTML : '';
+      if (deleteBtn) { deleteBtn.disabled = true; deleteBtn.innerHTML = '<i class="iconoir-loading"></i> Đang xóa...'; }
       
       // Gọi API xóa sản phẩm
       fetch(`../../api/products.php?id=${productId}`, {
@@ -1273,12 +1327,14 @@
           showDeleteProductSuccessMessage();
           
           // Xóa card sản phẩm khỏi giao diện
-          const productCard = deleteBtn.closest('.col-lg-4');
-          productCard.style.opacity = '0.5';
-          productCard.style.transform = 'scale(0.95)';
+          const productCard = deleteBtn ? deleteBtn.closest('.col-lg-4') : null;
+          if (productCard) {
+            productCard.style.opacity = '0.5';
+            productCard.style.transform = 'scale(0.95)';
+          }
           
           setTimeout(() => {
-            productCard.remove();
+            if (productCard) productCard.remove();
             
             // Kiểm tra xem còn sản phẩm nào không
             const remainingProducts = document.querySelectorAll('.product-card');
@@ -1308,9 +1364,13 @@
         showNotification('Lỗi: ' + error.message, 'error');
         
         // Khôi phục button
-        deleteBtn.disabled = false;
-        deleteBtn.innerHTML = originalText;
+        if (deleteBtn) { deleteBtn.disabled = false; deleteBtn.innerHTML = originalText; }
       });
+    };
+    if (window.showConfirmToast) {
+      window.showConfirmToast('warning', 'Bạn có chắc chắn muốn xóa sản phẩm?', `"${productName}" sẽ bị xóa vĩnh viễn.`, proceed);
+    } else {
+      if (confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${productName}"?`)) proceed();
     }
   }
 
@@ -1521,6 +1581,26 @@
         btn.innerHTML = 'Đang cập nhật...'; 
       }
       
+      // Kiểm tra trùng tên nhanh phía client (ngoại trừ chính sản phẩm đang sửa)
+      const rawName = (document.getElementById('editProductName')?.value || '').trim();
+      if (rawName) {
+        try {
+          const checkRes = await fetch(`../../api/products.php?search=${encodeURIComponent(rawName)}`);
+          if (checkRes.ok) {
+            const checkData = await checkRes.json();
+            const exists = Array.isArray(checkData.data) && checkData.data.some(p => {
+              const sameName = (p.name || '').trim().toLowerCase() === rawName.toLowerCase();
+              const differentId = String(p.id) !== String(currentEditProductId);
+              return sameName && differentId;
+            });
+            if (exists) {
+              if (window.showAppToast) window.showAppToast('error', 'Không thể cập nhật', 'Sản phẩm đã tồn tại'); else alert('Sản phẩm đã tồn tại');
+              return;
+            }
+          }
+        } catch(e) { /* nếu lỗi mạng, bỏ qua kiểm tra client, để server kiểm tra */ }
+      }
+      
       const form = document.getElementById('editProductForm');
       const formData = new FormData();
       
@@ -1544,9 +1624,10 @@
       });
       
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Server response:', errorText);
-        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+        let serverMsg = '';
+        try { const t = await response.text(); serverMsg = t; const j = JSON.parse(t); if (j && j.message) serverMsg = j.message; } catch(_) {}
+        if (window.showAppToast) window.showAppToast('error', 'Không thể cập nhật', serverMsg || 'Có lỗi xảy ra'); else alert(serverMsg || 'Có lỗi xảy ra');
+        return;
       }
       
       const result = await response.json();
@@ -1558,11 +1639,13 @@
           window.location.reload();
         }, 2000);
       } else {
-        throw new Error(result.message || 'Không thể cập nhật sản phẩm');
+        const msg = result.message || 'Không thể cập nhật sản phẩm';
+        if (window.showAppToast) window.showAppToast('error', 'Không thể cập nhật', msg); else alert(msg);
+        return;
       }
     } catch (err) {
       console.error('Error updating product:', err);
-      alert('Có lỗi xảy ra khi cập nhật sản phẩm: ' + err.message);
+      if (window.showAppToast) window.showAppToast('error', 'Lỗi', err.message || 'Có lỗi xảy ra khi cập nhật sản phẩm'); else alert('Có lỗi xảy ra khi cập nhật sản phẩm: ' + err.message);
     } finally {
       if (btn) { 
         btn.disabled = false; 
@@ -2343,14 +2426,87 @@
   function showToast(type, message) {
     const toast = document.createElement('div');
     toast.className = `toast bg-${type === 'error' ? 'danger' : 'success'} text-white`;
-    toast.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 10000; min-width: 300px; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: slideInRight 0.3s ease-out;';
+    toast.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 99999; min-width: 300px; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: fadeInQuick 0.2s ease-out;';
     toast.innerHTML = `<div class="d-flex align-items-center"><i class="iconoir-${type==='error'?'warning-triangle':'check-circle'} me-2"></i><span>${message}</span></div>`;
     document.body.appendChild(toast);
-    setTimeout(() => { toast.style.animation = 'slideOutRight 0.3s ease-out'; setTimeout(() => { toast.remove(); }, 300); }, 5000);
+    setTimeout(() => { toast.style.animation = 'fadeOutQuick 0.2s ease-out'; setTimeout(() => { toast.remove(); }, 200); }, 5000);
+  }
+
+  // Global pretty toast (title + message)
+  window.showAppToast = function(type, title, message) {
+    const toast = document.createElement('div');
+    toast.className = `app-toast app-toast-${type}`;
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 99999;
+      min-width: 250px;
+      max-width: 420px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      color: ${type==='error' ? '#842029' : '#0f5132'};
+      background: ${type==='error' ? '#f8d7da' : '#d1e7dd'};
+      border: 1px solid ${type==='error' ? '#f5c2c7' : '#badbcc'};
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      animation: fadeInQuick 0.2s ease-out;
+    `;
+    const icon = document.createElement('div');
+    icon.innerHTML = `<i class="iconoir-${type==='error'?'warning-triangle':'check-circle'}"></i>`;
+    icon.style.cssText = 'font-size: 20px; line-height: 1; margin-top: 2px;';
+    const body = document.createElement('div');
+    body.innerHTML = `<div style="font-weight:700; margin-bottom:4px;">${title || (type==='error'?'Lỗi':'Thông báo')}</div><div>${message || ''}</div>`;
+    const close = document.createElement('button');
+    close.innerHTML = '<i class="iconoir-xmark"></i>';
+    close.style.cssText = 'background: transparent; border: 0; color: inherit; margin-left: 8px; cursor: pointer;';
+    close.onclick = () => { toast.style.animation = 'fadeOutQuick 0.2s ease-out'; setTimeout(()=>toast.remove(), 200); };
+    toast.appendChild(icon);
+    toast.appendChild(body);
+    toast.appendChild(close);
+    document.body.appendChild(toast);
+    setTimeout(() => { if (toast.parentNode) { toast.style.animation = 'fadeOutQuick 0.2s ease-out'; setTimeout(()=>toast.remove(), 200); } }, 4000);
+  }
+
+  // Pretty confirm dialog (uses toast-style panel)
+  window.showConfirmToast = function(type, title, message, onConfirm) {
+    const panel = document.createElement('div');
+    panel.style.cssText = `
+      position: fixed; inset: 0; z-index: 99999; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.35);
+    `;
+    const box = document.createElement('div');
+    box.style.cssText = `
+      width: 420px; max-width: 90vw; background: #fff; border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+      padding: 16px 18px; animation: fadeInQuick 0.2s ease-out; border: 1px solid #eee;
+    `;
+    const head = document.createElement('div');
+    head.style.cssText = 'display:flex; align-items:center; gap:8px; margin-bottom:8px; color:#b45309;';
+    head.innerHTML = `<i class="iconoir-warning-triangle"></i><div style="font-weight:700; font-size:16px;">${title || 'Xác nhận'}</div>`;
+    const body = document.createElement('div');
+    body.style.cssText = 'color:#6b7280; margin-bottom:12px;';
+    body.textContent = message || '';
+    const actions = document.createElement('div');
+    actions.style.cssText = 'display:flex; gap:10px; justify-content:flex-end;';
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn btn-secondary';
+    cancelBtn.textContent = 'Hủy';
+    cancelBtn.onclick = () => document.body.removeChild(panel);
+    const okBtn = document.createElement('button');
+    okBtn.className = 'btn btn-danger';
+    okBtn.textContent = 'Xóa';
+    okBtn.onclick = () => { try { onConfirm && onConfirm(); } finally { document.body.removeChild(panel); } };
+    actions.appendChild(cancelBtn);
+    actions.appendChild(okBtn);
+    box.appendChild(head); box.appendChild(body); box.appendChild(actions);
+    panel.appendChild(box);
+    panel.addEventListener('click', (e)=>{ if (e.target === panel) document.body.removeChild(panel); });
+    document.body.appendChild(panel);
   }
 
   const style = document.createElement('style');
-  style.textContent = '@keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } } @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }';
+  style.textContent = '@keyframes fadeInQuick { from { opacity: 0; } to { opacity: 1; } } @keyframes fadeOutQuick { from { opacity: 1; } to { opacity: 0; } }';
   document.head.appendChild(style);
 
   document.addEventListener('DOMContentLoaded', function(){
