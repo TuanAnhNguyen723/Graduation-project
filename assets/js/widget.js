@@ -685,6 +685,7 @@
 // Categories widget
 (function() {
   let isCategoryModalOpen = false;
+  let isViewCategoryModalOpen = false;
 
   function openCreateCategoryModal() {
     const modal = document.getElementById('createCategoryModal');
@@ -828,6 +829,73 @@
   window.closeCreateCategoryModal = closeCreateCategoryModal;
   window.submitCreateCategoryForm = submitCreateCategoryForm;
   window.previewCategoryImage = previewCategoryImage;
+  
+  // ---------- View Category (Read-only) ----------
+  async function loadLocationsForCategoryView() {
+    try {
+      const response = await fetch('../../admin/iot/api/locations.php');
+      const result = await response.json();
+      const select = document.getElementById('viewCategoryLocationId');
+      if (select && result.success && Array.isArray(result.data)) {
+        const first = select.firstElementChild;
+        select.innerHTML = '';
+        if (first) select.appendChild(first);
+        result.data.forEach(loc => {
+          const opt = document.createElement('option');
+          opt.value = loc.id;
+          opt.textContent = `${loc.location_name} (${loc.location_code})`;
+          select.appendChild(opt);
+        });
+      }
+    } catch (e) { console.error('Load locations (view) failed', e); }
+  }
+
+  function openViewCategoryModal(category) {
+    const { id, name, slug, description, location_id, sort_order, is_active, image } = category || {};
+    const idEl = document.getElementById('viewCategoryId'); if (idEl) idEl.value = id || '';
+    const nameEl = document.getElementById('viewCategoryName'); if (nameEl) nameEl.value = name || '';
+    const slugEl = document.getElementById('viewCategorySlug'); if (slugEl) slugEl.value = slug || '';
+    const descEl = document.getElementById('viewCategoryDescription'); if (descEl) descEl.value = description || '';
+    const sortEl = document.getElementById('viewSortOrder'); if (sortEl) sortEl.value = (sort_order ?? 0);
+    const statusEl = document.getElementById('viewCategoryStatus'); if (statusEl) statusEl.value = (is_active !== undefined && is_active !== null) ? String(is_active) : '';
+    
+    const imgContainer = document.getElementById('currentViewCategoryImageContainer');
+    const imgEl = document.getElementById('currentViewCategoryImage');
+    if (imgEl && imgContainer) {
+      if (image && String(image).trim() !== '') {
+        imgEl.src = '../../' + image;
+        imgContainer.style.display = 'block';
+      } else {
+        imgContainer.style.display = 'none';
+      }
+    }
+
+    loadLocationsForCategoryView().then(() => {
+      const locSelect = document.getElementById('viewCategoryLocationId');
+      if (locSelect && location_id) locSelect.value = String(location_id);
+    });
+
+    const modal = document.getElementById('viewCategoryModal');
+    if (modal) {
+      modal.classList.add('show');
+      setTimeout(() => { modal.querySelector('.custom-modal').classList.add('show'); }, 10);
+      isViewCategoryModalOpen = true;
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeViewCategoryModal() {
+    const modal = document.getElementById('viewCategoryModal');
+    if (modal) {
+      modal.querySelector('.custom-modal').classList.remove('show');
+      setTimeout(() => { modal.classList.remove('show'); }, 300);
+      isViewCategoryModalOpen = false;
+      document.body.style.overflow = '';
+    }
+  }
+
+  window.openViewCategoryModal = openViewCategoryModal;
+  window.closeViewCategoryModal = closeViewCategoryModal;
   
   // Load locations for category create
   async function loadLocationsForCategoryCreate() {
@@ -1151,6 +1219,39 @@
   window.closeEditCategoryModal = closeEditCategoryModal;
   window.submitEditCategoryForm = submitEditCategoryForm;
   window.previewEditCategoryImage = previewEditCategoryImage;
+  
+  // Button dataset helpers for Category
+  window.openViewCategoryFromButton = function(btn){
+    if (!btn || !btn.dataset) return;
+    const d = btn.dataset;
+    openViewCategoryModal({
+      id: d.id ? parseInt(d.id) : null,
+      name: d.name || '',
+      slug: d.slug || '',
+      description: d.description || '',
+      location_id: d.locationId ? parseInt(d.locationId) : null,
+      sort_order: d.sortOrder ? parseInt(d.sortOrder) : 0,
+      is_active: d.isActive ? parseInt(d.isActive) : 0,
+      image: d.image || ''
+    });
+  };
+
+  window.openEditCategoryFromButton = function(btn){
+    if (!btn || !btn.dataset) return;
+    const d = btn.dataset;
+    openEditCategoryModal(
+      d.id ? parseInt(d.id) : null,
+      d.name || '',
+      d.slug || '',
+      d.description || '',
+      d.locationId ? parseInt(d.locationId) : null,
+      d.sortOrder ? parseInt(d.sortOrder) : 0,
+      d.isActive ? parseInt(d.isActive) : 0,
+      d.image || '',
+      'ambient',
+      'ambient'
+    );
+  };
   
   // Product Management Functions
   function deleteProduct(productId, productName) {

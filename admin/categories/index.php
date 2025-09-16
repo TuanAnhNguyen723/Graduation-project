@@ -818,9 +818,30 @@ if(!empty($search_results)) {
                                             
                                             <!-- Nút hành động -->
                                             <div class="d-flex justify-content-between mt-5">
+                                                <button style="border: 1px solid black; color: black;" type="button" 
+                                                        class="btn btn-outline-secondary"
+                                                        data-id="<?php echo $cat['id']; ?>"
+                                                        data-name="<?php echo htmlspecialchars($cat['name']); ?>"
+                                                        data-slug="<?php echo htmlspecialchars($cat['slug']); ?>"
+                                                        data-description="<?php echo htmlspecialchars($cat['description']); ?>"
+                                                        data-location-id="<?php echo $cat['location_id'] ?: ''; ?>"
+                                                        data-sort-order="<?php echo (int)$cat['sort_order']; ?>"
+                                                        data-is-active="<?php echo (int)$cat['is_active']; ?>"
+                                                        data-image="<?php echo htmlspecialchars($cat['image']); ?>"
+                                                        onclick="openViewCategoryFromButton(this)">
+                                                    <i class="iconoir-eye"></i> Xem
+                                                </button>
                                                 <button type="button" 
-                                                        class="btn btn-outline-primary" 
-                                                        onclick="openEditCategoryModal(<?php echo $cat['id']; ?>, '<?php echo htmlspecialchars(addslashes($cat['name'])); ?>', '<?php echo htmlspecialchars(addslashes($cat['slug'])); ?>', '<?php echo htmlspecialchars(addslashes($cat['description'])); ?>', <?php echo $cat['location_id'] ?: 'null'; ?>, <?php echo $cat['sort_order']; ?>, <?php echo $cat['is_active']; ?>, '<?php echo htmlspecialchars(addslashes($cat['image'])); ?>', '<?php echo isset($cat['temperature_type']) ? $cat['temperature_type'] : 'ambient'; ?>', '<?php echo isset($cat['humidity_type']) ? $cat['humidity_type'] : 'ambient'; ?>')">
+                                                        class="btn btn-outline-primary"
+                                                        data-id="<?php echo $cat['id']; ?>"
+                                                        data-name="<?php echo htmlspecialchars($cat['name']); ?>"
+                                                        data-slug="<?php echo htmlspecialchars($cat['slug']); ?>"
+                                                        data-description="<?php echo htmlspecialchars($cat['description']); ?>"
+                                                        data-location-id="<?php echo $cat['location_id'] ?: ''; ?>"
+                                                        data-sort-order="<?php echo (int)$cat['sort_order']; ?>"
+                                                        data-is-active="<?php echo (int)$cat['is_active']; ?>"
+                                                        data-image="<?php echo htmlspecialchars($cat['image']); ?>"
+                                                        onclick="openEditCategoryFromButton(this)">
                                                     <i class="iconoir-edit"></i> Sửa
                                                 </button>
                                                 <button type="button" 
@@ -1182,9 +1203,9 @@ if(!empty($search_results)) {
     </script>
     
     <!-- Include Widgets Modal -->
-    <?php include '../../assets/widgets/create-product.php'; ?>
     <?php include '../../assets/widgets/create-category.php'; ?>
     <?php include '../../assets/widgets/edit-category.php'; ?>
+    <?php include '../../assets/widgets/view-category.php'; ?>
     
     <!-- Include Unified Widgets JavaScript -->
     <script src="../../assets/js/widget.js"></script>
