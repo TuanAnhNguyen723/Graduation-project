@@ -82,6 +82,12 @@ try {
             border-radius: 10px;
             margin-bottom: 20px;
         }
+
+        .center-box {
+            gap: 6px;
+            display: flex;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -208,10 +214,11 @@ try {
                                             <i class="iconoir-calendar"></i> Cập nhật: <?php echo $sensor['updated_at'] ? date('d/m/Y H:i', strtotime($sensor['updated_at'])) : 'N/A'; ?>
                                         </small>
                                         <div class="mt-1 small text-muted">
-                                            <?php if (!empty($sensor['manufacturer']) || !empty($sensor['model'])): ?>
-                                                <div><i class="iconoir-tools"></i>
-                                                    <?php echo htmlspecialchars(trim(($sensor['manufacturer'] ?? '') . ' ' . ($sensor['model'] ?? ''))); ?>
-                                                </div>
+                                            <?php if (!empty($sensor['manufacturer'])): ?>
+                                                <div><i class="iconoir-industry"></i> NSX: <?php echo htmlspecialchars($sensor['manufacturer']); ?></div>
+                                            <?php endif; ?>
+                                            <?php if (!empty($sensor['model'])): ?>
+                                                <div><i class="iconoir-tools"></i> Model: <?php echo htmlspecialchars($sensor['model']); ?></div>
                                             <?php endif; ?>
 
                         						<?php if (!empty($sensor['serial_number'])): ?>
@@ -225,23 +232,42 @@ try {
                                             <?php if (!empty($sensor['last_calibration'])): ?>
                                                 <div><i class="iconoir-calendar"></i> Hiệu chuẩn cuối: <?php echo date('d/m/Y', strtotime($sensor['last_calibration'])); ?></div>
                                             <?php endif; ?>
-
-                                            <?php if (!empty($sensor['description'])): ?>
-                                                <div class="mt-1"><i class="iconoir-notes"></i>
-                                                    <?php $desc = (string)$sensor['description']; echo htmlspecialchars(mb_substr($desc, 0, 80)) . (mb_strlen($desc) > 80 ? '…' : ''); ?>
-                                                </div>
-                                            <?php endif; ?>
-
-                                            <?php if (!empty($sensor['notes'])): ?>
-                                                <div class="mt-1"><i class="iconoir-notes"></i>
-                                                    <?php $notes = (string)$sensor['notes']; echo htmlspecialchars(mb_substr($notes, 0, 80)) . (mb_strlen($notes) > 80 ? '…' : ''); ?>
-                                                </div>
-                                            <?php endif; ?>
                                         </div>
                                     </div>
                                     
-                                    <div class="mt-3">
-                                        <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditSensorModal(<?php echo $sensor['id']; ?>, '<?php echo htmlspecialchars(addslashes($sensor['sensor_name'])); ?>', '<?php echo htmlspecialchars(addslashes($sensor['sensor_code'])); ?>', '<?php echo htmlspecialchars(addslashes($sensor['sensor_type'])); ?>', <?php echo $sensor['location_id'] ? $sensor['location_id'] : 'null'; ?>, '<?php echo htmlspecialchars(addslashes($sensor['manufacturer'] ?? '')); ?>', '<?php echo htmlspecialchars(addslashes($sensor['model'] ?? '')); ?>', '<?php echo htmlspecialchars(addslashes($sensor['serial_number'] ?? '')); ?>', '<?php echo $sensor['installation_date'] ?? ''; ?>', '<?php echo htmlspecialchars(addslashes($sensor['status'])); ?>', '<?php echo $sensor['last_calibration'] ?? ''; ?>', '<?php echo htmlspecialchars(addslashes($sensor['description'] ?? '')); ?>', '<?php echo htmlspecialchars(addslashes($sensor['notes'] ?? '')); ?>')">
+                                    <div class="mt-3 d-flex gap-2">
+                                        <button style="border: 1px solid black; color: black;" class="btn btn-sm btn-outline-secondary"
+                                                data-id="<?php echo $sensor['id']; ?>"
+                                                data-sensor-name="<?php echo htmlspecialchars($sensor['sensor_name']); ?>"
+                                                data-sensor-code="<?php echo htmlspecialchars($sensor['sensor_code']); ?>"
+                                                data-sensor-type="<?php echo htmlspecialchars($sensor['sensor_type']); ?>"
+                                                data-location-id="<?php echo $sensor['location_id'] ? (int)$sensor['location_id'] : ''; ?>"
+                                                data-manufacturer="<?php echo htmlspecialchars($sensor['manufacturer'] ?? ''); ?>"
+                                                data-model="<?php echo htmlspecialchars($sensor['model'] ?? ''); ?>"
+                                                data-serial-number="<?php echo htmlspecialchars($sensor['serial_number'] ?? ''); ?>"
+                                                data-installation-date="<?php echo htmlspecialchars($sensor['installation_date'] ?? ''); ?>"
+                                                data-status="<?php echo htmlspecialchars($sensor['status']); ?>"
+                                                data-last-calibration="<?php echo htmlspecialchars($sensor['last_calibration'] ?? ''); ?>"
+                                                data-description="<?php echo htmlspecialchars($sensor['description'] ?? ''); ?>"
+                                                data-notes="<?php echo htmlspecialchars($sensor['notes'] ?? ''); ?>"
+                                                onclick="openViewSensorFromButton(this)">
+                                            <i class="iconoir-eye"></i> Xem
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-primary"
+                                                data-id="<?php echo $sensor['id']; ?>"
+                                                data-sensor-name="<?php echo htmlspecialchars($sensor['sensor_name']); ?>"
+                                                data-sensor-code="<?php echo htmlspecialchars($sensor['sensor_code']); ?>"
+                                                data-sensor-type="<?php echo htmlspecialchars($sensor['sensor_type']); ?>"
+                                                data-location-id="<?php echo $sensor['location_id'] ? (int)$sensor['location_id'] : ''; ?>"
+                                                data-manufacturer="<?php echo htmlspecialchars($sensor['manufacturer'] ?? ''); ?>"
+                                                data-model="<?php echo htmlspecialchars($sensor['model'] ?? ''); ?>"
+                                                data-serial-number="<?php echo htmlspecialchars($sensor['serial_number'] ?? ''); ?>"
+                                                data-installation-date="<?php echo htmlspecialchars($sensor['installation_date'] ?? ''); ?>"
+                                                data-status="<?php echo htmlspecialchars($sensor['status']); ?>"
+                                                data-last-calibration="<?php echo htmlspecialchars($sensor['last_calibration'] ?? ''); ?>"
+                                                data-description="<?php echo htmlspecialchars($sensor['description'] ?? ''); ?>"
+                                                data-notes="<?php echo htmlspecialchars($sensor['notes'] ?? ''); ?>"
+                                                onclick="openEditSensorFromButton(this)">
                                             <i class="iconoir-edit"></i> Sửa
                                         </button>
                                         <button class="btn btn-sm btn-outline-danger" onclick="deleteSensor(<?php echo $sensor['id']; ?>)">
@@ -338,8 +364,9 @@ try {
     <!-- Include Unified Widgets CSS -->
     <link href="../../../assets/css/widget.css" rel="stylesheet" type="text/css" />
     
-    <!-- Include Sensor Edit Modal Widget -->
+    <!-- Include Sensor Edit & View Modal Widgets -->
     <?php include '../../../assets/widgets/edit-sensor.php'; ?>
+    <?php include '../../../assets/widgets/view-sensor.php'; ?>
     
     <!-- Include Unified Widgets JavaScript -->
     <script src="../../../assets/js/widget.js"></script>
@@ -534,40 +561,64 @@ try {
                                 </div>
 
                                 <div class="mt-3">
-                                    <small class="text-muted d-block">
+                                    <small class="text-muted center-box">
                                         <i class="iconoir-calendar"></i> Cập nhật: ${updatedAt}
                                     </small>
                                     <div class="mt-1 small text-muted">
-                                        ${sensor.manufacturer || sensor.model ? `
-                                            <div><i class="iconoir-tools"></i>
-                                                ${[sensor.manufacturer, sensor.model].filter(Boolean).join(" ")}
-                                            </div>` : ""
+                                        ${sensor.manufacturer ? `
+                                            <div class="center-box"><i class="iconoir-industry"></i> NSX: ${sensor.manufacturer}</div>` : ""
+                                        }
+                                        ${sensor.model ? `
+                                            <div class="center-box"><i class="iconoir-tools"></i> Model: ${sensor.model}</div>` : ""
                                         }
 
                                         ${sensor.serial_number ? `
-                                            <div><i class="iconoir-hash"></i> Serial: ${sensor.serial_number}</div>` : ""
+                                            <div class="center-box"><i class="iconoir-barcode"></i> Serial: ${sensor.serial_number}</div>` : ""
                                         }
 
                                         ${installationDate ? `
-                                            <div><i class="iconoir-calendar"></i> Lắp đặt: ${installationDate}</div>` : ""
+                                            <div class="center-box"><i class="iconoir-calendar"></i> Lắp đặt: ${installationDate}</div>` : ""
                                         }
 
                                         ${lastCalibration ? `
-                                            <div><i class="iconoir-calendar"></i> Hiệu chuẩn cuối: ${lastCalibration}</div>` : ""
-                                        }
-
-                                        ${description ? `
-                                            <div class="mt-1"><i class="iconoir-notes"></i> ${description}</div>` : ""
-                                        }
-
-                                        ${notes ? `
-                                            <div class="mt-1"><i class="iconoir-notes"></i> ${notes}</div>` : ""
+                                            <div class="center-box"><i class="iconoir-calendar"></i> Hiệu chuẩn cuối: ${lastCalibration}</div>` : ""
                                         }
                                     </div>
                                 </div>
 
-                                <div class="mt-3">
-                                    <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditSensorModal(${sensor.id}, '${sensor.sensor_name}', '${sensor.sensor_code}', '${sensor.sensor_type}', ${sensor.location_id ? sensor.location_id : 'null'}, '${sensor.manufacturer || ''}', '${sensor.model || ''}', '${sensor.serial_number || ''}', '${sensor.installation_date || ''}', '${sensor.status}', '${sensor.last_calibration || ''}', '${sensor.description || ''}', '${sensor.notes || ''}')">
+                                <div class="mt-3 d-flex gap-2">
+                                    <button style="border: 1px solid black; color: black;" class="btn btn-sm btn-outline-secondary"
+                                            data-id="${sensor.id}"
+                                            data-sensor-name="${sensor.sensor_name || ''}"
+                                            data-sensor-code="${sensor.sensor_code || ''}"
+                                            data-sensor-type="${sensor.sensor_type || ''}"
+                                            data-location-id="${sensor.location_id ? sensor.location_id : ''}"
+                                            data-manufacturer="${sensor.manufacturer || ''}"
+                                            data-model="${sensor.model || ''}"
+                                            data-serial-number="${sensor.serial_number || ''}"
+                                            data-installation-date="${sensor.installation_date || ''}"
+                                            data-status="${sensor.status || ''}"
+                                            data-last-calibration="${sensor.last_calibration || ''}"
+                                            data-description="${sensor.description || ''}"
+                                            data-notes="${sensor.notes || ''}"
+                                            onclick="openViewSensorFromButton(this)">
+                                        <i class="iconoir-eye"></i> Xem
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary"
+                                            data-id="${sensor.id}"
+                                            data-sensor-name="${sensor.sensor_name || ''}"
+                                            data-sensor-code="${sensor.sensor_code || ''}"
+                                            data-sensor-type="${sensor.sensor_type || ''}"
+                                            data-location-id="${sensor.location_id ? sensor.location_id : ''}"
+                                            data-manufacturer="${sensor.manufacturer || ''}"
+                                            data-model="${sensor.model || ''}"
+                                            data-serial-number="${sensor.serial_number || ''}"
+                                            data-installation-date="${sensor.installation_date || ''}"
+                                            data-status="${sensor.status || ''}"
+                                            data-last-calibration="${sensor.last_calibration || ''}"
+                                            data-description="${sensor.description || ''}"
+                                            data-notes="${sensor.notes || ''}"
+                                            onclick="openEditSensorFromButton(this)">
                                         <i class="iconoir-edit"></i> Sửa
                                     </button>
                                     <button class="btn btn-sm btn-outline-danger" onclick="deleteSensor(${sensor.id})">

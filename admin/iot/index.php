@@ -345,7 +345,7 @@ try {
                                                     <?php endif; ?>
 
                                                     <?php if (!empty($sensor['serial_number'])): ?>
-                                                        <div class="custom-css"><i class="iconoir-hash me-1"></i> Serial: <?php echo htmlspecialchars($sensor['serial_number']); ?></div>
+                                                        <div class="custom-css"><i class="iconoir-barcode me-1"></i> Serial: <?php echo htmlspecialchars($sensor['serial_number']); ?></div>
                                                     <?php endif; ?>
 
                                                     <?php if (isset($sensor['min_threshold']) || isset($sensor['max_threshold'])): ?>

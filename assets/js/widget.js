@@ -1769,6 +1769,7 @@
 // Sensor Edit Modal Functions
 (function() {
   let isEditSensorModalOpen = false;
+  let isViewSensorModalOpen = false;
   let currentEditSensorId = null;
 
   function openEditSensorModal(sensorId, sensorName, sensorCode, sensorType, locationId, manufacturer, model, serialNumber, installationDate, status, lastCalibration, description, notes) {
@@ -2115,6 +2116,127 @@
   window.openEditSensorModal = openEditSensorModal;
   window.closeEditSensorModal = closeEditSensorModal;
   window.submitEditSensorForm = submitEditSensorForm;
+  
+  // -------- View Sensor (Read-only) --------
+  function openViewSensorModal(sensor) {
+    const {
+      id, sensor_name, sensor_code, sensor_type, location_id,
+      manufacturer, model, serial_number, installation_date,
+      status, last_calibration, description, notes
+    } = sensor || {};
+
+    const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v ?? ''; };
+    setVal('viewSensorId', id);
+    setVal('viewSensorName', sensor_name);
+    setVal('viewSensorCode', sensor_code);
+    setVal('viewManufacturer', manufacturer);
+    setVal('viewModel', model);
+    setVal('viewSerialNumber', serial_number);
+    setVal('viewInstallationDate', installation_date);
+    setVal('viewLastCalibration', last_calibration);
+    setVal('viewSensorDescription', description);
+    setVal('viewSensorNotes', notes);
+    const typeEl = document.getElementById('viewSensorType'); if (typeEl) typeEl.value = sensor_type || '';
+    const statusEl = document.getElementById('viewSensorStatus'); if (statusEl) statusEl.value = status || '';
+
+    // Load locations for VIEW then set selected
+    loadLocationsForViewSensor().then(() => {
+      const loc = document.getElementById('viewLocationId');
+      if (loc && location_id) loc.value = String(location_id);
+    });
+
+    const modal = document.getElementById('viewSensorModal');
+    if (modal) {
+      modal.classList.add('show');
+      setTimeout(() => { modal.querySelector('.custom-modal').classList.add('show'); }, 10);
+      isViewSensorModalOpen = true;
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeViewSensorModal() {
+    const modal = document.getElementById('viewSensorModal');
+    if (modal) {
+      modal.querySelector('.custom-modal').classList.remove('show');
+      setTimeout(() => { modal.classList.remove('show'); }, 300);
+      isViewSensorModalOpen = false;
+      document.body.style.overflow = '';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    document.addEventListener('click', function(e){ const modal = document.getElementById('viewSensorModal'); if (modal && e.target === modal) closeViewSensorModal(); });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && isViewSensorModalOpen) closeViewSensorModal(); });
+  });
+
+  window.openViewSensorModal = openViewSensorModal;
+  window.closeViewSensorModal = closeViewSensorModal;
+  
+  // Load locations specifically for VIEW select
+  function loadLocationsForViewSensor() {
+    return fetch('../api/locations.php')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && data.data) {
+          const locationSelect = document.getElementById('viewLocationId');
+          if (locationSelect) {
+            const firstOption = locationSelect.firstElementChild;
+            locationSelect.innerHTML = '';
+            if (firstOption) locationSelect.appendChild(firstOption);
+            data.data.forEach(location => {
+              const option = document.createElement('option');
+              option.value = location.id;
+              option.textContent = `${location.location_name} (${location.location_code})`;
+              locationSelect.appendChild(option);
+            });
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error loading locations for view:', error);
+      });
+  }
+  
+  // Button dataset helpers for Sensor
+  window.openViewSensorFromButton = function(btn){
+    if (!btn || !btn.dataset) return;
+    const d = btn.dataset;
+    openViewSensorModal({
+      id: d.id ? parseInt(d.id) : null,
+      sensor_name: d.sensorName || '',
+      sensor_code: d.sensorCode || '',
+      sensor_type: d.sensorType || '',
+      location_id: d.locationId ? parseInt(d.locationId) : null,
+      manufacturer: d.manufacturer || '',
+      model: d.model || '',
+      serial_number: d.serialNumber || '',
+      installation_date: d.installationDate || '',
+      status: d.status || '',
+      last_calibration: d.lastCalibration || '',
+      description: d.description || '',
+      notes: d.notes || ''
+    });
+  };
+
+  window.openEditSensorFromButton = function(btn){
+    if (!btn || !btn.dataset) return;
+    const d = btn.dataset;
+    openEditSensorModal(
+      d.id ? parseInt(d.id) : null,
+      d.sensorName || '',
+      d.sensorCode || '',
+      d.sensorType || '',
+      d.locationId ? parseInt(d.locationId) : null,
+      d.manufacturer || '',
+      d.model || '',
+      d.serialNumber || '',
+      d.installationDate || '',
+      d.status || '',
+      d.lastCalibration || '',
+      d.description || '',
+      d.notes || ''
+    );
+  };
 })();
 
 // IoT widget
