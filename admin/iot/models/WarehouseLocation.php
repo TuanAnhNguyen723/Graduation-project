@@ -226,22 +226,34 @@ class WarehouseLocation {
         return $zoneStats;
     }
 
-    // Lấy số sản phẩm theo vị trí (tính qua danh mục gắn với vị trí)
+    // Lấy số sản phẩm theo vị trí (tính qua bảng product_locations)
     public function getProductCountsPerLocation() {
-        $query = "SELECT wl.id AS location_id, COUNT(p.id) AS product_count
-                  FROM warehouse_locations wl
-                  LEFT JOIN categories c ON c.location_id = wl.id
-                  LEFT JOIN products p ON p.category_id = c.id
+        $query = "SELECT pl.location_id, SUM(pl.quantity) AS product_count
+                  FROM product_locations pl
+                  JOIN warehouse_locations wl ON pl.location_id = wl.id
                   WHERE wl.is_active = 1
-                  GROUP BY wl.id";
+                  GROUP BY pl.location_id";
 
         $stmt = $this->db->prepare($query);
         $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $result = [];
+        
+        // Khởi tạo tất cả vị trí với 0
+        $allLocationsQuery = "SELECT id FROM warehouse_locations WHERE is_active = 1";
+        $allStmt = $this->db->prepare($allLocationsQuery);
+        $allStmt->execute();
+        $allLocations = $allStmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        foreach ($allLocations as $location) {
+            $result[(int)$location['id']] = 0;
+        }
+        
+        // Cập nhật với số lượng thực tế
         foreach ($rows as $row) {
             $result[(int)$row['location_id']] = (int)$row['product_count'];
         }
+        
         return $result;
     }
     
@@ -258,6 +270,19 @@ class WarehouseLocation {
         $stmt = $this->db->prepare($query);
         $stmt->execute($params);
         return $stmt->rowCount() > 0;
+    }
+    
+    // Kiểm tra xem vị trí có sản phẩm không
+    public function hasProductsInLocation($locationId) {
+        $query = "SELECT COUNT(*) as product_count 
+                  FROM product_locations 
+                  WHERE location_id = ? AND quantity > 0";
+        
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$locationId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return (int)$result['product_count'] > 0;
     }
     
     // Lấy vị trí gần nhất còn trống

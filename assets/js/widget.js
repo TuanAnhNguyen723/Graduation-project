@@ -72,8 +72,7 @@
     if (!cat) { showFieldError('productCategory','Vui lòng chọn danh mục'); isValid = false; }
     const priceStr = document.getElementById('productPrice')?.value || '';
     if (!priceStr) { showFieldError('productPrice','Giá bán là bắt buộc'); isValid = false; } else if (parseFloat(priceStr) < 0) { showFieldError('productPrice','Giá bán không được âm'); isValid = false; }
-    const stockStr = document.getElementById('stockQuantity')?.value || '';
-    if (!stockStr) { showFieldError('stockQuantity','Số lượng tồn kho là bắt buộc'); isValid = false; } else if (parseInt(stockStr) < 0) { showFieldError('stockQuantity','Số lượng tồn kho không được âm'); isValid = false; }
+    // Đã bỏ validation cho stock_quantity vì sẽ quản lý ở vị trí kho
     const status = document.getElementById('productStatus')?.value || '';
     if (!status) { showFieldError('productStatus','Vui lòng chọn trạng thái'); isValid = false; }
     return isValid;
@@ -541,9 +540,11 @@
     const brandEl = document.getElementById('viewProductBrand'); if (brandEl) brandEl.value = brand || '';
     const priceEl = document.getElementById('viewProductPrice'); if (priceEl) priceEl.value = price ?? '';
     const salePriceEl = document.getElementById('viewProductSalePrice'); if (salePriceEl) salePriceEl.value = sale_price ?? '';
-    const stockEl = document.getElementById('viewStockQuantity'); if (stockEl) stockEl.value = stock_quantity ?? '';
+    // Đã bỏ viewStockQuantity vì sẽ quản lý ở vị trí kho
     const statusEl = document.getElementById('viewProductStatus'); if (statusEl) statusEl.value = (is_active !== undefined && is_active !== null) ? String(is_active) : '';
     const descEl = document.getElementById('viewProductDescription'); if (descEl) descEl.value = description || '';
+    
+    // Stock information removed as requested
 
     // Image
     const imgContainer = document.getElementById('currentViewProductImageContainer');
@@ -654,6 +655,7 @@
     document.addEventListener('click', function(e){ const modal = document.getElementById('viewProductModal'); if (modal && e.target === modal) closeViewProductModal(); });
     document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && isViewProductModalOpen) closeViewProductModal(); });
   });
+
 
   window.openViewProductModal = openViewProductModal;
   window.closeViewProductModal = closeViewProductModal;
@@ -1308,9 +1310,44 @@
   };
   
   // Product Management Functions
-  function deleteProduct(productId, productName) {
+  async function deleteProduct(productId, productName) {
     const triggerBtn = (typeof event !== 'undefined' && event && event.target) ? event.target.closest('.btn-outline-danger') : null;
-    const proceed = () => {
+    
+    try {
+      // Kiểm tra xem sản phẩm có tồn kho không
+      const checkResponse = await fetch(`../iot/api/stock-operations.php?action=get_product_stock_total&product_id=${productId}`);
+      const checkData = await checkResponse.json();
+      
+      if (checkData.success && checkData.data.total_stock > 0) {
+        if (typeof showStockWarningAlert === 'function') {
+          showStockWarningAlert(productName, checkData.data.total_stock);
+        } else {
+          console.error('showStockWarningAlert function not found');
+          alert(`Không thể xóa sản phẩm "${productName}" vì còn tồn kho (${checkData.data.total_stock} sản phẩm). Vui lòng xuất hết tồn kho trước khi xóa.`);
+        }
+        return;
+      }
+      
+      if (window.showConfirmToast) {
+        window.showConfirmToast('warning', 'Bạn có chắc chắn muốn xóa sản phẩm?', `"${productName}" sẽ bị xóa vĩnh viễn.`, () => {
+          // Thực hiện xóa trong callback
+          executeDeleteProduct(productId, productName);
+        });
+        return;
+      } else {
+        if (!confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${productName}"?`)) return;
+        executeDeleteProduct(productId, productName);
+      }
+    } catch (error) {
+      console.error('Error checking product stock:', error);
+      showNotification('Có lỗi xảy ra khi kiểm tra tồn kho sản phẩm', 'error');
+    }
+  }
+
+  async function executeDeleteProduct(productId, productName) {
+    const triggerBtn = (typeof event !== 'undefined' && event && event.target) ? event.target.closest('.btn-outline-danger') : null;
+    
+    try {
       // Hiển thị loading trên button
       const deleteBtn = triggerBtn;
       const originalText = deleteBtn ? deleteBtn.innerHTML : '';
@@ -1326,35 +1363,57 @@
           // Hiển thị thông báo thành công
           showDeleteProductSuccessMessage();
           
-          // Xóa card sản phẩm khỏi giao diện
-          const productCard = deleteBtn ? deleteBtn.closest('.col-lg-4') : null;
-          if (productCard) {
-            productCard.style.opacity = '0.5';
-            productCard.style.transform = 'scale(0.95)';
-          }
+          // Tìm card sản phẩm để xóa
+          const productCard = deleteBtn ? deleteBtn.closest('.col-lg-4, .col-md-6, .col-sm-12, .product-card-container, .card') : null;
+          console.log('Product card found:', productCard);
           
-          setTimeout(() => {
-            if (productCard) productCard.remove();
+          if (productCard) {
+            // Thêm animation fade out
+            productCard.style.transition = 'all 0.3s ease-out';
+            productCard.style.opacity = '0';
+            productCard.style.transform = 'scale(0.95) translateY(-10px)';
             
-            // Kiểm tra xem còn sản phẩm nào không
-            const remainingProducts = document.querySelectorAll('.product-card');
-            if (remainingProducts.length === 0) {
-              // Hiển thị trạng thái trống
-              const container = document.querySelector('.row');
-              container.innerHTML = `
-                <div class="col-12 text-center py-5">
-                  <div class="empty-state">
-                    <i class="iconoir-package" style="font-size: 64px; color: #dee2e6; margin-bottom: 20px;"></i>
-                    <h4 class="text-muted mb-3">Chưa có sản phẩm nào</h4>
-                    <p class="text-muted mb-4">Bắt đầu tạo sản phẩm đầu tiên để quản lý</p>
-                    <button type="button" class="btn btn-primary btn-lg" onclick="openCreateProductModal()">
-                      <i class="iconoir-plus"></i> Tạo sản phẩm đầu tiên
-                    </button>
-                  </div>
-                </div>
-              `;
-            }
-          }, 300);
+            // Xóa sau khi animation hoàn thành
+            setTimeout(() => {
+              if (productCard && productCard.parentNode) {
+                productCard.remove();
+                console.log('Product card removed from DOM');
+                
+                // Kiểm tra xem còn sản phẩm nào không
+                const remainingProducts = document.querySelectorAll('.col-lg-4, .col-md-6, .col-sm-12');
+                const productCards = Array.from(remainingProducts).filter(card => 
+                  card.querySelector('.card') || card.classList.contains('product-card')
+                );
+                
+                console.log('Remaining product cards:', productCards.length);
+                
+                if (productCards.length === 0) {
+                  // Hiển thị trạng thái trống
+                  const container = document.querySelector('.row, .products-container, .container-fluid');
+                  if (container) {
+                    container.innerHTML = `
+                      <div class="col-12 text-center py-5">
+                        <div class="empty-state">
+                          <i class="iconoir-package" style="font-size: 64px; color: #dee2e6; margin-bottom: 20px;"></i>
+                          <h4 class="text-muted mb-3">Chưa có sản phẩm nào</h4>
+                          <p class="text-muted mb-4">Bắt đầu tạo sản phẩm đầu tiên để quản lý</p>
+                          <button type="button" class="btn btn-primary btn-lg" onclick="openCreateProductModal()">
+                            <i class="iconoir-plus"></i> Tạo sản phẩm đầu tiên
+                          </button>
+                        </div>
+                      </div>
+                    `;
+                  }
+                }
+              }
+            }, 300);
+          } else {
+            console.warn('Product card not found, reloading page');
+            // Fallback: reload trang nếu không tìm thấy card
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          }
         } else {
           throw new Error(data.message || 'Có lỗi xảy ra khi xóa sản phẩm');
         }
@@ -1366,11 +1425,9 @@
         // Khôi phục button
         if (deleteBtn) { deleteBtn.disabled = false; deleteBtn.innerHTML = originalText; }
       });
-    };
-    if (window.showConfirmToast) {
-      window.showConfirmToast('warning', 'Bạn có chắc chắn muốn xóa sản phẩm?', `"${productName}" sẽ bị xóa vĩnh viễn.`, proceed);
-    } else {
-      if (confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${productName}"?`)) proceed();
+    } catch (error) {
+      console.error('Error executing delete:', error);
+      showNotification('Có lỗi xảy ra khi xóa sản phẩm', 'error');
     }
   }
 
@@ -1389,7 +1446,7 @@
     document.getElementById('editProductBrand').value = brand;
     document.getElementById('editProductPrice').value = price;
     document.getElementById('editProductSalePrice').value = salePrice;
-    document.getElementById('editStockQuantity').value = stockQuantity;
+    // Đã bỏ editStockQuantity vì sẽ quản lý ở vị trí kho
     document.getElementById('editProductStatus').value = isActive;
     
     // Handle image display
@@ -1547,11 +1604,7 @@
       isValid = false; 
     }
     
-    const stockQuantity = document.getElementById('editStockQuantity')?.value || '';
-    if (!stockQuantity || stockQuantity < 0) { 
-      showEditProductFieldError('editStockQuantity','Số lượng tồn kho phải lớn hơn hoặc bằng 0'); 
-      isValid = false; 
-    }
+    // Đã bỏ validation cho stock_quantity vì sẽ quản lý ở vị trí kho
     
     const categoryId = document.getElementById('editProductCategory')?.value || '';
     if (!categoryId) { 
@@ -1755,24 +1808,7 @@
       });
     }
     
-    const stockInput = document.getElementById('editStockQuantity');
-    if (stockInput) {
-      stockInput.addEventListener('input', function(){
-        const v = parseInt(this.value); 
-        if (v >= 0){
-          this.classList.add('success'); 
-          this.classList.remove('error'); 
-          clearEditProductFieldError('editStockQuantity'); 
-        } else if (this.value.length > 0){
-          this.classList.remove('success'); 
-          this.classList.add('error'); 
-          showEditProductFieldError('editStockQuantity','Số lượng tồn kho phải lớn hơn hoặc bằng 0'); 
-        } else { 
-          this.classList.remove('success','error'); 
-          clearEditProductFieldError('editStockQuantity'); 
-        }
-      });
-    }
+    // Đã bỏ event listener cho editStockQuantity vì sẽ quản lý ở vị trí kho
     
     const categorySelect = document.getElementById('editProductCategory');
     if (categorySelect) {
@@ -2504,6 +2540,84 @@
     panel.addEventListener('click', (e)=>{ if (e.target === panel) document.body.removeChild(panel); });
     document.body.appendChild(panel);
   }
+
+  // Custom stock warning alert
+  window.showStockWarningAlert = function(productName, stockQuantity) {
+    const panel = document.createElement('div');
+    panel.style.cssText = `
+      position: fixed; inset: 0; z-index: 99999; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.4);
+    `;
+    const box = document.createElement('div');
+    box.style.cssText = `
+      width: 480px; max-width: 90vw; background: #fff; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      padding: 24px; animation: fadeInQuick 0.3s ease-out; border: 2px solid #fbbf24;
+    `;
+    
+    // Header với icon và tiêu đề
+    const head = document.createElement('div');
+    head.style.cssText = 'display:flex; align-items:center; gap:12px; margin-bottom:16px;';
+    head.innerHTML = `
+      <div style="width:48px; height:48px; background:linear-gradient(135deg, #fbbf24, #f59e0b); border-radius:12px; display:flex; align-items:center; justify-content:center;">
+        <i class="iconoir-warning-triangle" style="font-size:24px; color:#fff;"></i>
+      </div>
+      <div>
+        <div style="font-weight:700; font-size:18px; color:#92400e;">Không thể xóa sản phẩm</div>
+        <div style="font-size:14px; color:#a16207; margin-top:2px;">Sản phẩm còn tồn kho</div>
+      </div>
+    `;
+    
+    // Body với thông tin chi tiết
+    const body = document.createElement('div');
+    body.style.cssText = 'margin-bottom:20px;';
+    body.innerHTML = `
+      <div style="background:#fef3c7; border:1px solid #fbbf24; border-radius:8px; padding:16px; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <i style="color:#92400e; font-size:16px;"></i>
+          <span style="font-weight:600; color:#92400e;">Sản phẩm: "${productName}"</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <i style="color:#92400e; font-size:16px;"></i>
+          <span style="color:#92400e;">Tồn kho hiện tại: <strong>${stockQuantity} sản phẩm</strong></span>
+        </div>
+      </div>
+      <div style="color:#6b7280; font-size:14px; line-height:1.5;">
+        Để xóa sản phẩm này, bạn cần xuất hết tồn kho trước. 
+        Hãy truy cập <strong>Vị trí kho</strong> để thực hiện xuất hàng.
+      </div>
+    `;
+    
+    // Actions
+    const actions = document.createElement('div');
+    actions.style.cssText = 'display:flex; gap:12px; justify-content:flex-end;';
+    const okBtn = document.createElement('button');
+    okBtn.className = 'btn btn-primary';
+    okBtn.style.cssText = 'background:linear-gradient(135deg, #3b82f6, #1d4ed8); border:none; padding:10px 24px; border-radius:8px; font-weight:600;';
+    okBtn.innerHTML = '<i class="iconoir-check" style="margin-right:6px;"></i>Đã hiểu';
+    okBtn.onclick = () => document.body.removeChild(panel);
+    
+    actions.appendChild(okBtn);
+    
+    box.appendChild(head); 
+    box.appendChild(body); 
+    box.appendChild(actions);
+    panel.appendChild(box);
+    
+    // Click outside to close
+    panel.addEventListener('click', (e) => { 
+      if (e.target === panel) document.body.removeChild(panel); 
+    });
+    
+    // ESC key to close
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') {
+        document.body.removeChild(panel);
+        document.removeEventListener('keydown', handleEsc);
+      }
+    };
+    document.addEventListener('keydown', handleEsc);
+    
+    document.body.appendChild(panel);
+  };
 
   const style = document.createElement('style');
   style.textContent = '@keyframes fadeInQuick { from { opacity: 0; } to { opacity: 1; } } @keyframes fadeOutQuick { from { opacity: 1; } to { opacity: 0; } }';

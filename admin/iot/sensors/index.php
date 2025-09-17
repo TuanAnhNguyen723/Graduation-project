@@ -433,7 +433,26 @@ try {
 
         // Xóa cảm biến
         function deleteSensor(sensorId) {
-            if (confirm('Bạn có chắc chắn muốn xóa cảm biến này?')) {
+            // Sử dụng custom confirm dialog thay vì confirm() mặc định
+            if (typeof showConfirmToast === 'function') {
+                showConfirmToast(
+                    'Xác nhận xóa cảm biến',
+                    'Bạn có chắc chắn muốn xóa cảm biến?',
+                    'Xóa',
+                    'Hủy',
+                    () => executeDeleteSensor(sensorId)
+                );
+            } else {
+                // Fallback nếu showConfirmToast không có sẵn
+                if (confirm('Bạn có chắc chắn muốn xóa cảm biến này?')) {
+                    executeDeleteSensor(sensorId);
+                }
+            }
+        }
+
+        // Thực hiện xóa cảm biến
+        function executeDeleteSensor(sensorId) {
+            try {
                 // Hiển thị loading trên button
                 const deleteBtn = event.target.closest('.btn-outline-danger');
                 const originalText = deleteBtn.innerHTML;
@@ -454,33 +473,57 @@ try {
                         // Hiển thị thông báo thành công
                         showDeleteSensorSuccessMessage();
                         
-                        // Xóa card cảm biến khỏi giao diện
-                        const sensorCard = deleteBtn.closest('.col-xl-4');
-                        sensorCard.style.opacity = '0.5';
-                        sensorCard.style.transform = 'scale(0.95)';
+                        // Xóa card cảm biến khỏi giao diện với animation mượt mà
+                        const sensorCard = deleteBtn ? deleteBtn.closest('.col-xl-4, .col-lg-4, .col-md-6, .col-sm-12, .sensor-card-container, .card') : null;
+                        console.log('Sensor card found:', sensorCard);
                         
-                        setTimeout(() => {
-                            sensorCard.remove();
+                        if (sensorCard) {
+                            // Thêm animation fade out
+                            sensorCard.style.transition = 'all 0.3s ease-out';
+                            sensorCard.style.opacity = '0';
+                            sensorCard.style.transform = 'scale(0.95) translateY(-10px)';
                             
-                            // Kiểm tra xem còn cảm biến nào không
-                            const remainingSensors = document.querySelectorAll('.sensor-card');
-                            if (remainingSensors.length === 0) {
-                                // Hiển thị trạng thái trống
-                                const container = document.querySelector('.row');
-                                container.innerHTML = `
-                                    <div class="col-12 text-center py-5">
-                                        <div class="empty-state">
-                                            <i class="iconoir-cpu" style="font-size: 64px; color: #dee2e6; margin-bottom: 20px;"></i>
-                                            <h4 class="text-muted mb-3">Chưa có cảm biến nào</h4>
-                                            <p class="text-muted mb-4">Bắt đầu thêm cảm biến đầu tiên để giám sát</p>
-                                            <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#addSensorModal">
-                                                <i class="iconoir-plus"></i> Thêm cảm biến đầu tiên
-                                            </button>
-                                        </div>
-                                    </div>
-                                `;
-                            }
-                        }, 300);
+                            // Xóa sau khi animation hoàn thành
+                            setTimeout(() => {
+                                if (sensorCard && sensorCard.parentNode) {
+                                    sensorCard.remove();
+                                    console.log('Sensor card removed from DOM');
+                                    
+                                    // Kiểm tra xem còn cảm biến nào không
+                                    const remainingSensors = document.querySelectorAll('.col-xl-4, .col-lg-4, .col-md-6, .col-sm-12');
+                                    const sensorCards = Array.from(remainingSensors).filter(card => 
+                                        card.querySelector('.card') || card.classList.contains('sensor-card')
+                                    );
+                                    
+                                    console.log('Remaining sensor cards:', sensorCards.length);
+                                    
+                                    if (sensorCards.length === 0) {
+                                        // Hiển thị trạng thái trống
+                                        const container = document.querySelector('.row, .sensors-container, .container-fluid');
+                                        if (container) {
+                                            container.innerHTML = `
+                                                <div class="col-12 text-center py-5">
+                                                    <div class="empty-state">
+                                                        <i class="iconoir-cpu" style="font-size: 64px; color: #dee2e6; margin-bottom: 20px;"></i>
+                                                        <h4 class="text-muted mb-3">Chưa có cảm biến nào</h4>
+                                                        <p class="text-muted mb-4">Bắt đầu thêm cảm biến đầu tiên để giám sát</p>
+                                                        <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#addSensorModal">
+                                                            <i class="iconoir-plus"></i> Thêm cảm biến đầu tiên
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            `;
+                                        }
+                                    }
+                                }
+                            }, 300);
+                        } else {
+                            console.warn('Sensor card not found, reloading page');
+                            // Fallback: reload trang nếu không tìm thấy card
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        }
                     } else {
                         throw new Error(data.error || 'Có lỗi xảy ra khi xóa cảm biến');
                     }
@@ -490,9 +533,14 @@ try {
                     showNotification('Lỗi: ' + error.message, 'error');
                     
                     // Khôi phục button
-                    deleteBtn.disabled = false;
-                    deleteBtn.innerHTML = originalText;
+                    if (deleteBtn) {
+                        deleteBtn.disabled = false;
+                        deleteBtn.innerHTML = originalText;
+                    }
                 });
+            } catch (error) {
+                console.error('Error executing delete:', error);
+                showNotification('Có lỗi xảy ra khi xóa cảm biến', 'error');
             }
         }
         // Hàm render lại giao diện cảm biến từ dữ liệu mới

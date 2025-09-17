@@ -280,7 +280,7 @@ try {
                 $product->sku = isset($data['sku']) ? $data['sku'] : $current_product['sku'];
                 $product->price = isset($data['price']) ? (float)$data['price'] : 0;
                 $product->sale_price = isset($data['sale_price']) && !empty($data['sale_price']) ? (float)$data['sale_price'] : null;
-                $product->stock_quantity = isset($data['stock_quantity']) ? (int)$data['stock_quantity'] : 0;
+                $product->stock_quantity = isset($data['stock_quantity']) ? (int)$data['stock_quantity'] : $current_product['stock_quantity'];
                 $product->category_id = isset($data['category_id']) && !empty($data['category_id']) ? (int)$data['category_id'] : null;
                 $product->brand = isset($data['brand']) ? $data['brand'] : '';
                 $product->images = $image_path;
@@ -360,7 +360,7 @@ try {
             $product->sku = $data['sku'];
             $product->price = isset($data['price']) ? (float)$data['price'] : 0;
             $product->sale_price = isset($data['sale_price']) ? (float)$data['sale_price'] : null;
-            $product->stock_quantity = isset($data['stock_quantity']) ? (int)$data['stock_quantity'] : 0;
+            $product->stock_quantity = 0; // Đặt mặc định là 0, sẽ được quản lý ở vị trí kho
             $product->category_id = isset($data['category_id']) ? (int)$data['category_id'] : null;
             $product->brand = isset($data['brand']) ? $data['brand'] : '';
             $product->images = $image_path; // Sử dụng images như trong model

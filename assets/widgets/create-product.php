@@ -148,24 +148,14 @@
                     </div>
                 </div>
 
-                <!-- Inventory Section -->
+                <!-- Brand Section -->
                 <div class="form-section">
                     <div class="section-header">
                         <i class="iconoir-package"></i>
-                        <h5>Thông tin tồn kho</h5>
+                        <h5>Thông tin bổ sung</h5>
                     </div>
                     
                     <div class="form-grid">
-                        <div class="form-field">
-                            <label for="stockQuantity" class="field-label">
-                                Số lượng tồn kho <span class="required">*</span>
-                            </label>
-                            <div class="input-wrapper">
-                                <input type="number" class="form-input" id="stockQuantity" name="stock_quantity" placeholder="0" min="0" required>
-                            </div>
-                            <div class="field-error" id="stockQuantityError"></div>
-                        </div>
-                        
                         <div class="form-field">
                             <label for="productBrand" class="field-label">Thương hiệu</label>
                             <div class="input-wrapper">

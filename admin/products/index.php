@@ -592,17 +592,17 @@ if ($categories_result) {
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="flex-grow-1">
                                             <?php 
-                                            $low_stock_products = count(array_filter($products, function($p) { 
-                                                return $p['stock_quantity'] <= 10; 
+                                            $inactive_products = count(array_filter($products, function($p) { 
+                                                return isset($p['is_active']) && $p['is_active'] == 0; 
                                             }));
                                             ?>
-                                            <h6 class="card-title text-white-50 mb-2 fw-semibold text-uppercase letter-spacing-1">Sắp hết hàng</h6>
-                                            <h2 class="mb-0 fw-bold"><?php echo $low_stock_products; ?></h2>
+                                            <h6 class="card-title text-white-50 mb-2 fw-semibold text-uppercase letter-spacing-1">Không hoạt động</h6>
+                                            <h2 class="mb-0 fw-bold"><?php echo $inactive_products; ?></h2>
                                             <div class="progress mt-3">
                                                 <?php 
-                                                $low_stock_percentage = count($products) > 0 ? ($low_stock_products / count($products)) * 100 : 0;
+                                                $inactive_percentage = count($products) > 0 ? ($inactive_products / count($products)) * 100 : 0;
                                                 ?>
-                                                <div class="progress-bar bg-white" style="width: <?php echo $low_stock_percentage; ?>%"></div>
+                                                <div class="progress-bar bg-white" style="width: <?php echo $inactive_percentage; ?>%"></div>
                                             </div>
                                         </div>
                                         <div class="icon-wrapper ms-3">
@@ -771,10 +771,8 @@ if ($categories_result) {
                                                 </div>
                                                 <div class="col-6">
                                                     <small class="text-muted d-block mb-1">Tồn kho</small>
-                                                    <div>
-                                                        <span class="badge <?php echo $prod['stock_quantity'] > 10 ? 'bg-success-subtle text-success' : ($prod['stock_quantity'] > 0 ? 'bg-warning-subtle text-warning' : 'bg-danger-subtle text-danger'); ?>">
-                                                            Tồn kho <?php echo $prod['stock_quantity']; ?>
-                                                        </span>
+                                                    <div class="fw-bold text-primary fs-6" id="stock-<?php echo $prod['id']; ?>">
+                                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -906,7 +904,7 @@ if ($categories_result) {
                                                         data-brand="<?php echo htmlspecialchars($prod['brand']); ?>"
                                                         data-price="<?php echo (float)$prod['price']; ?>"
                                                         data-sale-price="<?php echo $prod['sale_price'] !== null ? (float)$prod['sale_price'] : 0; ?>"
-                                                        data-stock-quantity="<?php echo (int)$prod['stock_quantity']; ?>"
+                                                        data-stock-quantity="0"
                                                         data-is-active="<?php echo (int)$prod['is_active']; ?>"
                                                         data-images="<?php echo htmlspecialchars($prod['images']); ?>"
                                                         onclick="openViewProductFromButton(this)">
@@ -922,7 +920,7 @@ if ($categories_result) {
                                                         data-brand="<?php echo htmlspecialchars($prod['brand']); ?>"
                                                         data-price="<?php echo (float)$prod['price']; ?>"
                                                         data-sale-price="<?php echo $prod['sale_price'] !== null ? (float)$prod['sale_price'] : 0; ?>"
-                                                        data-stock-quantity="<?php echo (int)$prod['stock_quantity']; ?>"
+                                                        data-stock-quantity="0"
                                                         data-is-active="<?php echo (int)$prod['is_active']; ?>"
                                                         data-images="<?php echo htmlspecialchars($prod['images']); ?>"
                                                         onclick="openEditProductFromButton(this)">
@@ -1017,6 +1015,9 @@ if ($categories_result) {
         
         // Enhanced Search and Filter Functionality
         document.addEventListener('DOMContentLoaded', function() {
+            // Load stock information for all products
+            loadAllProductStocks();
+            
             const searchForm = document.getElementById('searchForm');
             const searchBtn = document.getElementById('searchBtn');
             const searchIcon = document.getElementById('searchIcon');
@@ -1246,6 +1247,50 @@ if ($categories_result) {
                 }
             }
         });
+        
+        // Function to load stock information for all products
+        async function loadAllProductStocks() {
+            const productIds = [];
+            
+            // Collect all product IDs from the page
+            document.querySelectorAll('[id^="stock-"]').forEach(element => {
+                const productId = element.id.replace('stock-', '');
+                productIds.push(productId);
+            });
+            
+            // Load stock for each product
+            for (const productId of productIds) {
+                try {
+                    const response = await fetch(`../iot/api/stock-operations.php?action=get_product_stock_total&product_id=${productId}`);
+                    const result = await response.json();
+                    
+                    const stockElement = document.getElementById(`stock-${productId}`);
+                    if (stockElement && result.success) {
+                        const totalStock = result.data.total_stock || 0;
+                        
+                        // Apply styling based on stock level
+                        let stockClass = 'text-primary';
+                        if (totalStock === 0) {
+                            stockClass = 'text-danger';
+                        } else if (totalStock <= 10) {
+                            stockClass = 'text-warning';
+                        } else if (totalStock > 50) {
+                            stockClass = 'text-success';
+                        }
+                        
+                        stockElement.innerHTML = `<span class="${stockClass}">${totalStock}</span>`;
+                    } else if (stockElement) {
+                        stockElement.innerHTML = '<span class="text-muted">N/A</span>';
+                    }
+                } catch (error) {
+                    console.error(`Error loading stock for product ${productId}:`, error);
+                    const stockElement = document.getElementById(`stock-${productId}`);
+                    if (stockElement) {
+                        stockElement.innerHTML = '<span class="text-muted">N/A</span>';
+                    }
+                }
+            }
+        }
     </script>
 
     <!-- Delete Success Message - Fixed Position -->

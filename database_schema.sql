@@ -173,6 +173,32 @@ CREATE TABLE IF NOT EXISTS notifications (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
+
+-- BẢNG STOCK_TRANSACTIONS (GIAO DỊCH XUẤT NHẬP HÀNG)
+CREATE TABLE IF NOT EXISTS stock_transactions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    location_id INT NOT NULL,
+    transaction_type ENUM('import', 'export', 'move', 'adjust') NOT NULL,
+    quantity INT NOT NULL,
+    notes TEXT,
+    created_by INT DEFAULT NULL COMMENT 'User ID who performed the transaction',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+    FOREIGN KEY (location_id) REFERENCES warehouse_locations(id) ON DELETE CASCADE,
+    INDEX idx_transaction_date (created_at),
+    INDEX idx_transaction_type (transaction_type),
+    INDEX idx_product_location (product_id, location_id)
+) ENGINE=InnoDB;
+
+-- Thêm cột created_by vào bảng notifications nếu chưa có
+ALTER TABLE notifications 
+ADD COLUMN IF NOT EXISTS created_by INT DEFAULT NULL COMMENT 'User ID who created the notification';
+
+-- Tạo index cho performance
+CREATE INDEX IF NOT EXISTS idx_product_locations_quantity ON product_locations(quantity);
+CREATE INDEX IF NOT EXISTS idx_warehouse_locations_capacity ON warehouse_locations(current_capacity, max_capacity);
+
 -- ==============================================================
 -- INSERT DỮ LIỆU MẪU
 -- ==============================================================

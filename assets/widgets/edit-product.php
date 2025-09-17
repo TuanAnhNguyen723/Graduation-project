@@ -152,24 +152,14 @@
                     </div>
                 </div>
 
-                <!-- Inventory Section -->
+                <!-- Status Section -->
                 <div class="form-section">
                     <div class="section-header">
                         <i class="iconoir-package" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px;"></i>
-                        <h5>Thông tin tồn kho</h5>
+                        <h5>Trạng thái sản phẩm</h5>
                     </div>
                     
                     <div class="form-grid">
-                        <div class="form-field">
-                            <label for="editStockQuantity" class="field-label">
-                                Số lượng tồn kho <span class="required">*</span>
-                            </label>
-                            <div class="input-wrapper">
-                                <input type="number" class="form-input" id="editStockQuantity" name="stock_quantity" placeholder="0" min="0" required>
-                            </div>
-                            <div class="field-error" id="editStockQuantityError"></div>
-                        </div>
-
                         <div class="form-field">
                             <label for="editProductStatus" class="field-label">
                                 Trạng thái <span class="required">*</span>

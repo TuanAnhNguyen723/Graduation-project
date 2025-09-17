@@ -3,6 +3,11 @@
  * API Locations - Lấy danh sách vị trí kho
  */
 
+// Bật error reporting để debug
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Không hiển thị error trực tiếp
+ini_set('log_errors', 1); // Ghi log error
+
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS");
@@ -27,6 +32,28 @@ try {
     $locationModel = new WarehouseLocation($pdo);
 
     if ($method === 'GET') {
+        // Kiểm tra xem vị trí có sản phẩm không
+        if (isset($_GET['action']) && $_GET['action'] === 'check_products') {
+            try {
+                $id = $_GET['id'] ?? null;
+                if (!$id) {
+                    http_response_code(400);
+                    echo json_encode(['success'=>false,'message'=>'Thiếu id']);
+                    exit;
+                }
+                
+                $hasProducts = $locationModel->hasProductsInLocation((int)$id);
+                $location = $locationModel->getLocationById((int)$id);
+                $locationName = $location ? $location['location_name'] : 'Vị trí này';
+                echo json_encode(['success'=>true,'has_products'=>$hasProducts,'location_name'=>$locationName]);
+                exit;
+            } catch (Exception $e) {
+                http_response_code(500);
+                echo json_encode(['success'=>false,'message'=>'Lỗi khi kiểm tra sản phẩm: ' . $e->getMessage()]);
+                exit;
+            }
+        }
+        
         if (isset($_GET['id'])) {
             $loc = $locationModel->getLocationById((int)$_GET['id']);
             if ($loc) {
@@ -68,11 +95,21 @@ try {
     }
 
     if ($method === 'DELETE') {
-        $id = $_GET['id'] ?? null;
-        if (!$id) { http_response_code(400); echo json_encode(['success'=>false,'message'=>'Thiếu id']); exit; }
-        $ok = $locationModel->deleteLocation((int)$id);
-        echo json_encode(['success'=>$ok,'message'=>$ok?'Đã xóa vị trí':'Không thể xóa vị trí']);
-        exit;
+        try {
+            $id = $_GET['id'] ?? null;
+            if (!$id) { 
+                http_response_code(400); 
+                echo json_encode(['success'=>false,'message'=>'Thiếu id']); 
+                exit; 
+            }
+            $ok = $locationModel->deleteLocation((int)$id);
+            echo json_encode(['success'=>$ok,'message'=>$ok?'Đã xóa vị trí':'Không thể xóa vị trí']);
+            exit;
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success'=>false,'message'=>'Lỗi khi xóa vị trí: ' . $e->getMessage()]);
+            exit;
+        }
     }
 
 } catch (Exception $e) {
