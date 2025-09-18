@@ -385,27 +385,69 @@ try {
 
       // Stock Operations Functions
       async function openImportStockModal(locationId, locationName) {
+        // Reset form và ẩn thông tin sản phẩm cũ
         document.getElementById('importLocationId').value = locationId;
         document.getElementById('importLocationName').textContent = `Nhập hàng vào: ${locationName}`;
         
-        // Load products
+        // Reset form fields
+        document.getElementById('importProductSelect').value = '';
+        document.getElementById('importQuantity').value = '';
+        
+        // Ẩn thông tin sản phẩm và capacity info
+        hideProductInfo('import');
+        document.getElementById('importCapacityInfo').style.display = 'none';
+        
+        // Reset product info display
+        document.getElementById('importProductSku').textContent = '-';
+        document.getElementById('importProductCategory').textContent = '-';
+        document.getElementById('importProductPrice').textContent = '-';
+        document.getElementById('importCurrentStock').textContent = '-';
+        
+        // Load products (chỉ sản phẩm có cùng temperature_zone với vị trí)
         try {
-          const response = await fetch('../api/stock-operations.php?action=get_products');
+          const response = await fetch(`../api/stock-operations.php?action=get_products&location_id=${locationId}`);
           const result = await response.json();
           
           if (result.success) {
             const select = document.getElementById('importProductSelect');
             select.innerHTML = '<option value="">Chọn sản phẩm để nhập</option>';
             
-            result.data.forEach(product => {
+            if (result.data.length === 0) {
               const option = document.createElement('option');
-              option.value = product.id;
-              option.textContent = `${product.name} (${product.sku})`;
+              option.value = '';
+              option.textContent = `Không có sản phẩm phù hợp với mức môi trường (${result.location_temperature_zone || 'ambient'})`;
+              option.disabled = true;
               select.appendChild(option);
-            });
+            } else {
+              result.data.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product.id;
+                option.textContent = `${product.name} (${product.sku})`;
+                select.appendChild(option);
+              });
+            }
+            
+            // Hiển thị thông tin mức môi trường
+            const locationZone = result.location_temperature_zone || 'ambient';
+            const zoneLabels = {
+              'frozen': 'Đông lạnh',
+              'chilled': 'Lạnh Mát', 
+              'ambient': 'Nhiệt độ phòng'
+            };
+            
+            const zoneInfo = document.getElementById('importZoneInfo');
+            if (zoneInfo) {
+              zoneInfo.innerHTML = `
+                <div class="alert alert-info mb-3 box-center">
+                  <i class="iconoir-snow-flake"></i>
+                  <strong>Mức môi trường:</strong> ${zoneLabels[locationZone] || zoneLabels['ambient']}
+                </div>
+              `;
+            }
           }
         } catch (error) {
           console.error('Error loading products:', error);
+          showInsufficientStockAlert('Không thể tải danh sách sản phẩm phù hợp');
         }
         
         const modal = document.getElementById('importStockModal');
@@ -494,14 +536,47 @@ try {
         }
         
         try {
-          // Load product info from the products list
-          const response = await fetch('../api/stock-operations.php?action=get_products');
-          const result = await response.json();
+          const locationId = type === 'import' ? 
+            document.getElementById('importLocationId').value : 
+            document.getElementById('exportLocationId').value;
           
-          if (result.success) {
-            const product = result.data.find(p => p.id == productId);
-            if (product) {
-              showProductInfo(product, type);
+          if (!locationId) {
+            console.error('Location ID not found for', type);
+            return;
+          }
+          
+          let response, result;
+          
+          if (type === 'import') {
+            // For import: get all products compatible with location
+            response = await fetch(`../api/stock-operations.php?action=get_products&location_id=${locationId}`);
+            result = await response.json();
+            
+            if (result.success) {
+              const product = result.data.find(p => p.id == productId);
+              if (product) {
+                showProductInfo(product, type);
+              }
+            }
+          } else {
+            // For export: get products currently in this location
+            response = await fetch(`../api/stock-operations.php?action=get_location_products&location_id=${locationId}`);
+            result = await response.json();
+            
+            if (result.success) {
+              const allocation = result.data.find(a => a.product_id == productId);
+              if (allocation) {
+                // Create product object from allocation data
+                const product = {
+                  id: allocation.product_id,
+                  name: allocation.product_name,
+                  sku: allocation.sku,
+                  price: allocation.price,
+                  category_name: allocation.category_name,
+                  current_stock: allocation.quantity
+                };
+                showProductInfo(product, type);
+              }
             }
           }
         } catch (error) {
@@ -525,7 +600,7 @@ try {
         }
       }
 
-      function showProductInfo(product, type) {
+      async function showProductInfo(product, type) {
         const prefix = type === 'import' ? 'import' : 'export';
         
         const productInfoElement = document.getElementById(`${prefix}ProductInfo`);
@@ -543,7 +618,35 @@ try {
         if (priceElement) priceElement.textContent = product.price ? new Intl.NumberFormat('vi-VN').format(product.price) + ' ₫' : 'N/A';
         
         const stockElement = document.getElementById(`${prefix}CurrentStock`);
-        if (stockElement) stockElement.textContent = '0'; // Will be updated when we have stock info
+        if (stockElement) {
+          if (type === 'export' && product.current_stock !== undefined) {
+            // For export: show actual stock in location
+            stockElement.textContent = product.current_stock;
+          } else if (type === 'import') {
+            // For import: get actual stock in this location
+            try {
+              const locationId = document.getElementById(`${prefix}LocationId`).value;
+              const response = await fetch(`../api/stock-operations.php?action=get_location_products&location_id=${locationId}`);
+              const result = await response.json();
+              
+              if (result.success) {
+                const allocation = result.data.find(a => a.product_id == product.id);
+                if (allocation) {
+                  stockElement.textContent = allocation.quantity;
+                } else {
+                  stockElement.textContent = '0';
+                }
+              } else {
+                stockElement.textContent = '0';
+              }
+            } catch (error) {
+              console.error('Error loading current stock:', error);
+              stockElement.textContent = '0';
+            }
+          } else {
+            stockElement.textContent = '0';
+          }
+        }
       }
 
       function hideProductInfo(type) {
@@ -639,8 +742,22 @@ try {
       }
 
       async function openExportStockModal(locationId, locationName) {
+        // Reset form và ẩn thông tin sản phẩm cũ
         document.getElementById('exportLocationId').value = locationId;
         document.getElementById('exportLocationName').textContent = `Xuất hàng từ: ${locationName}`;
+        
+        // Reset form fields
+        document.getElementById('exportProductSelect').value = '';
+        document.getElementById('exportQuantity').value = '';
+        
+        // Ẩn thông tin sản phẩm
+        hideProductInfo('export');
+        
+        // Reset product info display
+        document.getElementById('exportProductSku').textContent = '-';
+        document.getElementById('exportProductCategory').textContent = '-';
+        document.getElementById('exportProductPrice').textContent = '-';
+        document.getElementById('exportCurrentStock').textContent = '-';
         
         // Load products in this location
         try {

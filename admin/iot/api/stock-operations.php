@@ -25,21 +25,46 @@ try {
             
             switch ($action) {
                 case 'get_products':
-                    // Lấy danh sách sản phẩm để nhập/xuất
+                    // Lấy danh sách sản phẩm để nhập/xuất (chỉ sản phẩm có cùng temperature_zone với vị trí)
+                    $locationId = $_GET['location_id'] ?? '';
+                    
+                    if (!$locationId) {
+                        throw new Exception('Location ID is required');
+                    }
+                    
+                    // Lấy temperature_zone của vị trí
+                    $stmt = $pdo->prepare("
+                        SELECT temperature_zone 
+                        FROM warehouse_locations 
+                        WHERE id = ? AND is_active = 1
+                    ");
+                    $stmt->execute([$locationId]);
+                    $location = $stmt->fetch(PDO::FETCH_ASSOC);
+                    
+                    if (!$location) {
+                        throw new Exception('Location not found');
+                    }
+                    
+                    $temperatureZone = $location['temperature_zone'];
+                    
+                    // Lấy danh sách sản phẩm có cùng temperature_zone
                     $stmt = $pdo->prepare("
                         SELECT p.id, p.name, p.sku, p.price, p.sale_price, p.images, 
-                               c.name as category_name
+                               c.name as category_name, wl.temperature_zone
                         FROM products p
                         LEFT JOIN categories c ON p.category_id = c.id
-                        WHERE p.is_active = 1
+                        LEFT JOIN warehouse_locations wl ON c.location_id = wl.id
+                        WHERE p.is_active = 1 
+                        AND (wl.temperature_zone = ? OR wl.temperature_zone IS NULL)
                         ORDER BY p.name
                     ");
-                    $stmt->execute();
+                    $stmt->execute([$temperatureZone]);
                     $productList = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     
                     echo json_encode([
                         'success' => true,
-                        'data' => $productList
+                        'data' => $productList,
+                        'location_temperature_zone' => $temperatureZone
                     ]);
                     break;
                     

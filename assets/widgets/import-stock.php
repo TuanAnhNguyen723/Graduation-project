@@ -42,6 +42,11 @@
                         <div class="field-error" id="importProductError"></div>
                     </div>
                     
+                    <!-- Environment Zone Info -->
+                    <div id="importZoneInfo" class="zone-info-display">
+                        <!-- Zone information will be populated by JavaScript -->
+                    </div>
+                    
                     <!-- Product Info Display -->
                     <div id="importProductInfo" class="product-info-display" style="display: none;">
                         <div class="row">
@@ -145,6 +150,12 @@
 #importStockModal .custom-modal {
     max-width: 600px;
     width: 90%;
+}
+
+.box-center {
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 #importStockModal .custom-modal-header {
