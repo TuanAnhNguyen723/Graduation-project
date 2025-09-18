@@ -1,5 +1,11 @@
 <?php
 session_start();
+
+// Kiểm tra đăng nhập
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    header('Location: login.php');
+    exit();
+}
 require_once 'config/database.php';
 require_once 'models/Product.php';
 require_once 'models/Category.php';
@@ -395,9 +401,16 @@ $recent_categories = $category->getAll(5);
     <div class="content-page">
         <div class="content">
             
-            <!-- Start Content-->
-            <div class="container-fluid">
-                <!-- Thống kê tổng quan -->
+    <!-- Start Content-->
+    <div class="container-fluid">
+        <?php if (isset($_GET['success'])): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="iconoir-check-circle me-2"></i>
+                <?php echo htmlspecialchars($_GET['success']); ?>
+            </div>
+        <?php endif; ?>
+        
+        <!-- Thống kê tổng quan -->
                 <div class="row mb-1">
                     <div class="col-md-6 col-lg-3 mb-2">
                         <div class="card stat-card bg-primary text-white">
@@ -481,25 +494,25 @@ $recent_categories = $category->getAll(5);
                                 <h4 class="header-title">Thao tác nhanh</h4>
                                 <div class="row">
                                     <div class="col-md-3 mb-3">
-                                        <a href="admin/products/index.php" class="btn btn-primary w-100 quick-action">
+                                        <a href="admin/products/" class="btn btn-primary w-100 quick-action">
                                             <i class="iconoir-plus me-2"></i>
                                             Thêm sản phẩm mới
                                         </a>
                                     </div>
                                     <div class="col-md-3 mb-3">
-                                        <a href="admin/categories/index.php" class="btn btn-success w-100 quick-action">
+                                        <a href="admin/categories/" class="btn btn-success w-100 quick-action">
                                             <i class="iconoir-folder me-2"></i>
                                             Thêm danh mục mới
                                         </a>
                                     </div>
                                     <div class="col-md-3 mb-3">
-                                        <a href="admin/products/index.php" class="btn btn-info w-100 quick-action">
+                                        <a href="admin/products/" class="btn btn-info w-100 quick-action">
                                             <i class="iconoir-shopping-bag me-2"></i>
                                             Quản lý sản phẩm
                                         </a>
                                     </div>
                                     <div class="col-md-3 mb-3">
-                                        <a href="admin/categories/index.php" class="btn btn-warning w-100 quick-action">
+                                        <a href="admin/categories/" class="btn btn-warning w-100 quick-action">
                                             <i class="iconoir-folder me-2"></i>
                                             Quản lý danh mục
                                         </a>
@@ -518,7 +531,7 @@ $recent_categories = $category->getAll(5);
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h4 class="header-title">Sản phẩm gần đây</h4>
-                                    <a href="admin/products/index.php" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+                                    <a href="admin/products/" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
                                 </div>
                                 <?php if($recent_products->rowCount() > 0): ?>
                                     <div class="table-responsive">
@@ -574,7 +587,7 @@ $recent_categories = $category->getAll(5);
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h4 class="header-title">Danh mục gần đây</h4>
-                                    <a href="admin/categories/index.php" class="btn btn-sm btn-outline-success">Xem tất cả</a>
+                                    <a href="admin/categories/" class="btn btn-sm btn-outline-success">Xem tất cả</a>
                                 </div>
                                 <?php if($recent_categories->rowCount() > 0): ?>
                                     <div class="table-responsive">

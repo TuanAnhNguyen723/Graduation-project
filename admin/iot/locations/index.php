@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once '../../auth_check.php';
 require_once '../../../config/database.php';
 require_once '../models/WarehouseLocation.php';
 
@@ -343,7 +343,7 @@ try {
             });
             return;
           } else {
-            if (!confirm('Bạn có chắc chắn muốn xóa vị trí này?')) return;
+        if (!confirm('Bạn có chắc chắn muốn xóa vị trí này?')) return;
             executeDeleteLocation(id);
           }
         } catch (error) {
@@ -354,7 +354,7 @@ try {
 
       async function executeDeleteLocation(id) {
         try {
-          const res = await fetch('../api/locations.php?id='+id, { method: 'DELETE' });
+        const res = await fetch('../api/locations.php?id='+id, { method: 'DELETE' });
             
           if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);

@@ -86,17 +86,7 @@ if ($admin_index !== false) {
                         <h6 class="mb-0 fw-semibold">Xin chào, Admin!</h6>
                         <small class="text-muted">Quản trị viên hệ thống</small>
                     </li>
-                    <li><a class="dropdown-item" href="#">
-                        <i class="iconoir-user me-2"></i>Hồ sơ cá nhân
-                    </a></li>
-                    <li><a class="dropdown-item" href="#">
-                        <i class="iconoir-settings me-2"></i>Cài đặt
-                    </a></li>
-                    <li><a class="dropdown-item" href="#">
-                        <i class="iconoir-lock me-2"></i>Khóa màn hình
-                    </a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-danger" href="#">
+                    <li><a class="dropdown-item text-danger" href="#" onclick="logout()">
                         <i class="iconoir-log-out me-2"></i>Đăng xuất
                     </a></li>
                 </ul>
@@ -421,5 +411,69 @@ function showNotificationError(message) {
             <button class="btn btn-sm btn-primary" onclick="loadNotifications()">Thử lại</button>
         </div>
     `;
+}
+
+// Logout function
+function logout() {
+    showLogoutConfirm();
+}
+
+// Custom logout confirmation dialog
+function showLogoutConfirm() {
+    const panel = document.createElement('div');
+    panel.style.cssText = `
+        position: fixed; inset: 0; z-index: 99999; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.35);
+    `;
+    const box = document.createElement('div');
+    box.style.cssText = `
+        width: 420px; max-width: 90vw; background: #fff; border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+        padding: 16px 18px; animation: fadeInQuick 0.2s ease-out; border: 1px solid #eee;
+    `;
+    const head = document.createElement('div');
+    head.style.cssText = 'display:flex; align-items:center; gap:8px; margin-bottom:8px; color:#dc3545;';
+    head.innerHTML = `<i class="iconoir-log-out"></i><div style="font-weight:700; font-size:16px;">Đăng xuất</div>`;
+    const body = document.createElement('div');
+    body.style.cssText = 'color:#6b7280; margin-bottom:12px;';
+    body.textContent = 'Bạn có chắc chắn muốn đăng xuất?';
+    const actions = document.createElement('div');
+    actions.style.cssText = 'display:flex; gap:10px; justify-content:flex-end;';
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn btn-secondary';
+    cancelBtn.textContent = 'Hủy';
+    cancelBtn.onclick = () => document.body.removeChild(panel);
+    const logoutBtn = document.createElement('button');
+    logoutBtn.className = 'btn btn-danger';
+    logoutBtn.textContent = 'Đăng xuất';
+    logoutBtn.onclick = () => { try { executeLogout(); } finally { document.body.removeChild(panel); } };
+    actions.appendChild(cancelBtn);
+    actions.appendChild(logoutBtn);
+    box.appendChild(head); 
+    box.appendChild(body); 
+    box.appendChild(actions);
+    panel.appendChild(box);
+    panel.addEventListener('click', (e)=>{ if (e.target === panel) document.body.removeChild(panel); });
+    document.body.appendChild(panel);
+}
+
+function executeLogout() {
+    fetch('<?php echo $root_path; ?>api/auth.php?action=logout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = data.redirect_url || '<?php echo $root_path; ?>login.php';
+        } else {
+            alert('Lỗi khi đăng xuất: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // Fallback: redirect về login page
+        window.location.href = '<?php echo $root_path; ?>login.php';
+    });
 }
 </script>
