@@ -237,16 +237,14 @@ try {
 
     <!-- Bootstrap JS -->
     <script src="../../../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- Bootstrap JS -->
-    <script src="../../../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
     <!-- Simplebar -->
     <script src="../../../assets/libs/simplebar/simplebar.min.js"></script>
     
-    <!-- Common Admin Layout JavaScript -->
-    <script src="../../../admin/partials/layout.js"></script>
-    
     <!-- Widget JavaScript -->
     <script src="../../../assets/js/widget.js"></script>
+    
+    <!-- Common Admin Layout JavaScript -->
+    <script src="../../../admin/partials/layout.js"></script>
 
     <?php include '../../../assets/widgets/create-location.php'; ?>
     <?php include '../../../assets/widgets/edit-location.php'; ?>
@@ -1282,6 +1280,34 @@ try {
             font-size: 0.7rem;
             padding: 0.2rem 0.4rem;
         }
+    }
+
+    /* Ensure header elements are clickable */
+    .navbar-nav .nav-link {
+        pointer-events: auto !important;
+        cursor: pointer !important;
+        z-index: 1000 !important;
+    }
+    
+    .dropdown-toggle {
+        pointer-events: auto !important;
+        cursor: pointer !important;
+    }
+    
+    /* Ensure header dropdowns work */
+    .navbar .dropdown-menu {
+        z-index: 1050 !important;
+    }
+    
+    /* Prevent modal overlays from blocking header */
+    .custom-modal-overlay {
+        z-index: 1040 !important;
+    }
+    
+    /* Ensure header stays above everything */
+    .navbar {
+        z-index: 1050 !important;
+        position: relative !important;
     }
     </style>
 </body>

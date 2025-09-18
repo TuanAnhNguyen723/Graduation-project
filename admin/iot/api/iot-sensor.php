@@ -92,51 +92,154 @@ try {
             $violatedTemp = ($tempDangerMin !== null && $temperature < $tempDangerMin) || ($tempDangerMax !== null && $temperature > $tempDangerMax);
             $violatedHumidity = ($humidity !== null) && (($humidityDangerMin !== null && $humidity < $humidityDangerMin) || ($humidityDangerMax !== null && $humidity > $humidityDangerMax));
 
-            if ($violatedTemp) {
-                $alerts[] = [
-                    'title' => 'Cảnh báo nhiệt độ vượt ngưỡng',
-                    'message' => sprintf('Cảm biến %s tại %s: Nhiệt độ %.2f°C vượt ngưỡng an toàn (%s%s%s).',
-                        $sensor['sensor_name'] ?? $sensorCode,
-                        $sensor['location_name'] ?? 'Không rõ vị trí',
-                        $temperature,
-                        $tempDangerMin !== null ? $tempDangerMin . '°C - ' : '',
-                        $tempDangerMax !== null ? $tempDangerMax . '°C' : '',
-                        ($tempDangerMin === null && $tempDangerMax !== null) ? ' (giới hạn trên)' : ''
-                    ),
-                    'icon' => 'iconoir-temperature-high',
-                    'icon_color' => 'danger'
-                ];
-            }
+            // Kiểm tra trạng thái hồi phục (từ vi phạm về bình thường)
+            $recoveredTemp = false;
+            $recoveredHumidity = false;
 
-            if ($violatedHumidity) {
-                $alerts[] = [
-                    'title' => 'Cảnh báo độ ẩm vượt ngưỡng',
-                    'message' => sprintf('Cảm biến %s tại %s: Độ ẩm %.2f%% vượt ngưỡng an toàn (%s - %s%%).',
-                        $sensor['sensor_name'] ?? $sensorCode,
-                        $sensor['location_name'] ?? 'Không rõ vị trí',
-                        $humidity,
-                        number_format($humidityDangerMin, 0),
-                        number_format($humidityDangerMax, 0)
-                    ),
-                    'icon' => 'iconoir-droplet',
-                    'icon_color' => 'warning'
-                ];
-            }
-
-            // Nếu có vi phạm -> tạo notification
-            if (!empty($alerts)) {
+            // Nếu có vi phạm -> kiểm tra và tạo notification (tránh spam)
+            if ($violatedTemp || $violatedHumidity) {
                 require_once '../../../config/database.php';
                 $db2 = new Database();
                 $conn2 = $db2->getConnection();
-                $stmt = $conn2->prepare("INSERT INTO notifications (title, message, type, icon, icon_color, related_id, related_type) VALUES (?, ?, 'sensor', ?, ?, ?, 'sensor')");
-                foreach ($alerts as $a) {
-                    $stmt->execute([
-                        $a['title'],
-                        $a['message'],
-                        $a['icon'],
-                        $a['icon_color'],
-                        $sensor['id'] ?? null
-                    ]);
+                
+                // Kiểm tra notification gần đây (trong 30 phút) cho cảm biến này
+                $stmt_check = $conn2->prepare("
+                    SELECT COUNT(*) as count 
+                    FROM notifications 
+                    WHERE related_id = ? AND related_type = 'sensor' 
+                    AND type = 'sensor' 
+                    AND created_at > DATE_SUB(NOW(), INTERVAL 30 MINUTE)
+                    AND (title LIKE '%nhiệt độ%' OR title LIKE '%độ ẩm%')
+                ");
+                $stmt_check->execute([$sensor['id'] ?? null]);
+                $recent_notifications = $stmt_check->fetch(PDO::FETCH_ASSOC)['count'];
+
+                // Chỉ tạo notification mới nếu chưa có notification nào trong 30 phút gần đây
+                if ($recent_notifications == 0) {
+                    if ($violatedTemp) {
+                        $alerts[] = [
+                            'title' => 'Cảnh báo nhiệt độ vượt ngưỡng',
+                            'message' => sprintf('Cảm biến %s tại %s: Nhiệt độ %.2f°C vượt ngưỡng an toàn (%s%s%s).',
+                                $sensor['sensor_name'] ?? $sensorCode,
+                                $sensor['location_name'] ?? 'Không rõ vị trí',
+                                $temperature,
+                                $tempDangerMin !== null ? $tempDangerMin . '°C - ' : '',
+                                $tempDangerMax !== null ? $tempDangerMax . '°C' : '',
+                                ($tempDangerMin === null && $tempDangerMax !== null) ? ' (giới hạn trên)' : ''
+                            ),
+                            'icon' => 'iconoir-temperature-high',
+                            'icon_color' => 'danger'
+                        ];
+                    }
+
+                    if ($violatedHumidity) {
+                        $alerts[] = [
+                            'title' => 'Cảnh báo độ ẩm vượt ngưỡng',
+                            'message' => sprintf('Cảm biến %s tại %s: Độ ẩm %.2f%% vượt ngưỡng an toàn (%s - %s%%).',
+                                $sensor['sensor_name'] ?? $sensorCode,
+                                $sensor['location_name'] ?? 'Không rõ vị trí',
+                                $humidity,
+                                number_format($humidityDangerMin, 0),
+                                number_format($humidityDangerMax, 0)
+                            ),
+                            'icon' => 'iconoir-droplet',
+                            'icon_color' => 'warning'
+                        ];
+                    }
+
+                    // Tạo notification mới
+                    if (!empty($alerts)) {
+                        $stmt = $conn2->prepare("INSERT INTO notifications (title, message, type, icon, icon_color, related_id, related_type) VALUES (?, ?, 'sensor', ?, ?, ?, 'sensor')");
+                        foreach ($alerts as $a) {
+                            $stmt->execute([
+                                $a['title'],
+                                $a['message'],
+                                $a['icon'],
+                                $a['icon_color'],
+                                $sensor['id'] ?? null
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            // Kiểm tra và tạo notification hồi phục nếu cần
+            if (!$violatedTemp && !$violatedHumidity) {
+                require_once '../../../config/database.php';
+                $db2 = new Database();
+                $conn2 = $db2->getConnection();
+                
+                // Kiểm tra xem có notification cảnh báo gần đây không
+                $stmt_check_recovery = $conn2->prepare("
+                    SELECT COUNT(*) as count 
+                    FROM notifications 
+                    WHERE related_id = ? AND related_type = 'sensor' 
+                    AND type = 'sensor' 
+                    AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)
+                    AND (title LIKE '%nhiệt độ%' OR title LIKE '%độ ẩm%')
+                    AND title NOT LIKE '%hồi phục%'
+                ");
+                $stmt_check_recovery->execute([$sensor['id'] ?? null]);
+                $recent_alerts = $stmt_check_recovery->fetch(PDO::FETCH_ASSOC)['count'];
+
+                // Kiểm tra xem đã có notification hồi phục gần đây chưa
+                $stmt_check_recovery_notification = $conn2->prepare("
+                    SELECT COUNT(*) as count 
+                    FROM notifications 
+                    WHERE related_id = ? AND related_type = 'sensor' 
+                    AND type = 'sensor' 
+                    AND created_at > DATE_SUB(NOW(), INTERVAL 2 HOUR)
+                    AND title LIKE '%hồi phục%'
+                ");
+                $stmt_check_recovery_notification->execute([$sensor['id'] ?? null]);
+                $recent_recovery = $stmt_check_recovery_notification->fetch(PDO::FETCH_ASSOC)['count'];
+
+                // Nếu có cảnh báo gần đây nhưng chưa có notification hồi phục
+                if ($recent_alerts > 0 && $recent_recovery == 0) {
+                    $recovery_alerts = [];
+                    
+                    // Tạo notification hồi phục nhiệt độ
+                    if (!$violatedTemp) {
+                        $recovery_alerts[] = [
+                            'title' => 'Cảm biến nhiệt độ đã hồi phục',
+                            'message' => sprintf('Cảm biến %s tại %s: Nhiệt độ %.2f°C đã trở về mức bình thường.',
+                                $sensor['sensor_name'] ?? $sensorCode,
+                                $sensor['location_name'] ?? 'Không rõ vị trí',
+                                $temperature
+                            ),
+                            'icon' => 'iconoir-check-circle',
+                            'icon_color' => 'success'
+                        ];
+                    }
+
+                    // Tạo notification hồi phục độ ẩm
+                    if (!$violatedHumidity && $humidity !== null) {
+                        $recovery_alerts[] = [
+                            'title' => 'Cảm biến độ ẩm đã hồi phục',
+                            'message' => sprintf('Cảm biến %s tại %s: Độ ẩm %.2f%% đã trở về mức bình thường.',
+                                $sensor['sensor_name'] ?? $sensorCode,
+                                $sensor['location_name'] ?? 'Không rõ vị trí',
+                                $humidity
+                            ),
+                            'icon' => 'iconoir-check-circle',
+                            'icon_color' => 'success'
+                        ];
+                    }
+
+                    // Tạo notification hồi phục
+                    if (!empty($recovery_alerts)) {
+                        $stmt_recovery = $conn2->prepare("INSERT INTO notifications (title, message, type, icon, icon_color, related_id, related_type) VALUES (?, ?, 'sensor', ?, ?, ?, 'sensor')");
+                        foreach ($recovery_alerts as $recovery_alert) {
+                            $stmt_recovery->execute([
+                                $recovery_alert['title'],
+                                $recovery_alert['message'],
+                                $recovery_alert['icon'],
+                                $recovery_alert['icon_color'],
+                                $sensor['id'] ?? null
+                            ]);
+                        }
+                        $alerts = array_merge($alerts, $recovery_alerts);
+                    }
                 }
             }
 
@@ -149,7 +252,13 @@ try {
                     'humidity' => $humidity,
                     'timestamp' => date('Y-m-d H:i:s'),
                     'sensor_info' => $sensor,
-                    'alerts_created' => count($alerts)
+                    'violations_detected' => [
+                        'temperature' => $violatedTemp,
+                        'humidity' => $violatedHumidity
+                    ],
+                    'alerts_created' => count($alerts),
+                    'notification_spam_prevented' => ($violatedTemp || $violatedHumidity) && count($alerts) == 0,
+                    'recovery_notifications' => count($alerts) - ($violatedTemp ? 1 : 0) - ($violatedHumidity ? 1 : 0)
                 ]
             ];
             http_response_code(201);

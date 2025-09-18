@@ -412,32 +412,53 @@ try {
         
         // Xóa thông báo
         function deleteNotification(notificationId) {
-            if (confirm('Bạn có chắc chắn muốn xóa thông báo này?')) {
-                fetch('../../api/notifications.php?action=delete', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ notification_id: notificationId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const card = document.querySelector(`[data-id="${notificationId}"]`);
-                        if (card) {
-                            card.closest('.col-12').remove();
-                        }
-                        // Cập nhật thống kê
-                        refreshNotifications();
-                    } else {
-                        alert('Lỗi: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Lỗi khi xóa thông báo');
-                });
+            // Sử dụng custom confirm dialog
+            if (typeof showConfirmToast === 'function') {
+                showConfirmToast(
+                    'Xóa thông báo',
+                    'Bạn có chắc chắn muốn xóa thông báo này?',
+                    () => executeDeleteNotification(notificationId)
+                );
+            } else {
+                if (confirm('Bạn có chắc chắn muốn xóa thông báo này?')) {
+                    executeDeleteNotification(notificationId);
+                }
             }
+        }
+        
+        // Thực hiện xóa thông báo
+        function executeDeleteNotification(notificationId) {
+            fetch('../../api/notifications.php?action=delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ notification_id: notificationId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const card = document.querySelector(`[data-id="${notificationId}"]`);
+                    if (card) {
+                        // Tìm container cha (.col-12) và xóa nó
+                        const container = card.closest('.col-12');
+                        if (container) {
+                            container.remove();
+                        } else {
+                            // Fallback: xóa card trực tiếp
+                            card.remove();
+                        }
+                    }
+                    // Cập nhật thống kê
+                    refreshNotifications();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Lỗi khi xóa thông báo');
+            });
         }
         
         // Đánh dấu tất cả đã đọc
@@ -467,33 +488,69 @@ try {
         
         // Xóa tất cả đã đọc
         function deleteAllRead() {
-            if (confirm('Bạn có chắc chắn muốn xóa tất cả thông báo đã đọc? Hành động này không thể hoàn tác!')) {
-                // Tìm tất cả thông báo đã đọc và xóa
-                const readCards = document.querySelectorAll('.notification-card.read');
-                const promises = [];
-                
-                readCards.forEach(card => {
-                    const notificationId = card.getAttribute('data-id');
-                    promises.push(
-                        fetch('../../api/notifications.php?action=delete', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ notification_id: notificationId })
-                        })
-                    );
-                });
-                
-                Promise.all(promises)
-                .then(() => {
-                    location.reload();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Lỗi khi xóa thông báo');
-                });
+            // Sử dụng custom confirm dialog
+            if (typeof showConfirmToast === 'function') {
+                showConfirmToast(
+                    'Xóa tất cả thông báo đã đọc',
+                    'Bạn có chắc chắn muốn xóa tất cả thông báo đã đọc? Hành động này không thể hoàn tác!',
+                    () => executeDeleteAllRead()
+                );
+            } else {
+                if (confirm('Bạn có chắc chắn muốn xóa tất cả thông báo đã đọc? Hành động này không thể hoàn tác!')) {
+                    executeDeleteAllRead();
+                }
             }
+        }
+        
+        // Thực hiện xóa tất cả thông báo đã đọc
+        function executeDeleteAllRead() {
+            // Tìm tất cả thông báo đã đọc và xóa
+            const readCards = document.querySelectorAll('.notification-card.read');
+            const promises = [];
+            
+            readCards.forEach(card => {
+                const notificationId = card.getAttribute('data-id');
+                promises.push(
+                    fetch('../../api/notifications.php?action=delete', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ notification_id: notificationId })
+                    })
+                );
+            });
+            
+            Promise.all(promises)
+            .then(responses => {
+                // Kiểm tra tất cả responses
+                let allSuccess = true;
+                responses.forEach(response => {
+                    if (!response.ok) {
+                        allSuccess = false;
+                    }
+                });
+                
+                if (allSuccess) {
+                    // Xóa tất cả cards đã đọc khỏi DOM
+                    readCards.forEach(card => {
+                        const container = card.closest('.col-12');
+                        if (container) {
+                            container.remove();
+                        } else {
+                            card.remove();
+                        }
+                    });
+                    // Cập nhật thống kê
+                    refreshNotifications();
+                } else {
+                    alert('Một số thông báo không thể xóa được');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Lỗi khi xóa thông báo');
+            });
         }
         
         // Làm mới trang
