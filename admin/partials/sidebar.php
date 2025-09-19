@@ -100,11 +100,6 @@ $is_ecommerce_active = ($active_page === 'products' || $active_page === 'categor
                             <i class="iconoir-map-pin"></i><span>Quản lý vị trí</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo $root_path; ?>admin/iot/dashboard/test_iot_api.html">
-                            <i class="iconoir-test-tube"></i><span>Test API</span>
-                        </a>
-                    </li>
                 </ul>
             </div>
         </div>
