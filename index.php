@@ -79,6 +79,16 @@ $recent_categories = $category->getAll(5);
             z-index: 2;
         }
         
+        /* Normalize Bootstrap heading sizes inside stat cards */
+        .stat-card .card-title {
+            font-size: 0.7rem;
+            margin-bottom: 0.3rem;
+        }
+        .stat-card h2 {
+            font-size: 1.4rem;
+            margin-bottom: 0.3rem;
+        }
+        
         .stat-card .icon-wrapper {
             width: 60px;
             height: 60px;
@@ -101,6 +111,8 @@ $recent_categories = $category->getAll(5);
             letter-spacing: 0.5px;
             position: relative;
             overflow: hidden;
+            font-size: 0.75rem;
+            padding: 0.4rem 0.8rem;
         }
         
         .quick-action::before {
@@ -155,15 +167,15 @@ $recent_categories = $category->getAll(5);
         }
         
         .product-card .card-body {
-            padding: 1.5rem;
+            padding: 0.75rem;
         }
         
         .product-image {
-            width: 80px;
-            height: 80px;
+            width: 50px;
+            height: 50px;
             object-fit: cover;
-            border-radius: 16px;
-            border: 3px solid #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid #f8f9fa;
             transition: all 0.3s ease;
         }
         
@@ -174,37 +186,37 @@ $recent_categories = $category->getAll(5);
         
         .product-card .card-title {
             color: #2c3e50;
-            font-size: 1.2rem;
+            font-size: 0.95rem;
             font-weight: 700;
             line-height: 1.3;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
         
         .product-card .card-text {
-            font-size: 0.95rem;
-            line-height: 1.5;
+            font-size: 0.8rem;
+            line-height: 1.4;
             color: #6c757d;
-            margin-bottom: 1rem;
+            margin-bottom: 0.6rem;
         }
         
         .product-card .badge {
-            font-size: 0.8rem;
-            padding: 0.6em 1em;
-            border-radius: 20px;
+            font-size: 0.65rem;
+            padding: 0.3em 0.6em;
+            border-radius: 14px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.25px;
         }
         
         .product-card .btn {
-            border-radius: 12px;
+            border-radius: 6px;
             font-weight: 600;
-            padding: 0.6rem 1.2rem;
+            padding: 0.3rem 0.6rem;
             transition: all 0.3s ease;
             border: 2px solid transparent;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-size: 0.85rem;
+            letter-spacing: 0.25px;
+            font-size: 0.7rem;
         }
         
         .product-card .btn:hover {
@@ -515,6 +527,12 @@ $recent_categories = $category->getAll(5);
                                         <a href="admin/categories/" class="btn btn-warning w-100 quick-action">
                                             <i class="iconoir-folder me-2"></i>
                                             Quản lý danh mục
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <a href="admin/iot/" class="btn btn-primary w-100 quick-action">
+                                            <i class="iconoir-plus me-2"></i>
+                                            Thêm Cảm Biến Mới
                                         </a>
                                     </div>
                                 </div>
