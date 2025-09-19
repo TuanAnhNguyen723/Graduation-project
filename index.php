@@ -529,12 +529,6 @@ $recent_categories = $category->getAll(5);
                                             Quản lý danh mục
                                         </a>
                                     </div>
-                                    <div class="col-md-3 mb-3">
-                                        <a href="admin/iot/" class="btn btn-primary w-100 quick-action">
-                                            <i class="iconoir-plus me-2"></i>
-                                            Thêm Cảm Biến Mới
-                                        </a>
-                                    </div>
                                 </div>
                             </div>
                         </div>
