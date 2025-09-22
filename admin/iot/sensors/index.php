@@ -436,10 +436,9 @@ try {
             // Sử dụng custom confirm dialog thay vì confirm() mặc định
             if (typeof showConfirmToast === 'function') {
                 showConfirmToast(
+                    'warning',
                     'Xác nhận xóa cảm biến',
-                    'Bạn có chắc chắn muốn xóa cảm biến?',
-                    'Xóa',
-                    'Hủy',
+                    'Bạn có chắc chắn muốn xóa cảm biến này?',
                     () => executeDeleteSensor(sensorId)
                 );
             } else {
@@ -453,11 +452,15 @@ try {
         // Thực hiện xóa cảm biến
         function executeDeleteSensor(sensorId) {
             try {
-                // Hiển thị loading trên button
-                const deleteBtn = event.target.closest('.btn-outline-danger');
-                const originalText = deleteBtn.innerHTML;
-                deleteBtn.disabled = true;
-                deleteBtn.innerHTML = '<i class="iconoir-loading"></i> Đang xóa...';
+                // Tìm button xóa tương ứng với sensorId
+                const deleteBtn = document.querySelector(`button[onclick="deleteSensor(${sensorId})"]`);
+                const originalText = deleteBtn ? deleteBtn.innerHTML : '';
+                
+                // Cập nhật trạng thái button nếu tìm thấy
+                if (deleteBtn) {
+                    deleteBtn.disabled = true;
+                    deleteBtn.innerHTML = '<i class="iconoir-loading"></i> Đang xóa...';
+                }
                 
                 // Gửi request xóa cảm biến
                 fetch('../api/delete-sensor.php', {

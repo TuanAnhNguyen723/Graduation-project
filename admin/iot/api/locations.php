@@ -85,9 +85,33 @@ try {
             exit;
         }
         if ($id) {
+            // Kiểm tra mã vị trí trùng lặp khi cập nhật
+            if ($locationModel->isLocationCodeExists($payload['location_code'], (int)$id)) {
+                http_response_code(400);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Mã vị trí "' . $payload['location_code'] . '" đã tồn tại trong hệ thống. Vui lòng chọn mã khác.',
+                    'error_type' => 'duplicate_code',
+                    'field' => 'location_code'
+                ]);
+                exit;
+            }
+            
             $ok = $locationModel->updateLocation((int)$id, $payload);
             echo json_encode(['success'=>$ok,'message'=>$ok?'Cập nhật vị trí thành công':'Không thể cập nhật vị trí']);
         } else {
+            // Kiểm tra mã vị trí trùng lặp khi tạo mới
+            if ($locationModel->isLocationCodeExists($payload['location_code'])) {
+                http_response_code(400);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Mã vị trí "' . $payload['location_code'] . '" đã tồn tại trong hệ thống. Vui lòng chọn mã khác.',
+                    'error_type' => 'duplicate_code',
+                    'field' => 'location_code'
+                ]);
+                exit;
+            }
+            
             $ok = $locationModel->createLocation($payload);
             echo json_encode(['success'=>$ok,'message'=>$ok?'Tạo vị trí thành công':'Không thể tạo vị trí']);
         }
@@ -114,9 +138,22 @@ try {
 
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Lỗi server: ' . $e->getMessage()
-    ]);
+    
+    // Xử lý lỗi trùng lặp mã vị trí một cách đẹp mắt
+    if (strpos($e->getMessage(), 'Duplicate entry') !== false && strpos($e->getMessage(), 'location_code') !== false) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Mã vị trí đã tồn tại trong hệ thống. Vui lòng chọn mã khác.',
+            'error_type' => 'duplicate_code',
+            'field' => 'location_code'
+        ]);
+    } else {
+        // Lỗi khác - hiển thị thông báo chung
+        echo json_encode([
+            'success' => false,
+            'message' => 'Có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại sau.',
+            'error_type' => 'server_error'
+        ]);
+    }
 }
 ?>

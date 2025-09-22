@@ -269,8 +269,12 @@ try {
                     $quantity = $_POST['quantity'] ?? 0;
                     $notes = $_POST['notes'] ?? '';
                     
-                    if (!$productId || !$locationId || $quantity <= 0) {
-                        throw new Exception('Invalid input data');
+                    if (!$productId || !$locationId) {
+                        throw new Exception('Thiếu thông tin sản phẩm hoặc vị trí');
+                    }
+                    
+                    if ($quantity <= 0) {
+                        throw new Exception('Số lượng không hợp lý');
                     }
                     
                     // Kiểm tra tồn kho

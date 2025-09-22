@@ -415,6 +415,7 @@ try {
             // Sử dụng custom confirm dialog
             if (typeof showConfirmToast === 'function') {
                 showConfirmToast(
+                    'warning',
                     'Xóa thông báo',
                     'Bạn có chắc chắn muốn xóa thông báo này?',
                     () => executeDeleteNotification(notificationId)
@@ -491,6 +492,7 @@ try {
             // Sử dụng custom confirm dialog
             if (typeof showConfirmToast === 'function') {
                 showConfirmToast(
+                    'warning',
                     'Xóa tất cả thông báo đã đọc',
                     'Bạn có chắc chắn muốn xóa tất cả thông báo đã đọc? Hành động này không thể hoàn tác!',
                     () => executeDeleteAllRead()

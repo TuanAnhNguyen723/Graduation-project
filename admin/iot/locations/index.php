@@ -273,7 +273,14 @@ try {
           if (data.success){
             const msg = document.getElementById('successMessageCreateLocation'); if (msg){ msg.classList.add('show','slide-in'); setTimeout(()=>{ msg.classList.remove('show','slide-in'); }, 1500); }
             setTimeout(()=>{ location.reload(); }, 1600);
-          } else { alert(data.message || 'Không thể tạo vị trí'); }
+          } else { 
+            // Hiển thị lỗi với giao diện đẹp
+            if (data.error_type === 'duplicate_code') {
+              showAppToast('error', 'Mã vị trí trùng lặp', data.message);
+            } else {
+              showAppToast('error', 'Lỗi tạo vị trí', data.message || 'Không thể tạo vị trí');
+            }
+          }
         } finally { if (btn){ btn.disabled=false; btn.classList.remove('loading'); btn.innerHTML = original || 'Tạo vị trí'; } }
       }
 
@@ -308,7 +315,14 @@ try {
           if (data.success){
             const msg = document.getElementById('successMessageEditLocation'); if (msg){ msg.classList.add('show','slide-in'); setTimeout(()=>{ msg.classList.remove('show','slide-in'); }, 1500); }
             setTimeout(()=>{ location.reload(); }, 1600);
-          } else { alert(data.message || 'Không thể cập nhật vị trí'); }
+          } else { 
+            // Hiển thị lỗi với giao diện đẹp
+            if (data.error_type === 'duplicate_code') {
+              showAppToast('error', 'Mã vị trí trùng lặp', data.message);
+            } else {
+              showAppToast('error', 'Lỗi cập nhật vị trí', data.message || 'Không thể cập nhật vị trí');
+            }
+          }
         } finally { if (btn){ btn.disabled=false; btn.classList.remove('loading'); btn.innerHTML = original || 'Cập nhật vị trí'; } }
       }
 
@@ -1012,7 +1026,7 @@ try {
         const quantity = prompt(`Nhập số lượng muốn xuất cho sản phẩm "${productName}" (tối đa: ${maxQuantity}):`, '1');
         
         if (!quantity || isNaN(quantity) || quantity <= 0 || quantity > maxQuantity) {
-          alert('Số lượng không hợp lệ');
+          alert('Số lượng không hợp lý');
           return;
         }
         
@@ -1075,6 +1089,18 @@ try {
           padding: 24px; animation: fadeInQuick 0.3s ease-out; border: 2px solid #dc3545;
         `;
         
+        // Xác định tiêu đề và mô tả dựa trên loại lỗi
+        let title, subtitle, helpText;
+        if (message.includes('Số lượng không hợp lý')) {
+          title = 'Số lượng không hợp lý';
+          subtitle = 'Vui lòng nhập số lượng hợp lệ';
+          helpText = 'Số lượng phải lớn hơn 0 và không vượt quá tồn kho hiện có.';
+        } else {
+          title = 'Không đủ hàng để xuất';
+          subtitle = 'Số lượng tồn kho không đủ';
+          helpText = 'Vui lòng kiểm tra lại số lượng tồn kho hiện tại hoặc giảm số lượng muốn xuất.';
+        }
+        
         // Header với icon và tiêu đề
         const head = document.createElement('div');
         head.style.cssText = 'display:flex; align-items:center; gap:12px; margin-bottom:16px;';
@@ -1083,8 +1109,8 @@ try {
             <i class="iconoir-warning-triangle" style="font-size:24px; color:#fff;"></i>
           </div>
           <div>
-            <div style="font-weight:700; font-size:18px; color:#721c24;">Không đủ hàng để xuất</div>
-            <div style="font-size:14px; color:#a71e2c; margin-top:2px;">Số lượng tồn kho không đủ</div>
+            <div style="font-weight:700; font-size:18px; color:#721c24;">${title}</div>
+            <div style="font-size:14px; color:#a71e2c; margin-top:2px;">${subtitle}</div>
           </div>
         `;
         
@@ -1099,7 +1125,7 @@ try {
             </div>
           </div>
           <div style="color:#6b7280; font-size:14px; line-height:1.5;">
-            Vui lòng kiểm tra lại số lượng tồn kho hiện tại hoặc giảm số lượng muốn xuất.
+            ${helpText}
           </div>
         `;
         
